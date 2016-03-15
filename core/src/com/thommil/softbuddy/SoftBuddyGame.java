@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.thommil.libgdx.runtime.Game;
 import com.thommil.libgdx.runtime.Settings;
+import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.softbuddy.screens.LoadingScreen;
 import com.thommil.softbuddy.screens.MainScreen;
 import com.thommil.softbuddy.screens.SplashScreen;
@@ -20,20 +21,22 @@ public class SoftBuddyGame extends Game {
 	private LoadingScreen loadingScreen;
 	private MainScreen mainScreen;
 
+	private Viewport viewport;
+
 	@Override
 	protected void onCreate(Settings settings) {
 		settings.viewport.type = Settings.Viewport.STRECTCH;
 		settings.viewport.width = WORLD_WIDTH;
 		settings.viewport.height = WORLD_HEIGHT;
 		settings.physics.enabled = true;
+
+		SpriteBatchLayer.setGlobalSize(10);
 	}
 
 	@Override
 	protected void onStart(Viewport viewport) {
+		this.viewport = viewport;
 		splashScreen = new SplashScreen(viewport);
-		loadingScreen = new LoadingScreen(viewport);
-		mainScreen = new MainScreen(viewport);
-		Gdx.input.setInputProcessor(mainScreen);
 		showScreen(splashScreen);
 	}
 
@@ -43,12 +46,12 @@ public class SoftBuddyGame extends Game {
 			Timer.schedule(new Timer.Task() {
 				@Override
 				public void run() {
-					showScreen(loadingScreen);
-					splashScreen.dispose();
-					//LOAD MainSCreen assets here
+					loadingScreen = new LoadingScreen(viewport);
+					mainScreen = new MainScreen(viewport);
 					showScreen(mainScreen);
+					Gdx.input.setInputProcessor(mainScreen);
 				}
-			},5);
+			},1);
 		}
 	}
 
@@ -59,12 +62,16 @@ public class SoftBuddyGame extends Game {
 
 	@Override
 	protected void onResume() {
-		showScreen(mainScreen);
+		if(mainScreen != null) {
+			showScreen(mainScreen);
+		}
 	}
 
 	@Override
 	protected void onPause() {
-		showScreen(mainScreen);
+		if(mainScreen != null) {
+			showScreen(mainScreen);
+		}
 	}
 
 	@Override

@@ -29,6 +29,7 @@ public class SplashScreen extends AbstractScreen {
                 SoftBuddyGame.WORLD_WIDTH, SoftBuddyGame.WORLD_HEIGHT,
                 0,1,1,0,
                 Color.WHITE.toFloatBits()));
+        spriteBatchLayer.show();
     }
 
     @Override
