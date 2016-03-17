@@ -3,6 +3,10 @@ package com.thommil.softbuddy.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
@@ -24,11 +28,8 @@ public class SplashScreen extends AbstractScreen {
 
     @Override
     public void show() {
-        spriteBatchLayer.addActor(new StaticActor(0, textureSet,
-                -SoftBuddyGame.WORLD_WIDTH/2, -SoftBuddyGame.WORLD_HEIGHT/2,
-                SoftBuddyGame.WORLD_WIDTH, SoftBuddyGame.WORLD_HEIGHT,
-                0,1,1,0,
-                Color.WHITE.toFloatBits()));
+        final Vector2 scalingVector = Scaling.fill.apply(640,400, 10,10);
+        
         spriteBatchLayer.show();
     }
 

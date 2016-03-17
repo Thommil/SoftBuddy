@@ -14,8 +14,8 @@ import com.thommil.softbuddy.screens.SplashScreen;
 
 public class SoftBuddyGame extends Game {
 
-	public static final float WORLD_WIDTH = 16;
-	public static final float WORLD_HEIGHT = 9;
+	public static final float WORLD_WIDTH = 10;
+	public static final float WORLD_HEIGHT = 10;
 
 	private SplashScreen splashScreen;
 	private LoadingScreen loadingScreen;
@@ -25,7 +25,7 @@ public class SoftBuddyGame extends Game {
 
 	@Override
 	protected void onCreate(Settings settings) {
-		settings.viewport.type = Settings.Viewport.STRECTCH;
+		settings.viewport.type = Settings.Viewport.FILL;
 		settings.viewport.width = WORLD_WIDTH;
 		settings.viewport.height = WORLD_HEIGHT;
 		settings.physics.enabled = true;
@@ -49,7 +49,6 @@ public class SoftBuddyGame extends Game {
 					loadingScreen = new LoadingScreen(viewport);
 					mainScreen = new MainScreen(viewport);
 					showScreen(mainScreen);
-					Gdx.input.setInputProcessor(mainScreen);
 				}
 			},1);
 		}
