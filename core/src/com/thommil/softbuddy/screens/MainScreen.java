@@ -1,55 +1,115 @@
 package com.thommil.softbuddy.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Scaling;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.actor.graphics.SpriteActor;
-import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
 import com.thommil.libgdx.runtime.events.TouchDispatcher;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
+import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.screen.AbstractScreen;
-import com.thommil.softbuddy.SoftBuddyGame;
+import com.thommil.softbuddy.SoftBuddyGameAPI;
+import com.thommil.softbuddy.resources.Screens;
 
-public class MainScreen extends AbstractScreen implements InputProcessor {
+public class MainScreen extends AbstractScreen {
 
-    final TextureSet bgTextureSet;
-    final TextureSet buttonsTextureSet;
-    final SpriteBatchLayer spriteBatchLayer;
-    final TouchDispatcher touchDispatcher;
+    final SoftBuddyGameAPI softBuddyGameAPI;
 
-    public MainScreen(Viewport viewport) {
+    TextureSet bgTextureSet;
+    TextureSet buttonsTextureSet;
+    SpriteBatchLayer spriteBatchLayer;
+    ViewportLayout viewportLayout;
+    TouchDispatcher touchDispatcher;
+
+    public MainScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI) {
         super(viewport);
-        bgTextureSet = new TextureSet(new Texture("textures/mainscreen_bg.png"));
+        this.softBuddyGameAPI = softBuddyGameAPI;
+        this.create();
+    }
+
+    public void create(){
+        bgTextureSet = new TextureSet(new Texture(Screens.MAINSCREEN_BACKGROUND_TEXTURE));
         bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        buttonsTextureSet = new TextureSet(new Texture("ui/buttons.png"));
+        buttonsTextureSet = new TextureSet(new Texture(Screens.MAINSCREEN_BUTTONS_TEXTURE));
         buttonsTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        spriteBatchLayer = new SpriteBatchLayer(viewport,1);
-        touchDispatcher = new TouchDispatcher(viewport, this);
+        spriteBatchLayer = new SpriteBatchLayer(viewport,4);
+        viewportLayout = new ViewportLayout(viewport);
+
+        //Background
+        spriteBatchLayer.addActor(new SpriteActor(Screens.MAINSCREEN_BACKGROUND_ACTOR_ID,bgTextureSet));
+
+        //Buttons
+        spriteBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_NEW_BUTTON_REGION){
+            @Override
+            public boolean onTouchDown(float worldX, float worldY, int button) {
+                softBuddyGameAPI.newGame();
+                return true;
+            }
+        });
+        spriteBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_RESUME_BUTTON_REGION){
+            @Override
+            public boolean onTouchDown(float worldX, float worldY, int button) {
+                softBuddyGameAPI.resumeGame();
+                return true;
+            }
+        });
+        spriteBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_QUIT_BUTTON_REGION){
+            @Override
+            public boolean onTouchDown(float worldX, float worldY, int button) {
+                softBuddyGameAPI.quitGame();
+                return true;
+            }
+        });
+
+        //events
+        touchDispatcher = new TouchDispatcher(viewport);
+        touchDispatcher.addListener((SpriteActor)spriteBatchLayer.getActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID));
+        touchDispatcher.addListener((SpriteActor)spriteBatchLayer.getActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID));
+        touchDispatcher.addListener((SpriteActor)spriteBatchLayer.getActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID));
     }
 
     @Override
     public void show() {
-        final Vector2 scalingVector = Scaling.fit.apply(viewport.getWorldWidth(),viewport.getWorldHeight(), 10,10);
-        spriteBatchLayer.addActor(new StaticActor(0, bgTextureSet,
-                -scalingVector.x/2, -scalingVector.y/2,
-                scalingVector.x, scalingVector.y,
-                0f,1f,1f,0f,
-                Color.WHITE.toFloatBits()));
-        spriteBatchLayer.addActor(new PlayButton(1, buttonsTextureSet,
-                -3f, this.viewport.getWorldHeight()/2 - 1.5f,
-                6f, 1.5f,
-                0, 1/3f, 1f, 0f,
-                Color.WHITE.toFloatBits()));
-
-        touchDispatcher.addListener((PlayButton)spriteBatchLayer.getActor(1));
-
         spriteBatchLayer.show();
+    }
+
+    private void layout(){
+        //Background
+        SpriteActor actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_BACKGROUND_ACTOR_ID);
+        Rectangle rec = actor.getBoundingRectangle();
+        viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
+        actor.setPosition(rec.x, rec.y);
+        actor.setSize(rec.width, rec.height);
+
+        //Buttons
+        actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID);
+        rec = actor.getBoundingRectangle();
+        rec.setSize(Screens.MAINSCREEN_BUTTONS_SIZE[0],Screens.MAINSCREEN_BUTTONS_SIZE[1]);
+        viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.NONE);
+        actor.setPosition(rec.x, viewportLayout.height/8);
+        actor.setSize(rec.width, rec.height);
+
+        actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID);
+        rec = actor.getBoundingRectangle();
+        rec.setSize(Screens.MAINSCREEN_BUTTONS_SIZE[0],Screens.MAINSCREEN_BUTTONS_SIZE[1]);
+        viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER);
+        actor.setPosition(rec.x, rec.y);
+        actor.setSize(rec.width, rec.height);
+
+        actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID);
+        rec = actor.getBoundingRectangle();
+        rec.setSize(Screens.MAINSCREEN_BUTTONS_SIZE[0],Screens.MAINSCREEN_BUTTONS_SIZE[1]);
+        viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.NONE);
+        actor.setPosition(rec.x, -viewportLayout.height/8 - rec.height);
+        actor.setSize(rec.width, rec.height);
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewportLayout.update(width, height);
+        this.layout();
     }
 
     @Override
@@ -57,63 +117,20 @@ public class MainScreen extends AbstractScreen implements InputProcessor {
         spriteBatchLayer.render(delta);
     }
 
-
     @Override
     public void dispose() {
+        Gdx.input.setInputProcessor(null);
         spriteBatchLayer.dispose();
         bgTextureSet.dispose();
         buttonsTextureSet.dispose();
     }
 
-    public static class PlayButton extends StaticActor{
-        public PlayButton(int id, TextureSet textureSet, float x, float y, float width, float height, float u, float v, float u2, float v2, float color) {
-            super(id, textureSet, x, y, width, height, u, v, u2, v2, color);
-        }
-
-        @Override
-        public boolean onTouchDown(float worldX, float worldY, int button) {
-            Gdx.app.log("","TOUCH");
-            return super.onTouchDown(worldX, worldY, button);
+    public static abstract class ButtonActor extends SpriteActor{
+        public ButtonActor(int id, TextureSet textureSet, final int[] buttonData) {
+            super(id, textureSet,
+                    buttonData[0],buttonData[1],
+                    buttonData[2],buttonData[3]);
         }
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(int amount) {
-        return false;
-    }
 }

@@ -7,15 +7,13 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.thommil.libgdx.runtime.Game;
 import com.thommil.libgdx.runtime.Settings;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
+import com.thommil.softbuddy.resources.Global;
 import com.thommil.softbuddy.screens.LoadingScreen;
 import com.thommil.softbuddy.screens.MainScreen;
 import com.thommil.softbuddy.screens.SplashScreen;
 
 
-public class SoftBuddyGame extends Game {
-
-	public static final float WORLD_WIDTH = 10;
-	public static final float WORLD_HEIGHT = 10;
+public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	private SplashScreen splashScreen;
 	private LoadingScreen loadingScreen;
@@ -25,12 +23,12 @@ public class SoftBuddyGame extends Game {
 
 	@Override
 	protected void onCreate(Settings settings) {
-		settings.viewport.type = Settings.Viewport.FILL;
-		settings.viewport.width = WORLD_WIDTH;
-		settings.viewport.height = WORLD_HEIGHT;
+		settings.viewport.type = Global.VIEWPORT_TYPE;
+		settings.viewport.width = Global.WORLD_WIDTH;
+		settings.viewport.height = Global.WORLD_HEIGHT;
 		settings.physics.enabled = true;
 
-		SpriteBatchLayer.setGlobalSize(10);
+		SpriteBatchLayer.setGlobalSize(Global.SPRITE_BATCH_SIZE);
 	}
 
 	@Override
@@ -47,8 +45,9 @@ public class SoftBuddyGame extends Game {
 				@Override
 				public void run() {
 					loadingScreen = new LoadingScreen(viewport);
-					mainScreen = new MainScreen(viewport);
+					mainScreen = new MainScreen(viewport,SoftBuddyGame.this);
 					showScreen(mainScreen);
+					splashScreen.dispose();
 				}
 			},1);
 		}
@@ -75,7 +74,22 @@ public class SoftBuddyGame extends Game {
 
 	@Override
 	protected void onDispose() {
-		mainScreen.dispose();
-		loadingScreen.dispose();
+		if(mainScreen != null) mainScreen.dispose();
+		if(loadingScreen != null) loadingScreen.dispose();
+	}
+
+	@Override
+	public void newGame() {
+		Gdx.app.log("", "newGame");
+	}
+
+	@Override
+	public void resumeGame() {
+		Gdx.app.log("", "resumeGame");
+	}
+
+	@Override
+	public void quitGame() {
+		Gdx.app.exit();
 	}
 }
