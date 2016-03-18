@@ -17,88 +17,100 @@ public class MainScreen extends AbstractScreen {
 
     final SoftBuddyGameAPI softBuddyGameAPI;
 
+    SpriteBatchLayer currentBatchLayer = null;
+
+    //Main menu
+    SpriteBatchLayer mainMenuBatchLayer;
     TextureSet bgTextureSet;
     TextureSet buttonsTextureSet;
-    SpriteBatchLayer spriteBatchLayer;
+
+
     ViewportLayout viewportLayout;
     TouchDispatcher touchDispatcher;
 
     public MainScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI) {
         super(viewport);
         this.softBuddyGameAPI = softBuddyGameAPI;
-        this.create();
+        this.createMainMenu();
     }
 
-    public void create(){
+    public void createMainMenu(){
         bgTextureSet = new TextureSet(new Texture(Screens.MAINSCREEN_BACKGROUND_TEXTURE));
         bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
         buttonsTextureSet = new TextureSet(new Texture(Screens.MAINSCREEN_BUTTONS_TEXTURE));
         buttonsTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        spriteBatchLayer = new SpriteBatchLayer(viewport,4);
+        mainMenuBatchLayer = new SpriteBatchLayer(viewport,4);
         viewportLayout = new ViewportLayout(viewport);
 
         //Background
-        spriteBatchLayer.addActor(new SpriteActor(Screens.MAINSCREEN_BACKGROUND_ACTOR_ID,bgTextureSet));
+        mainMenuBatchLayer.addActor(new SpriteActor(Screens.MAINSCREEN_BACKGROUND_ACTOR_ID,bgTextureSet));
 
         //Buttons
-        spriteBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_NEW_BUTTON_REGION){
+        mainMenuBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_NEW_BUTTON_REGION){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.newGame();
                 return true;
             }
         });
-        spriteBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_RESUME_BUTTON_REGION){
+        mainMenuBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_RESUME_BUTTON_REGION){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.resumeGame();
                 return true;
             }
         });
-        spriteBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_QUIT_BUTTON_REGION){
+        mainMenuBatchLayer.addActor(new ButtonActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID,buttonsTextureSet, Screens.MAINSCREEN_QUIT_BUTTON_REGION){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.quitGame();
                 return true;
             }
         });
+    }
+
+    public void showMainMenu(){
+        if(currentBatchLayer != null) currentBatchLayer.hide();
+        currentBatchLayer = mainMenuBatchLayer;
 
         //events
         touchDispatcher = new TouchDispatcher(viewport);
-        touchDispatcher.addListener((SpriteActor)spriteBatchLayer.getActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID));
-        touchDispatcher.addListener((SpriteActor)spriteBatchLayer.getActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID));
-        touchDispatcher.addListener((SpriteActor)spriteBatchLayer.getActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID));
+        touchDispatcher.addListener((SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID));
+        touchDispatcher.addListener((SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID));
+        touchDispatcher.addListener((SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID));
+
+        currentBatchLayer.show();
     }
 
     @Override
     public void show() {
-        spriteBatchLayer.show();
+        showMainMenu();
     }
 
     private void layout(){
         //Background
-        SpriteActor actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_BACKGROUND_ACTOR_ID);
+        SpriteActor actor = (SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_BACKGROUND_ACTOR_ID);
         Rectangle rec = actor.getBoundingRectangle();
         viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
         actor.setPosition(rec.x, rec.y);
         actor.setSize(rec.width, rec.height);
 
         //Buttons
-        actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID);
+        actor = (SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_NEW_BUTTON_ACTOR_ID);
         rec = actor.getBoundingRectangle();
         rec.setSize(Screens.MAINSCREEN_BUTTONS_SIZE[0],Screens.MAINSCREEN_BUTTONS_SIZE[1]);
         viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.NONE);
         actor.setPosition(rec.x, viewportLayout.height/8);
         actor.setSize(rec.width, rec.height);
 
-        actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID);
+        actor = (SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_RESUME_BUTTON_ACTOR_ID);
         rec = actor.getBoundingRectangle();
         rec.setSize(Screens.MAINSCREEN_BUTTONS_SIZE[0],Screens.MAINSCREEN_BUTTONS_SIZE[1]);
         viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER);
         actor.setPosition(rec.x, rec.y);
         actor.setSize(rec.width, rec.height);
 
-        actor = (SpriteActor) spriteBatchLayer.getActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID);
+        actor = (SpriteActor) mainMenuBatchLayer.getActor(Screens.MAINSCREEN_QUIT_BUTTON_ACTOR_ID);
         rec = actor.getBoundingRectangle();
         rec.setSize(Screens.MAINSCREEN_BUTTONS_SIZE[0],Screens.MAINSCREEN_BUTTONS_SIZE[1]);
         viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.NONE);
@@ -114,13 +126,13 @@ public class MainScreen extends AbstractScreen {
 
     @Override
     public void render(float delta) {
-        spriteBatchLayer.render(delta);
+        currentBatchLayer.render(delta);
     }
 
     @Override
     public void dispose() {
         Gdx.input.setInputProcessor(null);
-        spriteBatchLayer.dispose();
+        mainMenuBatchLayer.dispose();
         bgTextureSet.dispose();
         buttonsTextureSet.dispose();
     }
