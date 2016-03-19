@@ -2,11 +2,12 @@ package com.thommil.softbuddy.levels.cave;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
-import com.thommil.libgdx.runtime.tools.RuntimeProfiler;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 import com.thommil.softbuddy.levels.Level;
 
-public class CaveLevel1 extends Level{
+public class CaveLevel01 extends Level{
+
+    public static final String RESOURCES_FILE = "chapters/cave/level01/resources.json";
 
     @Override
     public void build(final AssetManager assetManager) {
@@ -16,7 +17,6 @@ public class CaveLevel1 extends Level{
     @Override
     public void start(final SoftBuddyGameAPI softBuddyGameAPI) {
         Gdx.app.log("","start");
-        RuntimeProfiler.profile();
     }
 
     @Override

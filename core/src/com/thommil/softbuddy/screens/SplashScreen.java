@@ -8,9 +8,10 @@ import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.screen.AbstractScreen;
-import com.thommil.softbuddy.resources.Screens;
 
 public class SplashScreen extends AbstractScreen {
+
+    public static final String SPLASHSCREEN_BACKGROUND_TEXTURE = "screens/splashscreen.png";
 
     final TextureSet bgTextureSet;
     final SpriteBatchLayer spriteBatchLayer;
@@ -18,7 +19,7 @@ public class SplashScreen extends AbstractScreen {
 
     public SplashScreen(Viewport viewport) {
         super(viewport);
-        bgTextureSet = new TextureSet(new Texture(Screens.SPLASHSCREEN_BACKGROUND_TEXTURE));
+        bgTextureSet = new TextureSet(new Texture(SPLASHSCREEN_BACKGROUND_TEXTURE));
         bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
         spriteBatchLayer = new SpriteBatchLayer(viewport,1);
         viewportLayout = new ViewportLayout(viewport);
@@ -26,7 +27,7 @@ public class SplashScreen extends AbstractScreen {
     }
 
     public void create(){
-        spriteBatchLayer.addActor(new SpriteActor(Screens.SPLASHSCREEN_BACKGROUND_ACTOR_ID,bgTextureSet));
+        spriteBatchLayer.addActor(new SpriteActor(0,bgTextureSet));
     }
 
     @Override
@@ -35,7 +36,7 @@ public class SplashScreen extends AbstractScreen {
     }
 
     private void layout(){
-        final SpriteActor bgActor = (SpriteActor) spriteBatchLayer.getActor(Screens.SPLASHSCREEN_BACKGROUND_ACTOR_ID);
+        final SpriteActor bgActor = (SpriteActor) spriteBatchLayer.getActor(0);
         final Rectangle rec = bgActor.getBoundingRectangle();
         viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
         bgActor.setPosition(rec.x, rec.y);

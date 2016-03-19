@@ -1,0 +1,28 @@
+{
+  "mainscreen" : {
+    "background" : "screens/mainscreen_bg.png",
+    "foreground" : "screens/mainscreen_fg.png",
+    "main" : {
+      "buttons" : {
+        "new" : {
+          "id" : 1,
+          "size" : [4.4,1.0],
+          "pos" : [0,3],
+          "region" : [0,0,250,56]
+        },
+        "resume" : {
+          "id" : 2,
+          "size" : [4.4,1.0],
+          "pos" : [0.0,0.0],
+          "region" : [0,60,250,56]
+        },
+        "quit" : {
+          "id" : 3,
+          "size" : [4.4,1.0],
+          "pos" : [0.0,-3.0],
+          "region" : [0,116,250,62]
+        }
+      }
+    }
+  }
+}

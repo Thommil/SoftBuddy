@@ -11,7 +11,6 @@ import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
 import com.thommil.softbuddy.levels.cave.CaveChapter;
-import com.thommil.softbuddy.resources.Global;
 import com.thommil.softbuddy.screens.LoadingScreen;
 import com.thommil.softbuddy.screens.MainScreen;
 import com.thommil.softbuddy.screens.SplashScreen;
@@ -32,12 +31,12 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	protected void onCreate(Settings settings) {
-		settings.viewport.type = Global.VIEWPORT_TYPE;
-		settings.viewport.width = Global.WORLD_WIDTH;
-		settings.viewport.height = Global.WORLD_HEIGHT;
+		settings.viewport.type = Resources.VIEWPORT_TYPE;
+		settings.viewport.width = Resources.WORLD_WIDTH;
+		settings.viewport.height = Resources.WORLD_HEIGHT;
 		settings.physics.enabled = true;
 
-		SpriteBatchLayer.setGlobalSize(Global.SPRITE_BATCH_SIZE);
+		SpriteBatchLayer.setGlobalSize(Resources.SPRITE_BATCH_SIZE);
 	}
 
 	@Override
