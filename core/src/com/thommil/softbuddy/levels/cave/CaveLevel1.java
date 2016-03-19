@@ -1,38 +1,43 @@
 package com.thommil.softbuddy.levels.cave;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.thommil.libgdx.runtime.tools.RuntimeProfiler;
+import com.thommil.softbuddy.SoftBuddyGameAPI;
 import com.thommil.softbuddy.levels.Level;
 
 public class CaveLevel1 extends Level{
 
     @Override
-    public void buildBackground() {
-        Gdx.app.log("","buildBackground");
+    public void build(final AssetManager assetManager) {
+        Gdx.app.log("","build");
     }
 
     @Override
-    public void buildBuddy() {
-        Gdx.app.log("","buildBuddy");
-    }
-
-    @Override
-    public void buildStatic() {
-        Gdx.app.log("","buildStatic");
-    }
-
-    @Override
-    public void buildObjects() {
-        Gdx.app.log("","buildObjects");
-    }
-
-    @Override
-    public void start() {
+    public void start(final SoftBuddyGameAPI softBuddyGameAPI) {
         Gdx.app.log("","start");
+        RuntimeProfiler.profile();
     }
 
     @Override
-    public void restart() {
-        Gdx.app.log("","restart");
+    public void reset() {
+        Gdx.app.log("","reset");
+    }
+
+    protected void buildBackground(final AssetManager assetManager){
+
+    }
+
+    protected void buildBuddy(final AssetManager assetManager){
+
+    }
+
+    protected void buildDynamic(final AssetManager assetManager){
+
+    }
+
+    protected void buildStatic(final AssetManager assetManager){
+
     }
 
     @Override

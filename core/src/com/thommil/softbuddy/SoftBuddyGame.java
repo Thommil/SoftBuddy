@@ -50,27 +50,32 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			public void run() {
 				loadingScreen = new LoadingScreen(viewport);
 				mainScreen = new MainScreen(viewport,SoftBuddyGame.this);
-				chapters.add(new CaveChapter());
-				//TODO others
+				loadChapters();
 				showScreen(mainScreen);
 				splashScreen.dispose();
 			}
 		},1);
 	}
 
+	/**
+	 * Load all chapters (objects only) in memory
+	 */
+	private void loadChapters(){
+		if(this.chapters.size == 0) {
+			chapters.add(new CaveChapter());
+		}
+	}
+
 	@Override
 	protected void onShowRuntime() {
 		final Level level = this.currentChapter.getLevels().get(this.currentLevel);
 		if(rebuildLevel) {
-			level.buildBackground();
-			level.buildBuddy();
-			level.buildStatic();
-			level.buildObjects();
+			level.build(this.getAssetManager());
 			rebuildLevel = false;
 		}
 		Gdx.input.setCatchBackKey(true);
 		Gdx.input.setInputProcessor(level);
-		level.start();
+		level.start(this);
 	}
 
 	@Override
@@ -115,7 +120,14 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		//TODO find current chapter
 		//this.showScreen(loadingScreen);
 		//this.setPlayerProgression(chapters.first(), 0);
-		this.showScreen(Runtime.getInstance());
+		if(this.currentChapter != null) {
+			this.showScreen(Runtime.getInstance());
+		}
+	}
+
+	@Override
+	public void showMenu() {
+		this.showScreen(mainScreen);
 	}
 
 	public void setPlayerProgression(final Chapter chapter, final int level){
@@ -126,7 +138,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 				this.currentChapter.dispose();
 				this.currentChapter = chapter;
 				this.currentLevel = level;
-				this.currentChapter.loadResources(this.getAssetManager());
+				this.currentChapter.load(this.getAssetManager());
 				rebuildLevel = true;
 			}
 			else if(currentLevel != level){
@@ -135,14 +147,14 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 				rebuildLevel = true;
 			}
 			else{
-				this.currentChapter.getLevels().get(this.currentLevel).restart();
+				this.currentChapter.getLevels().get(this.currentLevel).reset();
 				rebuildLevel = false;
 			}
 		}
 		else{
 			this.currentChapter = chapter;
 			this.currentLevel = level;
-			this.currentChapter.loadResources(this.getAssetManager());
+			this.currentChapter.load(this.getAssetManager());
 			rebuildLevel = true;
 		}
 	}

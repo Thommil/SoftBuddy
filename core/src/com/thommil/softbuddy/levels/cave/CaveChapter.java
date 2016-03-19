@@ -11,8 +11,8 @@ import com.thommil.softbuddy.resources.Cave;
 public class CaveChapter extends Chapter {
 
     @Override
-    public void loadResources(AssetManager assetManager) {
-        Gdx.app.log("","loadResources");
+    public void load(AssetManager assetManager) {
+        Gdx.app.log("","load");
         assetManager.load(Cave.SPLASHSCREEN_BACKGROUND_TEXTURE, Texture.class);
     }
 

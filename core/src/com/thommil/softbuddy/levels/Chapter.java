@@ -8,7 +8,7 @@ public abstract class Chapter implements Disposable{
 
     final protected Array<Level> levels = new Array<Level>(false,10);
 
-    public abstract void loadResources(final AssetManager assetManager);
+    public abstract void load(final AssetManager assetManager);
 
     public Array<Level> getLevels(){
         return this.levels;
