@@ -10,7 +10,6 @@ import com.thommil.libgdx.runtime.Settings;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
-import com.thommil.softbuddy.levels.cave.CaveChapter;
 import com.thommil.softbuddy.screens.LoadingScreen;
 import com.thommil.softbuddy.screens.MainScreen;
 import com.thommil.softbuddy.screens.SplashScreen;
@@ -18,16 +17,19 @@ import com.thommil.softbuddy.screens.SplashScreen;
 
 public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
+	private Viewport viewport;
+
 	private SplashScreen splashScreen;
 	private LoadingScreen loadingScreen;
 	private MainScreen mainScreen;
 
+	private Array<Chapter> chapters;
 	private Chapter currentChapter;
-	private int currentLevel;
-	private final Array<Chapter> chapters = new Array<Chapter>(false,6);
-	private boolean rebuildLevel = true;
+	private Level currentLevel;
 
-	private Viewport viewport;
+	private boolean mustReloadChapter = true;
+	private boolean mustRebuildLevel = true;
+	private boolean mustResetLevel = true;
 
 	@Override
 	protected void onCreate(Settings settings) {
@@ -42,124 +44,123 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	@Override
 	protected void onStart(final Viewport viewport) {
 		this.viewport = viewport;
-		splashScreen = new SplashScreen(viewport);
-		showScreen(splashScreen);
+		this.splashScreen = new SplashScreen(viewport);
+		this.loadingScreen = new LoadingScreen(viewport, this);
+		this.mainScreen = new MainScreen(viewport,this);
+		showScreen(this.splashScreen);
 		Timer.schedule(new Timer.Task() {
 			@Override
 			public void run() {
-				loadingScreen = new LoadingScreen(viewport);
-				mainScreen = new MainScreen(viewport,SoftBuddyGame.this);
-				loadChapters();
-				showScreen(mainScreen);
-				splashScreen.dispose();
+				SoftBuddyGame.this.chapters = Chapter.getChapters();
+				showScreen(SoftBuddyGame.this.mainScreen);
+				SoftBuddyGame.this.splashScreen.dispose();
 			}
 		},1);
 	}
 
-	/**
-	 * Load all chapters (objects only) in memory
-	 */
-	private void loadChapters(){
-		if(this.chapters.size == 0) {
-			chapters.add(new CaveChapter());
-		}
-	}
-
 	@Override
 	protected void onShowRuntime() {
-		final Level level = this.currentChapter.getLevels().get(this.currentLevel);
-		if(rebuildLevel) {
-			level.build(this.getAssetManager());
-			rebuildLevel = false;
+		if(this.mustResetLevel){
+			this.currentLevel.reset();
+			this.mustResetLevel = false;
 		}
 		Gdx.input.setCatchBackKey(true);
-		Gdx.input.setInputProcessor(level);
-		level.start(this);
+		Gdx.input.setInputProcessor(this.currentLevel);
+		this.currentLevel.start(this);
 	}
 
 	@Override
 	protected void onHideRuntime() {
-		Gdx.input.setCatchBackKey(false);
+		if(this.currentLevel != null){
+			this.currentLevel.stop();
+		}
 	}
 
 	@Override
-	protected void onResize(int width, int height) {}
+	protected void onResize(int width, int height) {
+		this.mainScreen.resize(width, height);
+		//TODO -> Check after refactoring : this.loadingScreen.resize(width, height);
+	}
 
 	@Override
 	protected void onResume() {
-		if(mainScreen != null) {
-			showScreen(mainScreen);
+		if(this.mainScreen != null) {
+			showScreen(this.mainScreen);
 		}
 	}
 
 	@Override
 	protected void onPause() {
-		if(mainScreen != null) {
-			showScreen(mainScreen);
+		if(this.mainScreen != null) {
+			showScreen(this.mainScreen);
 		}
 	}
 
 	@Override
 	protected void onDispose() {
-		if(mainScreen != null) mainScreen.dispose();
-		if(loadingScreen != null) loadingScreen.dispose();
+		if(this.mainScreen != null) this.mainScreen.dispose();
+		if(this.loadingScreen != null) this.loadingScreen.dispose();
 	}
 
 	@Override
-	public void newGame() {
-		Gdx.app.log("", "newGame");
-		this.showScreen(loadingScreen);
-		this.setPlayerProgression(chapters.first(), 0);
+	public void load() {
+		if(this.mustReloadChapter){
+			this.currentChapter.load(this.getAssetManager());
+			this.mustReloadChapter = false;
+		}
+		if(this.getAssetManager().getProgress() < 1f){
+			this.getAssetManager().update();
+		}
+		else if(this.mustRebuildLevel) {
+			this.currentLevel.build(this.getAssetManager());
+			this.mustRebuildLevel = false;
+		}
+	}
+
+	@Override
+	public float getLoadingProgress() {
+		return this.getAssetManager().getProgress() * 0.9f + (this.mustRebuildLevel ? 0.0f : 0.1f);
+	}
+
+	@Override
+	public void onLoaded() {
 		this.showScreen(Runtime.getInstance());
 	}
 
 	@Override
-	public void resumeGame() {
-		Gdx.app.log("", "resumeGame");
-		//TODO find current chapter
-		//this.showScreen(loadingScreen);
-		//this.setPlayerProgression(chapters.first(), 0);
-		if(this.currentChapter != null) {
-			this.showScreen(Runtime.getInstance());
+	public void startLevel(final int chapter, final int level, final boolean restart) {
+		final Chapter selectedChapter = this.chapters.get(chapter);
+		final Level selectedLevel = selectedChapter.getLevels().get(level);
+		if(this.currentChapter != selectedChapter){
+			this.mustReloadChapter = true;
+			if(this.currentChapter != null){
+				this.currentChapter.unload(this.getAssetManager());
+			}
+			this.currentChapter = selectedChapter;
+			this.mustRebuildLevel = true;
+			if(this.currentLevel != null){
+				this.currentLevel.dispose();
+			}
+			this.currentLevel = selectedLevel;
+			this.mustResetLevel = false;
 		}
-	}
-
-	@Override
-	public void showMenu() {
-		this.showScreen(mainScreen);
-	}
-
-	public void setPlayerProgression(final Chapter chapter, final int level){
-		Gdx.app.log("","setPlayerProgression");
-		if(this.currentChapter != null){
-			if(currentChapter != chapter){
-				this.currentChapter.getLevels().get(this.currentLevel).dispose();
-				this.currentChapter.dispose();
-				this.currentChapter = chapter;
-				this.currentLevel = level;
-				this.currentChapter.load(this.getAssetManager());
-				rebuildLevel = true;
+		else if(this.currentLevel != selectedLevel){
+			this.mustReloadChapter = false;
+			this.mustRebuildLevel = true;
+			if(this.currentLevel != null){
+				this.currentLevel.dispose();
 			}
-			else if(currentLevel != level){
-				this.currentChapter.getLevels().get(this.currentLevel).dispose();
-				this.currentLevel = level;
-				rebuildLevel = true;
-			}
-			else{
-				this.currentChapter.getLevels().get(this.currentLevel).reset();
-				rebuildLevel = false;
-			}
+			this.currentLevel = selectedLevel;
+			this.mustResetLevel = false;
 		}
 		else{
-			this.currentChapter = chapter;
-			this.currentLevel = level;
-			this.currentChapter.load(this.getAssetManager());
-			rebuildLevel = true;
+			this.mustResetLevel = restart;
 		}
+		this.showScreen(this.loadingScreen);
 	}
 
 	@Override
-	public void quitGame() {
+	public void quit() {
 		Gdx.app.exit();
 	}
 }

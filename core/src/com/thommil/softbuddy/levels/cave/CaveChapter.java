@@ -2,6 +2,7 @@ package com.thommil.softbuddy.levels.cave;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
@@ -13,16 +14,24 @@ public class CaveChapter extends Chapter {
     @Override
     public void load(AssetManager assetManager) {
         Gdx.app.log("","load");
+        assetManager.load("lether.png", Texture.class);
+        assetManager.load("stone.png", Texture.class);
+    }
+
+    @Override
+    public void unload(AssetManager assetManager) {
+        Gdx.app.log("","unload");
+        assetManager.unload("lether.png");
+        assetManager.unload("stone.png");
     }
 
     @Override
     public Array<Level> getLevels() {
-        this.levels.add(new CaveLevel01());
-        return super.getLevels();
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
+        if(this.levels == null) {
+            this.levels = new Array<Level>(false,2);
+            this.levels.add(new CaveLevel01());
+            this.levels.add(new CaveLevel01());
+        }
+        return this.levels;
     }
 }

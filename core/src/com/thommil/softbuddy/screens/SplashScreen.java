@@ -1,5 +1,7 @@
 package com.thommil.softbuddy.screens;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -19,44 +21,45 @@ public class SplashScreen extends AbstractScreen {
 
     public SplashScreen(Viewport viewport) {
         super(viewport);
-        bgTextureSet = new TextureSet(new Texture(SPLASHSCREEN_BACKGROUND_TEXTURE));
-        bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        spriteBatchLayer = new SpriteBatchLayer(viewport,1);
-        viewportLayout = new ViewportLayout(viewport);
+        this.bgTextureSet = new TextureSet(new Texture(SPLASHSCREEN_BACKGROUND_TEXTURE));
+        this.bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
+        this.spriteBatchLayer = new SpriteBatchLayer(viewport,1);
+        this.viewportLayout = new ViewportLayout(viewport);
         this.create();
     }
 
     public void create(){
-        spriteBatchLayer.addActor(new SpriteActor(0,bgTextureSet));
+        this.spriteBatchLayer.addActor(new SpriteActor(0,this.bgTextureSet));
     }
 
     @Override
     public void show() {
-        spriteBatchLayer.show();
+        this.spriteBatchLayer.show();
     }
 
     private void layout(){
-        final SpriteActor bgActor = (SpriteActor) spriteBatchLayer.getActor(0);
+        final SpriteActor bgActor = (SpriteActor) this.spriteBatchLayer.getActor(0);
         final Rectangle rec = bgActor.getBoundingRectangle();
-        viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
+        this.viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
         bgActor.setPosition(rec.x, rec.y);
         bgActor.setSize(rec.width, rec.height);
     }
 
     @Override
     public void resize(int width, int height) {
-        viewportLayout.update(width, height);
+        this.viewportLayout.update(width, height);
         this.layout();
     }
 
     @Override
     public void render(float delta) {
-        spriteBatchLayer.render(delta);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        this.spriteBatchLayer.render(delta);
     }
 
     @Override
     public void dispose() {
-        spriteBatchLayer.dispose();
-        bgTextureSet.dispose();
+        this.spriteBatchLayer.dispose();
+        this.bgTextureSet.dispose();
     }
 }

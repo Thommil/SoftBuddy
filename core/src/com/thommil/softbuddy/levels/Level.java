@@ -15,9 +15,11 @@ public abstract class Level implements Disposable, InputProcessor{
         this.buildHUD(assetManager);
     }
 
+    public abstract void reset();
+
     public abstract void start(final SoftBuddyGameAPI softBuddyGameAPI);
 
-    public abstract void reset();
+    public abstract void stop();
 
     protected abstract void buildBackground(final AssetManager assetManager);
 

@@ -11,7 +11,15 @@ public class CaveLevel01 extends Level{
 
     @Override
     public void build(final AssetManager assetManager) {
-        Gdx.app.log("","build");
+        Gdx.app.log("", "build");
+        for(int i=0; i<100000000;i++) {
+            String toto = new String();
+        }
+    }
+
+    @Override
+    public void reset() {
+        Gdx.app.log("","reset");
     }
 
     @Override
@@ -20,8 +28,8 @@ public class CaveLevel01 extends Level{
     }
 
     @Override
-    public void reset() {
-        Gdx.app.log("","reset");
+    public void stop() {
+        Gdx.app.log("","stop");
     }
 
     protected void buildBackground(final AssetManager assetManager){
