@@ -10,47 +10,64 @@ public class CaveLevel01 extends Level{
     public static final String RESOURCES_FILE = "chapters/cave/level01/resources.json";
 
     @Override
-    public void build(final AssetManager assetManager) {
-        Gdx.app.log("", "build");
-        for(int i=0; i<100000000;i++) {
-            String toto = new String();
-        }
+    public void load(AssetManager assetManager) {
+        Gdx.app.log("","load cave 01");
+    }
+
+    @Override
+    public void unload(AssetManager assetManager) {
+        Gdx.app.log("","unload cave 01");
+    }
+
+    @Override
+    public void build(final SoftBuddyGameAPI softBuddyGameAPI) {
+        Gdx.app.log("", "build cave 01");
+
     }
 
     @Override
     public void reset() {
-        Gdx.app.log("","reset");
+        Gdx.app.log("","reset cave 01");
     }
 
     @Override
-    public void start(final SoftBuddyGameAPI softBuddyGameAPI) {
-        Gdx.app.log("","start");
+    public void start() {
+        Gdx.app.log("","start cave 01");
     }
 
     @Override
     public void stop() {
-        Gdx.app.log("","stop");
+        Gdx.app.log("","stop cave 01");
     }
 
-    protected void buildBackground(final AssetManager assetManager){
-
-    }
-
-    protected void buildBuddy(final AssetManager assetManager){
-
-    }
-
-    protected void buildDynamic(final AssetManager assetManager){
-
-    }
-
-    protected void buildStatic(final AssetManager assetManager){
+    @Override
+    protected void buildBackground() {
 
     }
 
     @Override
+    protected void buildBuddy() {
+
+    }
+
+    @Override
+    protected void buildDynamic() {
+
+    }
+
+    @Override
+    protected void buildStatic() {
+
+    }
+
+    @Override
+    protected void buildHUD() {
+        super.buildHUD();
+    }
+
+    @Override
     public void dispose() {
-        Gdx.app.log("","dispose");
+        Gdx.app.log("","dispose cave 01");
     }
 
     @Override

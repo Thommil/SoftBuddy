@@ -12,13 +12,13 @@ public class CaveChapter extends Chapter {
 
     @Override
     public void load(AssetManager assetManager) {
-        Gdx.app.log("","load");
+        Gdx.app.log("","load cave");
 
     }
 
     @Override
     public void unload(AssetManager assetManager) {
-        Gdx.app.log("","unload");
+        Gdx.app.log("","unload cave");
 
     }
 

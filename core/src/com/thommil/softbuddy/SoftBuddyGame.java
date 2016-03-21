@@ -28,6 +28,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	private Level currentLevel;
 
 	private boolean mustReloadChapter = true;
+	private boolean mustReloadLevel = true;
 	private boolean mustRebuildLevel = true;
 	private boolean mustResetLevel = true;
 
@@ -66,7 +67,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		}
 		Gdx.input.setCatchBackKey(true);
 		Gdx.input.setInputProcessor(this.currentLevel);
-		this.currentLevel.start(this);
+		this.currentLevel.start();
 	}
 
 	@Override
@@ -104,15 +105,19 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	public void load() {
-		if(this.mustReloadChapter){
+		if (this.mustReloadChapter) {
 			this.currentChapter.load(this.getAssetManager());
 			this.mustReloadChapter = false;
+		}
+		if (this.mustReloadLevel){
+			this.currentLevel.load(this.getAssetManager());
+			this.mustReloadLevel = false;
 		}
 		if(this.getAssetManager().getProgress() < 1f){
 			this.getAssetManager().update();
 		}
 		else if(this.mustRebuildLevel) {
-			this.currentLevel.build(this.getAssetManager());
+			this.currentLevel.build(this);
 			this.mustRebuildLevel = false;
 		}
 	}
@@ -137,25 +142,29 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 				this.currentChapter.unload(this.getAssetManager());
 			}
 			this.currentChapter = selectedChapter;
+			this.mustReloadLevel = true;
 			this.mustRebuildLevel = true;
 			if(this.currentLevel != null){
-				this.currentLevel.dispose();
+				this.currentLevel.unload(this.getAssetManager());
 			}
 			this.currentLevel = selectedLevel;
-			this.mustResetLevel = false;
+			this.mustResetLevel = true;
 			this.showScreen(this.loadingScreen);
 		}
 		else if(this.currentLevel != selectedLevel){
 			this.mustReloadChapter = false;
+			this.mustReloadLevel = true;
 			this.mustRebuildLevel = true;
 			if(this.currentLevel != null){
-				this.currentLevel.dispose();
+				this.currentLevel.unload(this.getAssetManager());
 			}
 			this.currentLevel = selectedLevel;
-			this.mustResetLevel = false;
+			this.mustResetLevel = true;
 			this.showScreen(this.loadingScreen);
 		}
 		else{
+			this.mustReloadLevel = false;
+			this.mustRebuildLevel = true;
 			this.mustResetLevel = restart;
 			this.showScreen(Runtime.getInstance());
 		}
