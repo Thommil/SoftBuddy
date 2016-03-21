@@ -27,15 +27,15 @@ public class LoadingScreen extends AbstractScreen {
         fontActor = new BitmapFontActor(0, generator.generateFont(parameter));
         generator.dispose();
         bitmapFontBatchLayer = new BitmapFontBatchLayer(viewport, 1);
+
+        fontActor.setText(this.textTemplate.replaceAll("PROGRESS", "00"));
+        fontActor.setPosition(-100, 0);
+        fontActor.setTargetWidth(200);
+        this.bitmapFontBatchLayer.addActor(fontActor);
     }
 
     @Override
     public void show() {
-        fontActor.setText(this.textTemplate.replaceAll("PROGRESS", "00"));
-        fontActor.setPosition(-100, 0);
-        fontActor.setTargetWidth(200);
-        //bitmapFontBatchLayer.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        this.bitmapFontBatchLayer.addActor(fontActor);
         this.bitmapFontBatchLayer.show();
         firstPass = true;
     }

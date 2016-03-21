@@ -14,15 +14,13 @@ public class CaveChapter extends Chapter {
     @Override
     public void load(AssetManager assetManager) {
         Gdx.app.log("","load");
-        assetManager.load("lether.png", Texture.class);
-        assetManager.load("stone.png", Texture.class);
+
     }
 
     @Override
     public void unload(AssetManager assetManager) {
         Gdx.app.log("","unload");
-        assetManager.unload("lether.png");
-        assetManager.unload("stone.png");
+
     }
 
     @Override

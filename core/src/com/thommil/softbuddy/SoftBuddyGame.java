@@ -79,7 +79,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	@Override
 	protected void onResize(int width, int height) {
 		this.mainScreen.resize(width, height);
-		//TODO -> Check after refactoring : this.loadingScreen.resize(width, height);
+		this.loadingScreen.resize(width, height);
 	}
 
 	@Override
