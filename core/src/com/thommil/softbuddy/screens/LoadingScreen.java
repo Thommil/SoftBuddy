@@ -49,7 +49,7 @@ public class LoadingScreen extends AbstractScreen {
             firstPass = false;
         }
 
-        final float progress = this.softBuddyGameAPI.getLoadingProgress() * 100f;
+        final int progress = Math.round(this.softBuddyGameAPI.getLoadingProgress() * 100f);
         if (progress < 10) {
             fontActor.setText(this.textTemplate.replaceAll("PROGRESS", "0" + progress));
         } else {
