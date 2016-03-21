@@ -143,6 +143,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			}
 			this.currentLevel = selectedLevel;
 			this.mustResetLevel = false;
+			this.showScreen(this.loadingScreen);
 		}
 		else if(this.currentLevel != selectedLevel){
 			this.mustReloadChapter = false;
@@ -152,11 +153,12 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			}
 			this.currentLevel = selectedLevel;
 			this.mustResetLevel = false;
+			this.showScreen(this.loadingScreen);
 		}
 		else{
 			this.mustResetLevel = restart;
+			this.showScreen(Runtime.getInstance());
 		}
-		this.showScreen(this.loadingScreen);
 	}
 
 	@Override

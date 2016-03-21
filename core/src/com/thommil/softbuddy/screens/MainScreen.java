@@ -65,8 +65,7 @@ public class MainScreen extends AbstractScreen {
         this.mainMenuBatchLayer.addActor(new ButtonActor(this.config.get("main").get("buttons").get("quit").getInt("id"), this.fgTextureSet, this.config.get("main").get("buttons").get("quit").get("region").asIntArray()){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
-                //softBuddyGameAPI.quit();
-                softBuddyGameAPI.startLevel(0, 1, true);
+                softBuddyGameAPI.quit();
                 return true;
             }
         });
