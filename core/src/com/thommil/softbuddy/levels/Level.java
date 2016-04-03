@@ -7,6 +7,9 @@ import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public abstract class Level implements Disposable, InputProcessor{
 
+    protected static final CommonLoader commonLoader = new CommonLoader();
+    protected static final LevelLoader levelLoader = new LevelLoader();
+
     public abstract void load(final AssetManager assetManager);
 
     public abstract void unload(final AssetManager assetManager);

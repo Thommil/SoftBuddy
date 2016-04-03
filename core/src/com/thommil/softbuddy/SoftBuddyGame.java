@@ -34,12 +34,31 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	protected void onCreate(Settings settings) {
-		settings.viewport.type = Resources.VIEWPORT_TYPE;
-		settings.viewport.width = Resources.WORLD_WIDTH;
-		settings.viewport.height = Resources.WORLD_HEIGHT;
+		settings.viewport.type = Settings.Viewport.FILL;
+		final float screenRatio = Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+		// 4/3
+		if(screenRatio <= (4f/3f)){
+			settings.viewport.width = 13;
+			settings.viewport.height = 10;
+		}
+		// 3/2
+		else if(screenRatio <= (3f/2f)){
+			settings.viewport.width = 13;
+			settings.viewport.height = 9;
+		}
+		// 16/10
+		else if(screenRatio <= (16f/10f)){
+			settings.viewport.width = 16;
+			settings.viewport.height = 10;
+		}
+		// 16/9
+		else{
+			settings.viewport.width = 16;
+			settings.viewport.height = 9;
+		}
 		settings.physics.enabled = true;
 
-		SpriteBatchLayer.setGlobalSize(Resources.SPRITE_BATCH_SIZE);
+		SpriteBatchLayer.setGlobalSize(SPRITE_BATCH_SIZE);
 	}
 
 	@Override

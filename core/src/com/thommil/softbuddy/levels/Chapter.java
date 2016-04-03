@@ -3,7 +3,7 @@ package com.thommil.softbuddy.levels;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
-import com.thommil.softbuddy.levels.cave.CaveChapter;
+import com.thommil.softbuddy.levels.mountain.Mountain;
 
 public abstract class Chapter implements Disposable{
 
@@ -13,7 +13,7 @@ public abstract class Chapter implements Disposable{
     public static Array<Chapter> getChapters(){
         if(Chapter.chapters == null){
             Chapter.chapters = new Array<Chapter>(true,5);
-            Chapter.chapters.add(new CaveChapter());
+            Chapter.chapters.add(new Mountain());
         }
         return Chapter.chapters;
     }

@@ -14,7 +14,6 @@ import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.screen.AbstractScreen;
-import com.thommil.softbuddy.Resources;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public class MainScreen extends AbstractScreen {
@@ -39,7 +38,7 @@ public class MainScreen extends AbstractScreen {
 
     public MainScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI) {
         super(viewport);
-        this.config = new JsonReader().parse(Gdx.files.internal(Resources.SCREENS_RESOURCES_FILE)).get("mainscreen");
+        this.config = new JsonReader().parse(Gdx.files.internal(SoftBuddyGameAPI.SCREENS_RESOURCES_FILE)).get("mainscreen");
         this.softBuddyGameAPI = softBuddyGameAPI;
         this.viewportLayout = new ViewportLayout(viewport);
         this.touchDispatcher = new TouchDispatcher(viewport);

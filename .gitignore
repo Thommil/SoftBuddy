@@ -16,6 +16,7 @@ html/war/WEB-INF/classes/
 gwt-unitCache/
 www-test/
 .gwt-tmp/
+data/
 
 ## Android Studio and Intellij and Android in general
 android/libs/armeabi/

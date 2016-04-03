@@ -1,4 +1,4 @@
-package com.thommil.softbuddy.levels.cave;
+package com.thommil.softbuddy.levels.mountain;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
@@ -6,19 +6,18 @@ import com.badlogic.gdx.utils.Array;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
 
-public class CaveChapter extends Chapter {
+public class Mountain extends Chapter {
 
-    public static final String RESOURCES_FILE = "chapters/cave/resources.json";
+    public static final String RESOURCES_FILE = "chapters/mountain/resources.json";
 
     @Override
     public void load(AssetManager assetManager) {
-        Gdx.app.log("","load cave");
+
 
     }
 
     @Override
     public void unload(AssetManager assetManager) {
-        Gdx.app.log("","unload cave");
 
     }
 
@@ -26,7 +25,7 @@ public class CaveChapter extends Chapter {
     public Array<Level> getLevels() {
         if(this.levels == null) {
             this.levels = new Array<Level>(false,1);
-            this.levels.add(new CaveLevel01());
+            this.levels.add(new Level01());
         }
         return this.levels;
     }

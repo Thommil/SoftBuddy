@@ -1,43 +1,43 @@
-package com.thommil.softbuddy.levels.cave;
+package com.thommil.softbuddy.levels.mountain;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 import com.thommil.softbuddy.levels.Level;
 
-public class CaveLevel01 extends Level{
+public class Level01 extends Level{
 
-    public static final String RESOURCES_FILE = "chapters/cave/level01/resources.json";
+    public static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
 
     @Override
     public void load(AssetManager assetManager) {
-        Gdx.app.log("","load cave 01");
+        Level.levelLoader.parse(Gdx.files.internal(RESOURCES_FILE));
     }
 
     @Override
     public void unload(AssetManager assetManager) {
-        Gdx.app.log("","unload cave 01");
+
+
     }
 
     @Override
     public void build(final SoftBuddyGameAPI softBuddyGameAPI) {
-        Gdx.app.log("", "build cave 01");
 
     }
 
     @Override
     public void reset() {
-        Gdx.app.log("","reset cave 01");
+
     }
 
     @Override
     public void start() {
-        Gdx.app.log("","start cave 01");
+
     }
 
     @Override
     public void stop() {
-        Gdx.app.log("","stop cave 01");
+
     }
 
     @Override
@@ -67,7 +67,7 @@ public class CaveLevel01 extends Level{
 
     @Override
     public void dispose() {
-        Gdx.app.log("","dispose cave 01");
+
     }
 
     @Override
