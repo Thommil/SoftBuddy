@@ -7,22 +7,18 @@ import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public abstract class Level implements Disposable, InputProcessor{
 
-    protected static final CommonLoader commonLoader = new CommonLoader();
     protected static final LevelLoader levelLoader = new LevelLoader();
-
-    protected SoftBuddyGameAPI softBuddyGameAPI;
 
     public abstract void load(final AssetManager assetManager);
 
     public abstract void unload(final AssetManager assetManager);
 
-    public void build(final SoftBuddyGameAPI softBuddyGameAPI){
-        this.softBuddyGameAPI = softBuddyGameAPI;
-        this.buildBackground();
-        this.buildBuddy();
-        this.buildDynamic();
-        this.buildStatic();
-        this.buildHUD();
+    public void build(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager){
+        this.buildBackground(softBuddyGameAPI, assetManager);
+        this.buildBuddy(softBuddyGameAPI, assetManager);
+        this.buildDynamic(softBuddyGameAPI, assetManager);
+        this.buildStatic(softBuddyGameAPI, assetManager);
+        this.buildHUD(softBuddyGameAPI, assetManager);
     }
 
     public abstract void reset();
@@ -31,17 +27,15 @@ public abstract class Level implements Disposable, InputProcessor{
 
     public abstract void stop();
 
-    protected abstract void buildBackground();
+    protected abstract void buildBackground(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
-    protected abstract void buildBuddy();
+    protected abstract void buildBuddy(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
-    protected abstract void buildDynamic();
+    protected abstract void buildDynamic(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
-    protected abstract void buildStatic();
+    protected abstract void buildStatic(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
-    protected void buildHUD(){
-
-    }
+    protected abstract void buildHUD(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
     @Override
     public boolean keyDown(int keycode) {

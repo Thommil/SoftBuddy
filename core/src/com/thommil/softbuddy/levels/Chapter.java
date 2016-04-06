@@ -7,6 +7,8 @@ import com.thommil.softbuddy.levels.mountain.Mountain;
 
 public abstract class Chapter implements Disposable{
 
+    protected static final ChapterLoader chapterLoader = new ChapterLoader();
+
     private static Array<Chapter> chapters;
     protected Array<Level> levels;
 

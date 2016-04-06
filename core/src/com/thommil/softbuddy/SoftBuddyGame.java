@@ -146,7 +146,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			this.getAssetManager().update();
 		}
 		else if(this.mustRebuildLevel) {
-			this.currentLevel.build(this);
+			this.currentLevel.build(this, this.getAssetManager());
 			this.mustRebuildLevel = false;
 		}
 	}

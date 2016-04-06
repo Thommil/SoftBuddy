@@ -1,10 +1,15 @@
 package com.thommil.softbuddy;
 
+import com.badlogic.gdx.assets.AssetManager;
+
 public interface SoftBuddyGameAPI {
 
     /**
      * Settings
      */
+    int TARGETED_WIDTH = 1024;
+    int TARGETED_HEIGHT = 640;
+
     float WORLD_WIDTH = 16;
     float WORLD_HEIGHT = 10;
     float SAFE_WORLD_WIDTH = 13;

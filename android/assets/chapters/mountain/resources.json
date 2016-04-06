@@ -1,0 +1,9 @@
+{
+  "fonts" : [
+    {
+      "name" : "title.ttf",
+      "path" : "fonts/AirAmericana.ttf",
+      "size" : 36
+    }
+  ]
+}
