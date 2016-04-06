@@ -31,6 +31,7 @@ public class SkyLayer extends Layer{
     private static final float starFieldTreshold = 0.99f;
 
     protected final boolean starField;
+    protected final float[] starsOffset = new float[2];
     protected float starsAlpha = 1f;
 
     public SkyLayer(Viewport viewport, final boolean starField, final float initialTime){
@@ -79,6 +80,19 @@ public class SkyLayer extends Layer{
         this.mesh.setVertices(this.vertices);
     }
 
+    public void setStarsOffset(final float x, final float y){
+        this.starsOffset[0] = x;
+        this.starsOffset[1] = y;
+    }
+
+    public float getStarsXOffset(){
+        return this.starsOffset[0];
+    }
+
+    public float getStarsYOffset(){
+        return this.starsOffset[1];
+    }
+
     public void setMidnightColors(final Color topColor, final Color bottomColor){
         midnightTopColor.set(topColor);
         midnightBottomColor.set(bottomColor);
@@ -110,6 +124,7 @@ public class SkyLayer extends Layer{
         this.shader.setUniformMatrix("u_projectionViewMatrix", this.viewport.getCamera().combined);
         if(this.starField) {
             this.shader.setUniformf("u_starsAlpha", starsAlpha);
+            this.shader.setUniform2fv("u_starsOffset", starsOffset,0,2);
         }
         this.mesh.render(this.shader, GL20.GL_TRIANGLES, 0, 6);
         this.shader.end();
@@ -163,6 +178,7 @@ public class SkyLayer extends Layer{
                     + "precision highp float;\n" //
                     + "#endif\n" //
                     + "uniform float u_starsAlpha;\n" //
+                    + "uniform vec2 u_starsOffset;\n" //
                     + "const float STARS_TRESHOLD="+starFieldTreshold+";\n" //
                     + "\n" //
                     + "varying vec4 v_color;\n" //
@@ -175,7 +191,7 @@ public class SkyLayer extends Layer{
                     + "{\n" //
                     + "   vec3 vColor  = v_color.rgb;\n" //
                     + "   if(u_starsAlpha > 0.0){\n" //
-                    + "     float StarVal = snoise( gl_FragCoord.xy/100.0);\n" //
+                    + "     float StarVal = snoise( (gl_FragCoord.xy + u_starsOffset)/100.0);\n" //
                     + "     if ( StarVal >= STARS_TRESHOLD )\n" //
                     + "     {\n" //
                     + "         StarVal = pow( (StarVal - STARS_TRESHOLD)/(1.0 - STARS_TRESHOLD), 6.0 );\n" //

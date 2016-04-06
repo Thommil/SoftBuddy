@@ -1,6 +1,12 @@
 package com.thommil.softbuddy;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.loaders.FileHandleResolver;
+import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
+import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -59,6 +65,10 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		settings.physics.enabled = true;
 
 		SpriteBatchLayer.setGlobalSize(SPRITE_BATCH_SIZE);
+
+		final FileHandleResolver resolver = new InternalFileHandleResolver();
+		this.getAssetManager().setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
+		this.getAssetManager().setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
 	}
 
 	@Override
