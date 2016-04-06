@@ -38,23 +38,23 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		final float screenRatio = Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
 		// 4/3
 		if(screenRatio <= (4f/3f)){
-			settings.viewport.width = 13;
-			settings.viewport.height = 10;
+			settings.viewport.width = SAFE_WORLD_WIDTH;
+			settings.viewport.height = WORLD_HEIGHT;
 		}
 		// 3/2
 		else if(screenRatio <= (3f/2f)){
-			settings.viewport.width = 13;
-			settings.viewport.height = 9;
+			settings.viewport.width = SAFE_WORLD_WIDTH;
+			settings.viewport.height = SAFE_WORLD_HEIGHT;
 		}
 		// 16/10
 		else if(screenRatio <= (16f/10f)){
-			settings.viewport.width = 16;
-			settings.viewport.height = 10;
+			settings.viewport.width = WORLD_WIDTH;
+			settings.viewport.height = WORLD_HEIGHT;
 		}
 		// 16/9
 		else{
-			settings.viewport.width = 16;
-			settings.viewport.height = 9;
+			settings.viewport.width = WORLD_WIDTH;
+			settings.viewport.height = SAFE_WORLD_HEIGHT;
 		}
 		settings.physics.enabled = true;
 

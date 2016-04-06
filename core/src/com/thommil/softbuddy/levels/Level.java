@@ -10,11 +10,14 @@ public abstract class Level implements Disposable, InputProcessor{
     protected static final CommonLoader commonLoader = new CommonLoader();
     protected static final LevelLoader levelLoader = new LevelLoader();
 
+    protected SoftBuddyGameAPI softBuddyGameAPI;
+
     public abstract void load(final AssetManager assetManager);
 
     public abstract void unload(final AssetManager assetManager);
 
     public void build(final SoftBuddyGameAPI softBuddyGameAPI){
+        this.softBuddyGameAPI = softBuddyGameAPI;
         this.buildBackground();
         this.buildBuddy();
         this.buildDynamic();

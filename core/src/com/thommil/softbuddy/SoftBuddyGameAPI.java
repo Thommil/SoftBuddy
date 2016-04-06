@@ -5,6 +5,11 @@ public interface SoftBuddyGameAPI {
     /**
      * Settings
      */
+    float WORLD_WIDTH = 16;
+    float WORLD_HEIGHT = 10;
+    float SAFE_WORLD_WIDTH = 13;
+    float SAFE_WORLD_HEIGHT = 9;
+
     int SPRITE_BATCH_SIZE = 1000;
 
     /**
