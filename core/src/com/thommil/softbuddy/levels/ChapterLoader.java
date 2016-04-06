@@ -15,7 +15,7 @@ public class ChapterLoader extends JSONLoader {
                     final FontDef fontDef = new FontDef();
                     fontDef.name = jsonFont.getString("name");
                     fontDef.path = jsonFont.getString("path");
-                    fontDef.size = convertFontSize(jsonFont.getInt("size"));
+                    fontDef.size = jsonFont.getInt("size");
                     fontDefs.add(fontDef);
                 }
             }
@@ -29,16 +29,12 @@ public class ChapterLoader extends JSONLoader {
                     final FontDef fontDef = new FontDef();
                     fontDef.name = jsonFont.getString("name");
                     fontDef.path = jsonFont.getString("path");
-                    fontDef.size = convertFontSize(jsonFont.getInt("size"));
+                    fontDef.size = jsonFont.getInt("size");
                     return fontDef;
                 }
             }
         }
         return null;
-    }
-
-    private int convertFontSize(final int originalSize){
-        return originalSize * Gdx.graphics.getWidth() / SoftBuddyGameAPI.TARGETED_WIDTH;
     }
 
     public static class FontDef{

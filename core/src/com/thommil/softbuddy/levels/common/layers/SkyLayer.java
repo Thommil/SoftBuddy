@@ -9,7 +9,7 @@ import com.thommil.libgdx.runtime.layer.Layer;
 public class SkyLayer extends Layer{
 
     public static final int VERTEX_SIZE = 3;
-    public static final int VERTEX_COUNT = 4;
+    public static final int VERTEX_COUNT = 6;
     public static final int SIZE = VERTEX_COUNT * VERTEX_SIZE;
 
     protected final Mesh mesh;
@@ -35,10 +35,10 @@ public class SkyLayer extends Layer{
     protected float starsAlpha = 1f;
 
     public SkyLayer(Viewport viewport, final boolean starField, final float initialTime){
-        this(viewport, starField, initialTime, -viewport.getWorldWidth()/2, -viewport.getWorldHeight()/2, viewport.getWorldWidth(), viewport.getWorldHeight());
+        this(viewport, starField, initialTime, -viewport.getWorldWidth()/2, -viewport.getWorldHeight()/2, viewport.getWorldWidth(), viewport.getWorldHeight(), viewport.getWorldHeight()/2);
     }
 
-    public SkyLayer(Viewport viewport, final boolean starField, final float initialTime, final float x, final float y, final float width, final float height){
+    public SkyLayer(Viewport viewport, final boolean starField, final float initialTime, final float x, final float y, final float width, final float height, final float middle){
         super(viewport, 1);
         this.starField = starField;
         this.shader = this.createShader();
@@ -50,16 +50,24 @@ public class SkyLayer extends Layer{
         this.vertices[2] = 0;
 
         this.vertices[3] = x;
-        this.vertices[4] = y;
+        this.vertices[4] = y + middle;
         this.vertices[5] = 0;
 
         this.vertices[6] = x + width;
-        this.vertices[7] = y;
+        this.vertices[7] = y + middle;
         this.vertices[8] = 0;
 
         this.vertices[9] = x + width;
         this.vertices[10] = y + height;
         this.vertices[11] = 0;
+
+        this.vertices[12] = x;
+        this.vertices[13] = y;
+        this.vertices[14] = 0;
+
+        this.vertices[15] = x + width;
+        this.vertices[16] = y;
+        this.vertices[17] = 0;
 
         this.setTime(initialTime);
     }
@@ -76,7 +84,8 @@ public class SkyLayer extends Layer{
             }
         }
         this.vertices[2] = this.vertices[11] = topColor.toFloatBits();
-        this.vertices[5] = this.vertices[8] = bottomColor.toFloatBits();
+        this.vertices[5] = this.vertices[8] = topColor.toFloatBits();
+        this.vertices[14] = this.vertices[17] = bottomColor.toFloatBits();
         this.mesh.setVertices(this.vertices);
     }
 
@@ -126,7 +135,7 @@ public class SkyLayer extends Layer{
             this.shader.setUniformf("u_starsAlpha", starsAlpha);
             this.shader.setUniform2fv("u_starsOffset", starsOffset,0,2);
         }
-        this.mesh.render(this.shader, GL20.GL_TRIANGLES, 0, 6);
+        this.mesh.render(this.shader, GL20.GL_TRIANGLES, 0, 12);
         this.shader.end();
     }
 
@@ -135,20 +144,24 @@ public class SkyLayer extends Layer{
         if (Gdx.gl30 != null) {
             vertexDataType = Mesh.VertexDataType.VertexBufferObjectWithVAO;
         }
-        final Mesh mesh = new Mesh(vertexDataType, true, 4, 6,
+        final Mesh mesh = new Mesh(vertexDataType, true, 6, 12,
                 new VertexAttribute(VertexAttributes.Usage.Position, 2, ShaderProgram.POSITION_ATTRIBUTE),
                 new VertexAttribute(VertexAttributes.Usage.ColorPacked, 4, ShaderProgram.COLOR_ATTRIBUTE));
 
-        final short[] indices = new short[6];
-        short j = 0;
-        for (int i = 0; i < 6; i += 6, j += 4) {
-            indices[i] = j;
-            indices[i + 1] = (short)(j + 1);
-            indices[i + 2] = (short)(j + 2);
-            indices[i + 3] = (short)(j + 2);
-            indices[i + 4] = (short)(j + 3);
-            indices[i + 5] = j;
-        }
+        final short[] indices = new short[12];
+        indices[0] = 0;
+        indices[1] = 1;
+        indices[2] = 2;
+        indices[3] = 2;
+        indices[4] = 3;
+        indices[5] = 0;
+        indices[6] = 1;
+        indices[7] = 4;
+        indices[8] = 5;
+        indices[9] = 5;
+        indices[10] = 2;
+        indices[11] = 1;
+
         mesh.setIndices(indices);
 
         return mesh;

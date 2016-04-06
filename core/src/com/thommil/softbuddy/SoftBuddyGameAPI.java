@@ -1,14 +1,14 @@
 package com.thommil.softbuddy;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.math.Vector2;
 
 public interface SoftBuddyGameAPI {
 
     /**
      * Settings
      */
-    int TARGETED_WIDTH = 1024;
-    int TARGETED_HEIGHT = 640;
+    Vector2 REFERENCE_SCREEN = new Vector2(1024, 640);
 
     float WORLD_WIDTH = 16;
     float WORLD_HEIGHT = 10;

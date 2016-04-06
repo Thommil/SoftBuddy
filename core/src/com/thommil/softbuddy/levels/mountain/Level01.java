@@ -4,8 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector2;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
+import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
 import com.thommil.libgdx.runtime.layer.Layer;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
@@ -15,6 +17,8 @@ import com.thommil.softbuddy.levels.common.layers.SkyLayer;
 public class Level01 extends Level{
 
     private static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
+
+    private Vector2 tmpVector = new Vector2();
 
     private static final String TITLE = "01 - The landing";
 
@@ -28,7 +32,7 @@ public class Level01 extends Level{
     private float TITLE_FADE_END = TITLE_FADE_PAUSE + 1f;
 
     private float SCROLL_DOWN_START = TITLE_FADE_END;
-    private float SCROLL_DOWN_STEP = 2f;
+    private float SCROLL_DOWN_STEP = 3f;
     private float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
 
     private float SAUCER_FLY_START = SCROLL_DOWN_END;
@@ -98,12 +102,14 @@ public class Level01 extends Level{
 
     @Override
     protected void buildBackground(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
-        this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/2, this.levelWorldWidth, this.levelWorldHeight);
+        this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/4, this.levelWorldWidth, this.levelWorldHeight,this.levelWorldHeight/4);
         Runtime.getInstance().addLayer(this.skyLayer);
 
         final BitmapFontActor titleFontActor = new BitmapFontActor(0, assetManager.get(Mountain.RESOURCES_FONT_TITLE, BitmapFont.class));
         titleFontActor.setText(TITLE);
-        titleFontActor.setPosition(200, 50);
+        tmpVector.set(100, 70);
+        ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVector);
+        titleFontActor.setPosition(tmpVector.x, tmpVector.y);
         titleFontActor.getBitmapFont().setColor(1,1,1,0);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
         this.bitmapFontBatchLayer.addActor(titleFontActor);
@@ -161,7 +167,7 @@ public class Level01 extends Level{
         time += deltaTime;
         //Gdx.app.log("",""+time);
         //Intro mode
-        if(time < PLAY_START){
+       if(time < PLAY_START){
             //Scroll state
             if(time < SCROLL_DOWN_START){
                 if(this.bitmapFontBatchLayer.isHidden()) {
@@ -175,13 +181,13 @@ public class Level01 extends Level{
                     final float fadeTime = ((TITLE_FADE_END - time) / (TITLE_FADE_END - TITLE_FADE_PAUSE));
                     ((BitmapFontActor)this.bitmapFontBatchLayer.getActor(0)).getBitmapFont().setColor(1,1,1,fadeTime);
                 }
-                Runtime.getInstance().getViewport().getCamera().position.set(0,levelWorldWidth/4,0);
+                Runtime.getInstance().getViewport().getCamera().position.set(0,levelWorldWidth/2,0);
                 Runtime.getInstance().getViewport().apply();
             }
             else if(time < SCROLL_DOWN_END){
                 final float scrollTime = ((SCROLL_DOWN_END - time) / (SCROLL_DOWN_END - SCROLL_DOWN_START));
                 this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-SCROLL_DOWN_STEP);
-                Runtime.getInstance().getViewport().getCamera().position.set(0,(levelWorldWidth/4 * scrollTime),0);
+                Runtime.getInstance().getViewport().getCamera().position.set(0,(levelWorldWidth/2 * scrollTime),0);
                 Runtime.getInstance().getViewport().apply();
             }
             else if(Runtime.getInstance().getViewport().getCamera().position.y != 0){
@@ -192,8 +198,7 @@ public class Level01 extends Level{
                 Runtime.getInstance().getViewport().apply();
             }
 
-
-            //this.skyLayer.setTime(time);
+            //this.skyLayer.setTime(time/10);
         }
     }
 

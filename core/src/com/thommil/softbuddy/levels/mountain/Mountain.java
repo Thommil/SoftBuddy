@@ -5,6 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.Array;
+import com.thommil.softbuddy.SoftBuddyGameAPI;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.ChapterLoader;
 import com.thommil.softbuddy.levels.Level;
@@ -22,7 +23,7 @@ public class Mountain extends Chapter {
         final ChapterLoader.FontDef titleFontDef = this.chapterLoader.getFontDef(RESOURCES_FONT_TITLE);
         final FreetypeFontLoader.FreeTypeFontLoaderParameter titleFontParams = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
         titleFontParams.fontFileName = titleFontDef.path;
-        titleFontParams.fontParameters.size = titleFontDef.size;
+        titleFontParams.fontParameters.size = (int)(titleFontDef.size * Gdx.graphics.getHeight() / SoftBuddyGameAPI.REFERENCE_SCREEN.y);
         assetManager.load(RESOURCES_FONT_TITLE, BitmapFont.class, titleFontParams);
     }
 
