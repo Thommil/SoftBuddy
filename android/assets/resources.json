@@ -40,7 +40,7 @@
     "loading": {
       "font": "fonts/OpenSans-Bold.ttf",
       "size": 20,
-      "pos": [330, -350],
+      "pos": [300, -260],
       "color": [1, 1, 1, 1]
     }
   }

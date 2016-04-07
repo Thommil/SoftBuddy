@@ -86,8 +86,8 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 				SoftBuddyGame.this.loadingScreen = new LoadingScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
 				SoftBuddyGame.this.chapters = Chapter.getChapters();
 				SoftBuddyGame.this.mainScreen = new MainScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
-				SoftBuddyGame.this.loadingScreen.resize(viewport.getScreenWidth(), viewport.getScreenHeight());
-				SoftBuddyGame.this.mainScreen.resize(viewport.getScreenWidth(), viewport.getScreenHeight());
+				SoftBuddyGame.this.loadingScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+				SoftBuddyGame.this.mainScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 				showScreen(SoftBuddyGame.this.mainScreen);
 				SoftBuddyGame.this.splashScreen.dispose();
 			}
