@@ -370,19 +370,7 @@
 			"type" : 0
 		}
 	],
-	"customProperties" :
-	[
-		
-		{
-			"name" : "normalOffset",
-			"vec2" : 
-			{
-				"x" : 512.0,
-				"y" : 0
-			}
-		}
-	],
-	"gravity" : 
+	"gravity" :
 	{
 		"x" : 0,
 		"y" : -10
@@ -428,6 +416,14 @@
 				{
 					"float" : 16.0,
 					"name" : "width"
+				},
+				{
+					"name" : "normalOffset",
+					"vec2" :
+					{
+						"x" : 512.0,
+						"y" : 0
+					}
 				}
 			],
 			"file" : "chapters/mountain/level01/main.png",
@@ -469,6 +465,14 @@
 				{
 					"float" : 16.0,
 					"name" : "width"
+				},
+				{
+					"name" : "normalOffset",
+					"vec2" :
+					{
+						"x" : 512.0,
+						"y" : 0
+					}
 				}
 			],
 			"file" : "chapters/mountain/level01/main.png",

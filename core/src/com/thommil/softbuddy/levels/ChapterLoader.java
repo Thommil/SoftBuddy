@@ -1,26 +1,9 @@
 package com.thommil.softbuddy.levels;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 import com.thommil.libgdx.runtime.tools.JSONLoader;
-import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public class ChapterLoader extends JSONLoader {
-
-    public Array<FontDef> getFontsDef(){
-        final Array<FontDef> fontDefs = new Array<FontDef>(false,8);
-        if(this.jsonRoot.has("fonts")){
-            for(final JsonValue jsonFont : this.jsonRoot.get("fonts")){
-                    final FontDef fontDef = new FontDef();
-                    fontDef.name = jsonFont.getString("name");
-                    fontDef.path = jsonFont.getString("path");
-                    fontDef.size = jsonFont.getInt("size");
-                    fontDefs.add(fontDef);
-                }
-            }
-        return fontDefs;
-    }
 
     public FontDef getFontDef(final String name){
         if(this.jsonRoot.has("fonts")){
