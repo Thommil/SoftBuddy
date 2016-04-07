@@ -25,6 +25,8 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	private Viewport viewport;
 
+	private SharedResources sharedResources;
+
 	private SplashScreen splashScreen;
 	private LoadingScreen loadingScreen;
 	private MainScreen mainScreen;
@@ -33,6 +35,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	private Chapter currentChapter;
 	private Level currentLevel;
 
+	private boolean mustLoadSharedResources = true;
 	private boolean mustReloadChapter = true;
 	private boolean mustReloadLevel = true;
 	private boolean mustRebuildLevel = true;
@@ -81,6 +84,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		Timer.schedule(new Timer.Task() {
 			@Override
 			public void run() {
+				SoftBuddyGame.this.sharedResources = new SharedResources();
 				SoftBuddyGame.this.chapters = Chapter.getChapters();
 				showScreen(SoftBuddyGame.this.mainScreen);
 				SoftBuddyGame.this.splashScreen.dispose();
@@ -134,6 +138,10 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	public void load() {
+		if(this.mustLoadSharedResources){
+			this.sharedResources.load(this.getAssetManager());
+			this.mustLoadSharedResources = false;
+		}
 		if (this.mustReloadChapter) {
 			this.currentChapter.load(this.getAssetManager());
 			this.mustReloadChapter = false;
@@ -146,7 +154,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			this.getAssetManager().update();
 		}
 		else if(this.mustRebuildLevel) {
-			this.currentLevel.build(this, this.getAssetManager());
+			this.currentLevel.build(this.currentChapter.getChapterResources(), this, this.getAssetManager());
 			this.mustRebuildLevel = false;
 		}
 	}
@@ -159,6 +167,11 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	@Override
 	public void onLoaded() {
 		this.showScreen(Runtime.getInstance());
+	}
+
+	@Override
+	public SharedResources getSharedResources() {
+		return this.sharedResources;
 	}
 
 	@Override

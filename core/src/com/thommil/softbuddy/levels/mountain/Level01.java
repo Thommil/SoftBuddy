@@ -10,7 +10,9 @@ import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
 import com.thommil.libgdx.runtime.layer.Layer;
+import com.thommil.softbuddy.SharedResources;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
+import com.thommil.softbuddy.levels.ChapterResources;
 import com.thommil.softbuddy.levels.Level;
 import com.thommil.softbuddy.levels.common.layers.SkyLayer;
 
@@ -19,8 +21,6 @@ public class Level01 extends Level{
     private static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
 
     private Vector2 tmpVector = new Vector2();
-
-    private static final String TITLE = "01 - The landing";
 
     private float levelWorldWidth;
     private float levelWorldHeight;
@@ -53,13 +53,8 @@ public class Level01 extends Level{
     private BitmapFontBatchLayer bitmapFontBatchLayer;
 
     @Override
-    public void load(AssetManager assetManager) {
-        Level.levelLoader.parse(Gdx.files.internal(RESOURCES_FILE));
-    }
-
-    @Override
-    public void unload(AssetManager assetManager) {
-
+    public String getResourcesPath() {
+        return RESOURCES_FILE;
     }
 
     @Override
@@ -79,7 +74,7 @@ public class Level01 extends Level{
     }
 
     @Override
-    public void build(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+    public void build(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
         this.levelWorldHeight = Runtime.getInstance().getSettings().viewport.height * 2;
         this.ticklayer = new Layer(Runtime.getInstance().getViewport(),0) {
@@ -97,42 +92,37 @@ public class Level01 extends Level{
             @Override public void dispose() {}
         };
         Runtime.getInstance().addLayer(this.ticklayer);
-        super.build(softBuddyGameAPI,assetManager);
+        this.buildBackground(chapterResources, softBuddyGameAPI, assetManager);
+        this.buildBuddy(chapterResources, softBuddyGameAPI, assetManager);
+        this.buildDynamic(chapterResources, softBuddyGameAPI, assetManager);
+        this.buildStatic(chapterResources, softBuddyGameAPI, assetManager);
     }
 
-    @Override
-    protected void buildBackground(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+    protected void buildBackground(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
         this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/4, this.levelWorldWidth, this.levelWorldHeight,this.levelWorldHeight/4);
         Runtime.getInstance().addLayer(this.skyLayer);
 
-        final BitmapFontActor titleFontActor = new BitmapFontActor(0, assetManager.get(Mountain.RESOURCES_FONT_TITLE, BitmapFont.class));
-        titleFontActor.setText(TITLE);
-        tmpVector.set(100, 70);
+        final SharedResources.LabelDef titleLableDef = softBuddyGameAPI.getSharedResources().getLabelDef("chapter_title");
+        final BitmapFontActor titleFontActor = new BitmapFontActor(0, assetManager.get(titleLableDef.assetName, BitmapFont.class));
+        titleFontActor.setText(chapterResources.getChapterDef().title);
+        tmpVector.set(titleLableDef.position[0], titleLableDef.position[1]);
         ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVector);
         titleFontActor.setPosition(tmpVector.x, tmpVector.y);
-        titleFontActor.getBitmapFont().setColor(1,1,1,0);
+        titleFontActor.getBitmapFont().setColor(titleLableDef.color[0],titleLableDef.color[1],titleLableDef.color[2],0);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
         this.bitmapFontBatchLayer.addActor(titleFontActor);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
     }
 
-    @Override
-    protected void buildBuddy(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+    protected void buildBuddy(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
 
     }
 
-    @Override
-    protected void buildDynamic(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+    protected void buildDynamic(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
 
     }
 
-    @Override
-    protected void buildStatic(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
-
-    }
-
-    @Override
-    protected void buildHUD(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+    protected void buildStatic(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
 
     }
 
@@ -174,12 +164,12 @@ public class Level01 extends Level{
                     this.bitmapFontBatchLayer.show();
                 }
                 if(time < TITLE_FADE_START){
-                    final float fadeTime = 1-((TITLE_FADE_START - time) / TITLE_FADE_START);
-                    ((BitmapFontActor)this.bitmapFontBatchLayer.getActor(0)).getBitmapFont().setColor(1,1,1,fadeTime);
+                    final float fadeTime = 1- ((TITLE_FADE_START - time) / TITLE_FADE_START);
+                    ((BitmapFontActor)this.bitmapFontBatchLayer.getActor(0)).getBitmapFont().getColor().a = fadeTime;
                 }
                 else if(time > TITLE_FADE_PAUSE){
                     final float fadeTime = ((TITLE_FADE_END - time) / (TITLE_FADE_END - TITLE_FADE_PAUSE));
-                    ((BitmapFontActor)this.bitmapFontBatchLayer.getActor(0)).getBitmapFont().setColor(1,1,1,fadeTime);
+                    ((BitmapFontActor)this.bitmapFontBatchLayer.getActor(0)).getBitmapFont().getColor().a = fadeTime;
                 }
                 Runtime.getInstance().getViewport().getCamera().position.set(0,levelWorldWidth/2,0);
                 Runtime.getInstance().getViewport().apply();

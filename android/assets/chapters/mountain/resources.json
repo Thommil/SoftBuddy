@@ -1,9 +1,3 @@
 {
-  "fonts" : [
-    {
-      "name" : "title.ttf",
-      "path" : "fonts/AirAmericana.ttf",
-      "size" : 48
-    }
-  ]
+  "title" : "01 - The landing"
 }

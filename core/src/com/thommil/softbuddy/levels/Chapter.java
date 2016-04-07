@@ -7,10 +7,15 @@ import com.thommil.softbuddy.levels.mountain.Mountain;
 
 public abstract class Chapter implements Disposable{
 
-    protected static final ChapterLoader chapterLoader = new ChapterLoader();
+    protected ChapterResources chapterResources;
 
     private static Array<Chapter> chapters;
     protected Array<Level> levels;
+
+    public Chapter() {
+        super();
+        this.chapterResources = new ChapterResources(this.getResourcesPath());
+    }
 
     public static Array<Chapter> getChapters(){
         if(Chapter.chapters == null){
@@ -20,11 +25,21 @@ public abstract class Chapter implements Disposable{
         return Chapter.chapters;
     }
 
-    public abstract void load(final AssetManager assetManager);
+    public void load(final AssetManager assetManager){
+        this.chapterResources.load(assetManager);
+    }
 
-    public abstract void unload(final AssetManager assetManager);
+    public void unload(final AssetManager assetManager){
+        this.chapterResources.unload(assetManager);
+    }
+
+    public abstract String getResourcesPath();
 
     public abstract Array<Level> getLevels();
+
+    public ChapterResources getChapterResources(){
+        return this.chapterResources;
+    }
 
     @Override
     public void dispose() {

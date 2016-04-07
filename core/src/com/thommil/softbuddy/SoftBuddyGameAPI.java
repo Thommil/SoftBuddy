@@ -28,6 +28,7 @@ public interface SoftBuddyGameAPI {
     void load();
     float getLoadingProgress();
     void onLoaded();
+    SharedResources getSharedResources();
 
     void startLevel(final int chapter, final int level, final boolean restart);
     void quit();

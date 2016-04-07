@@ -7,35 +7,30 @@ import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public abstract class Level implements Disposable, InputProcessor{
 
-    protected static final LevelLoader levelLoader = new LevelLoader();
+    protected LevelResources levelResources;
 
-    public abstract void load(final AssetManager assetManager);
-
-    public abstract void unload(final AssetManager assetManager);
-
-    public void build(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager){
-        this.buildBackground(softBuddyGameAPI, assetManager);
-        this.buildBuddy(softBuddyGameAPI, assetManager);
-        this.buildDynamic(softBuddyGameAPI, assetManager);
-        this.buildStatic(softBuddyGameAPI, assetManager);
-        this.buildHUD(softBuddyGameAPI, assetManager);
+    public Level() {
+        super();
+        this.levelResources = new LevelResources(this.getResourcesPath());
     }
+
+    public void load(final AssetManager assetManager){
+        this.levelResources.load(assetManager);
+    }
+
+    public void unload(final AssetManager assetManager){
+        this.levelResources.unload(assetManager);
+    }
+
+    public abstract String getResourcesPath();
+
+    public abstract void build(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
     public abstract void reset();
 
     public abstract void start();
 
     public abstract void stop();
-
-    protected abstract void buildBackground(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
-
-    protected abstract void buildBuddy(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
-
-    protected abstract void buildDynamic(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
-
-    protected abstract void buildStatic(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
-
-    protected abstract void buildHUD(final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
 
     @Override
     public boolean keyDown(int keycode) {

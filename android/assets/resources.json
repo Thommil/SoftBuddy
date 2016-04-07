@@ -1,0 +1,31 @@
+{
+  "screens" :{
+     "main": {
+        "background": "screens/mainscreen_bg.png",
+        "foreground": "screens/mainscreen_fg.png",
+        "buttons": {
+          "start": {
+            "id": 1,
+            "size": [4.4, 1.0],
+            "pos": [0, 2],
+            "region": [0, 0, 250, 56]
+          },
+          "quit": {
+            "id": 2,
+            "size": [4.4, 1.0],
+            "pos": [0.0, -2.0],
+            "region": [0, 116, 250, 62]
+          }
+        }
+    }
+  },
+
+  "labels" : {
+    "chapter_title": {
+      "font": "fonts/AirAmericana.ttf",
+      "size": 48,
+      "pos": [100, 70],
+      "color": [1, 1, 1, 1]
+    }
+  }
+}
