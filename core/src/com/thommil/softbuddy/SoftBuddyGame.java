@@ -35,7 +35,6 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	private Chapter currentChapter;
 	private Level currentLevel;
 
-	private boolean mustLoadSharedResources = true;
 	private boolean mustReloadChapter = true;
 	private boolean mustReloadLevel = true;
 	private boolean mustRebuildLevel = true;
@@ -78,14 +77,17 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	protected void onStart(final Viewport viewport) {
 		this.viewport = viewport;
 		this.splashScreen = new SplashScreen(viewport);
-		this.loadingScreen = new LoadingScreen(viewport, this);
-		this.mainScreen = new MainScreen(viewport,this);
 		showScreen(this.splashScreen);
 		Timer.schedule(new Timer.Task() {
 			@Override
 			public void run() {
 				SoftBuddyGame.this.sharedResources = new SharedResources();
+				SoftBuddyGame.this.sharedResources.load(SoftBuddyGame.this.getAssetManager());
+				SoftBuddyGame.this.loadingScreen = new LoadingScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
 				SoftBuddyGame.this.chapters = Chapter.getChapters();
+				SoftBuddyGame.this.mainScreen = new MainScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
+				SoftBuddyGame.this.loadingScreen.resize(viewport.getScreenWidth(), viewport.getScreenHeight());
+				SoftBuddyGame.this.mainScreen.resize(viewport.getScreenWidth(), viewport.getScreenHeight());
 				showScreen(SoftBuddyGame.this.mainScreen);
 				SoftBuddyGame.this.splashScreen.dispose();
 			}
@@ -112,8 +114,8 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	protected void onResize(int width, int height) {
-		this.mainScreen.resize(width, height);
-		this.loadingScreen.resize(width, height);
+		if(this.mainScreen != null) this.mainScreen.resize(width, height);
+		if(this.loadingScreen != null) this.loadingScreen.resize(width, height);
 	}
 
 	@Override
@@ -138,10 +140,6 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	public void load() {
-		if(this.mustLoadSharedResources){
-			this.sharedResources.load(this.getAssetManager());
-			this.mustLoadSharedResources = false;
-		}
 		if (this.mustReloadChapter) {
 			this.currentChapter.load(this.getAssetManager());
 			this.mustReloadChapter = false;

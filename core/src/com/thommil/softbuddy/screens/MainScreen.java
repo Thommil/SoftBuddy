@@ -1,6 +1,7 @@
 package com.thommil.softbuddy.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
@@ -14,12 +15,15 @@ import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.screen.AbstractScreen;
+import com.thommil.softbuddy.SharedResources;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public class MainScreen extends AbstractScreen {
 
     final SoftBuddyGameAPI softBuddyGameAPI;
-    final JsonValue config;
+    final AssetManager assetManager;
+    final SharedResources.ScreenDef screenDef;
+
 
     SpriteBatchLayer currentBatchLayer = null;
 
@@ -36,32 +40,33 @@ public class MainScreen extends AbstractScreen {
     ViewportLayout viewportLayout;
     TouchDispatcher touchDispatcher;
 
-    public MainScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI) {
+    public MainScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI, AssetManager assetManager) {
         super(viewport);
-        this.config = new JsonReader().parse(Gdx.files.internal(SoftBuddyGameAPI.SCREENS_RESOURCES_FILE)).get("mainscreen");
+        this.screenDef = softBuddyGameAPI.getSharedResources().getScreenDef("main");
         this.softBuddyGameAPI = softBuddyGameAPI;
+        this.assetManager = assetManager;
         this.viewportLayout = new ViewportLayout(viewport);
         this.touchDispatcher = new TouchDispatcher(viewport);
         this.build();
     }
 
     protected void build(){
-        this.bgTextureSet = new TextureSet(new Texture(this.config.getString("background")));
+        this.bgTextureSet = new TextureSet(this.assetManager.get(this.screenDef.backgroundPath, Texture.class));
         this.bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
-        this.fgTextureSet = new TextureSet(new Texture(this.config.getString("foreground")));
+        this.fgTextureSet = new TextureSet(this.assetManager.get(this.screenDef.buttons[0].widget.texturePath, Texture.class));
         this.fgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
 
         //Main menu
         this.mainMenuBatchLayer = new SpriteBatchLayer(this.viewport,3);
         this.mainMenuBatchLayer.addActor(new SpriteActor(0,this.bgTextureSet));
-        this.mainMenuBatchLayer.addActor(new ButtonActor(this.config.get("main").get("buttons").get("start").getInt("id"), this.fgTextureSet, this.config.get("main").get("buttons").get("start").get("region").asIntArray()){
+        this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[0].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[0].widget.region){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.startLevel(selectedChapter, selectedChapter, restartLevel);
                 return true;
             }
         });
-        this.mainMenuBatchLayer.addActor(new ButtonActor(this.config.get("main").get("buttons").get("quit").getInt("id"), this.fgTextureSet, this.config.get("main").get("buttons").get("quit").get("region").asIntArray()){
+        this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[1].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[1].widget.region){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.quit();
@@ -78,8 +83,8 @@ public class MainScreen extends AbstractScreen {
         if(this.currentBatchLayer != null) this.currentBatchLayer.hide();
         this.touchDispatcher.clear();
         this.touchDispatcher.bind();
-        this.touchDispatcher.addListener((SpriteActor) this.mainMenuBatchLayer.getActor(this.config.get("main").get("buttons").get("start").getInt("id")));
-        this.touchDispatcher.addListener((SpriteActor) this.mainMenuBatchLayer.getActor(this.config.get("main").get("buttons").get("quit").getInt("id")));
+        this.touchDispatcher.addListener((SpriteActor) this.mainMenuBatchLayer.getActor(this.screenDef.buttons[0].name.hashCode()));
+        this.touchDispatcher.addListener((SpriteActor) this.mainMenuBatchLayer.getActor(this.screenDef.buttons[1].name.hashCode()));
         this.currentBatchLayer.show();
     }
 
@@ -102,11 +107,11 @@ public class MainScreen extends AbstractScreen {
         if(this.currentBatchLayer == this.mainMenuBatchLayer) {
             //Buttons
             final Vector2 buttonPos = new Vector2();
-            for (JsonValue button : this.config.get("main").get("buttons")) {
-                actor = (SpriteActor) this.mainMenuBatchLayer.getActor(button.getInt("id"));
-                buttonPos.set(button.get("pos").getFloat(0), button.get("pos").getFloat(1));
+            for(SharedResources.ButtonDef button : this.screenDef.buttons){
+                actor = (SpriteActor) this.mainMenuBatchLayer.getActor(button.name.hashCode());
+                buttonPos.set(button.position[0], button.position[1]);
                 this.viewportLayout.adapt(buttonPos);
-                actor.setSize(button.get("size").getFloat(0), button.get("size").getFloat(1));
+                actor.setSize(button.size[0], button.size[1]);
                 actor.setCenter(buttonPos.x, buttonPos.y);
             }
         }

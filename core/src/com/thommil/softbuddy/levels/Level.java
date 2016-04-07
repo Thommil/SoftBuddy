@@ -2,6 +2,7 @@ package com.thommil.softbuddy.levels;
 
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 

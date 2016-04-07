@@ -1,10 +1,14 @@
 package com.thommil.softbuddy.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
+import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
 import com.thommil.libgdx.runtime.screen.AbstractScreen;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
@@ -12,25 +16,24 @@ import com.thommil.softbuddy.SoftBuddyGameAPI;
 public class LoadingScreen extends AbstractScreen {
 
     final SoftBuddyGameAPI softBuddyGameAPI;
+    final AssetManager assetManager;
     final BitmapFontBatchLayer bitmapFontBatchLayer;
     final BitmapFontActor fontActor;
     final String textTemplate = "Loading - PROGRESS%";
 
     private boolean firstPass = true;
 
-    public LoadingScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI) {
+    public LoadingScreen(Viewport viewport, SoftBuddyGameAPI softBuddyGameAPI, AssetManager assetManager) {
         super(viewport);
         this.softBuddyGameAPI = softBuddyGameAPI;
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/OpenSans-Bold.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 28;
-        fontActor = new BitmapFontActor(0, generator.generateFont(parameter));
-        generator.dispose();
+        this.assetManager = assetManager;
+        fontActor = new BitmapFontActor(0, assetManager.get(softBuddyGameAPI.getSharedResources().getLabelDef("loading").assetName, BitmapFont.class));
         bitmapFontBatchLayer = new BitmapFontBatchLayer(viewport, 1);
-
         fontActor.setText(this.textTemplate.replaceAll("PROGRESS", "00"));
-        fontActor.setPosition(-100, 0);
-        fontActor.setTargetWidth(200);
+        final Vector2 tmpVector = new Vector2();
+        tmpVector.set(softBuddyGameAPI.getSharedResources().getLabelDef("loading").position[0], softBuddyGameAPI.getSharedResources().getLabelDef("loading").position[1]);
+        ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVector);
+        fontActor.setPosition(tmpVector.x, tmpVector.y);
         this.bitmapFontBatchLayer.addActor(fontActor);
     }
 

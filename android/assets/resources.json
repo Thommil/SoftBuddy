@@ -2,21 +2,31 @@
   "screens" :{
      "main": {
         "background": "screens/mainscreen_bg.png",
-        "foreground": "screens/mainscreen_fg.png",
         "buttons": {
-          "start": {
-            "id": 1,
+          "start" : {
+            "widgetId" : 1,
             "size": [4.4, 1.0],
-            "pos": [0, 2],
-            "region": [0, 0, 250, 56]
+            "pos": [0, 2]
           },
-          "quit": {
-            "id": 2,
+          "quit" : {
+            "widgetId" : 2,
             "size": [4.4, 1.0],
-            "pos": [0.0, -2.0],
-            "region": [0, 116, 250, 62]
+            "pos": [0.0, -2.0]
           }
         }
+    }
+  },
+
+  "widgets" : {
+    "btn_start": {
+      "id": 1,
+      "texture": "screens/mainscreen_fg.png",
+      "region": [0, 0, 250, 56]
+    },
+    "btn_quit": {
+      "id": 2,
+      "texture": "screens/mainscreen_fg.png",
+      "region": [0, 116, 250, 62]
     }
   },
 
@@ -25,6 +35,12 @@
       "font": "fonts/AirAmericana.ttf",
       "size": 48,
       "pos": [100, 70],
+      "color": [1, 1, 1, 1]
+    },
+    "loading": {
+      "font": "fonts/OpenSans-Bold.ttf",
+      "size": 20,
+      "pos": [330, -350],
       "color": [1, 1, 1, 1]
     }
   }
