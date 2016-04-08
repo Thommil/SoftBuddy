@@ -107,7 +107,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		Gdx.input.setInputProcessor(this.currentLevel);
 		this.currentLevel.start();
 
-		//RuntimeProfiler.profile();
+		RuntimeProfiler.profile();
 	}
 
 	@Override
@@ -158,6 +158,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		}
 		else if(this.mustRebuildLevel) {
 			this.currentLevel.build(this.currentChapter.getChapterResources(), this, this.getAssetManager());
+			Runtime.getInstance().resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 			this.mustRebuildLevel = false;
 		}
 	}
@@ -213,6 +214,16 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			this.mustResetLevel = restart;
 			this.showScreen(Runtime.getInstance());
 		}
+	}
+
+	@Override
+	public void pauseLevel() {
+		this.onPause();
+	}
+
+	@Override
+	public void resumeLevel() {
+		this.showScreen(Runtime.getInstance());
 	}
 
 	@Override

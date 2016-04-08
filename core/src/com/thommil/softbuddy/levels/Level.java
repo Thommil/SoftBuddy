@@ -1,8 +1,8 @@
 package com.thommil.softbuddy.levels;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 
@@ -15,6 +15,9 @@ public abstract class Level implements Disposable, InputProcessor{
 
 
     protected LevelResources levelResources;
+    protected ChapterResources chapterResources;
+    protected SoftBuddyGameAPI softBuddyGameAPI;
+    protected AssetManager assetManager;
 
     public Level() {
         super();
@@ -31,7 +34,14 @@ public abstract class Level implements Disposable, InputProcessor{
 
     public abstract String getResourcesPath();
 
-    public abstract void build(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager);
+    public final void build(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager){
+        this.chapterResources = chapterResources;
+        this.softBuddyGameAPI = softBuddyGameAPI;
+        this.assetManager = assetManager;
+        this.build();
+    }
+
+    protected abstract void build();
 
     public abstract void reset();
 
@@ -41,6 +51,9 @@ public abstract class Level implements Disposable, InputProcessor{
 
     @Override
     public boolean keyDown(int keycode) {
+        if(keycode == Input.Keys.BACK){
+            this.softBuddyGameAPI.pauseLevel();
+        }
         return false;
     }
 

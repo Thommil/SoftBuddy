@@ -31,5 +31,7 @@ public interface SoftBuddyGameAPI {
     SharedResources getSharedResources();
 
     void startLevel(final int chapter, final int level, final boolean restart);
+    void pauseLevel();
+    void resumeLevel();
     void quit();
 }
