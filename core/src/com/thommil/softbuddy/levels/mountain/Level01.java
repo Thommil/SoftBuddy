@@ -3,18 +3,29 @@ package com.thommil.softbuddy.levels.mountain;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.utils.Array;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
+import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
+import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
+import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
 import com.thommil.libgdx.runtime.layer.Layer;
+import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
+import com.thommil.libgdx.runtime.tools.RubeLoader;
 import com.thommil.softbuddy.SharedResources;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
+import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.ChapterResources;
 import com.thommil.softbuddy.levels.Level;
 import com.thommil.softbuddy.levels.common.layers.SkyLayer;
+import com.thommil.softbuddy.levels.mountain.renderers.IntroRenderer;
 
 public class Level01 extends Level{
 
@@ -47,10 +58,12 @@ public class Level01 extends Level{
     private float PLAY_START = SAUCER_CRASH_END + 1f;
 
     private Layer ticklayer;
-
     private SkyLayer skyLayer;
-
     private BitmapFontBatchLayer bitmapFontBatchLayer;
+    private SpriteBatchLayer backgroundLayer;
+    private SpriteBatchLayer foregroundLayer;
+
+    private IntroRenderer introRenderer;
 
     @Override
     public String getResourcesPath() {
@@ -92,17 +105,16 @@ public class Level01 extends Level{
             @Override public void dispose() {}
         };
         Runtime.getInstance().addLayer(this.ticklayer);
+        this.introRenderer = new IntroRenderer(1);
         this.buildBackground(chapterResources, softBuddyGameAPI, assetManager);
-        this.buildBuddy(chapterResources, softBuddyGameAPI, assetManager);
-        this.buildDynamic(chapterResources, softBuddyGameAPI, assetManager);
-        this.buildStatic(chapterResources, softBuddyGameAPI, assetManager);
+        this.buildForeground(chapterResources, softBuddyGameAPI, assetManager);
     }
 
     protected void buildBackground(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
         this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/4, this.levelWorldWidth, this.levelWorldHeight,this.levelWorldHeight/4);
         Runtime.getInstance().addLayer(this.skyLayer);
 
-        final SharedResources.LabelDef titleLableDef = softBuddyGameAPI.getSharedResources().getLabelDef("chapter_title");
+        final SharedResources.LabelDef titleLableDef = softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
         final BitmapFontActor titleFontActor = new BitmapFontActor(0, assetManager.get(titleLableDef.assetName, BitmapFont.class));
         titleFontActor.setText(chapterResources.getChapterDef().title);
         tmpVector.set(titleLableDef.position[0], titleLableDef.position[1]);
@@ -112,28 +124,69 @@ public class Level01 extends Level{
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
         this.bitmapFontBatchLayer.addActor(titleFontActor);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
+
+        this.backgroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1,this.introRenderer);
+        final RubeLoader.ImageDef backgroundImageDef = this.levelResources.getImageDefinition(BACKGROUND_IMAGE_NAME);
+        final StaticActor backgroundActor = new StaticActor(0
+                ,new TextureSet(assetManager.get(backgroundImageDef.path, Texture.class))
+                ,backgroundImageDef.center.x - backgroundImageDef.width/2
+                ,backgroundImageDef.center.y - backgroundImageDef.height/2
+                ,backgroundImageDef.width
+                ,backgroundImageDef.height
+                ,backgroundImageDef.regionX
+                ,backgroundImageDef.regionY
+                ,backgroundImageDef.regionX + backgroundImageDef.regionWidth
+                ,backgroundImageDef.regionY + backgroundImageDef.regionHeight
+                ,Color.WHITE.toFloatBits());
+
+        this.backgroundLayer.addActor(backgroundActor);
+        Runtime.getInstance().addLayer(this.backgroundLayer);
     }
 
-    protected void buildBuddy(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+    protected void buildForeground(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
+        this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
+        final RubeLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(FOREGROUND_BODY_NAME);
+        final RubeLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(FOREGROUND_IMAGE_NAME);
+        final StaticBodyActor foregroundStaticBodyActor = new StaticBodyActor(0
+                ,new TextureSet(assetManager.get(foregroundImageDef.path, Texture.class))
+                ,foregroundBodyDef.position.x + foregroundImageDef.center.x - foregroundImageDef.width/2
+                ,foregroundBodyDef.position.y + foregroundImageDef.center.y - foregroundImageDef.height/2
+                ,foregroundImageDef.width
+                ,foregroundImageDef.height
+                ,foregroundImageDef.regionX
+                ,foregroundImageDef.regionY
+                ,foregroundImageDef.regionX + foregroundImageDef.regionWidth
+                ,foregroundImageDef.regionY + foregroundImageDef.regionHeight
+                ,Color.WHITE.toFloatBits()) {
+            @Override
+            public BodyDef getDefinition() {
+                return foregroundBodyDef;
+            }
 
+            @Override
+            public Array<FixtureDef> getFixturesDefinition() {
+                return Level01.this.levelResources.getFixturesDefinition(foregroundBodyDef.index);
+            }
+        };
+
+        this.foregroundLayer.addActor(foregroundStaticBodyActor);
+        Runtime.getInstance().addLayer(this.foregroundLayer);
     }
 
-    protected void buildDynamic(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
-
-    }
-
-    protected void buildStatic(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager) {
-
-    }
 
     @Override
     public void dispose() {
-        Runtime.getInstance().removeLayer(this.ticklayer);
-        Runtime.getInstance().removeLayer(this.skyLayer);
+        Runtime.getInstance().removeLayer(this.foregroundLayer);
+        Runtime.getInstance().removeLayer(this.backgroundLayer);
         Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
+        Runtime.getInstance().removeLayer(this.skyLayer);
+        Runtime.getInstance().removeLayer(this.ticklayer);
         this.ticklayer.dispose();
         this.skyLayer.dispose();
         this.bitmapFontBatchLayer.dispose();
+        this.backgroundLayer.dispose();
+        this.foregroundLayer.dispose();
+        this.introRenderer.dispose();
     }
 
     /*
@@ -175,15 +228,15 @@ public class Level01 extends Level{
                 Runtime.getInstance().getViewport().apply();
             }
             else if(time < SCROLL_DOWN_END){
+                if(!this.bitmapFontBatchLayer.isHidden()) {
+                    this.bitmapFontBatchLayer.hide();
+                }
                 final float scrollTime = ((SCROLL_DOWN_END - time) / (SCROLL_DOWN_END - SCROLL_DOWN_START));
                 this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-SCROLL_DOWN_STEP);
                 Runtime.getInstance().getViewport().getCamera().position.set(0,(levelWorldWidth/2 * scrollTime),0);
                 Runtime.getInstance().getViewport().apply();
             }
             else if(Runtime.getInstance().getViewport().getCamera().position.y != 0){
-                if(!this.bitmapFontBatchLayer.isHidden()) {
-                    this.bitmapFontBatchLayer.hide();
-                }
                 Runtime.getInstance().getViewport().getCamera().position.set(0,0,0);
                 Runtime.getInstance().getViewport().apply();
             }

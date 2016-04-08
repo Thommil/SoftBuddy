@@ -14,6 +14,7 @@ import com.thommil.libgdx.runtime.Game;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.Settings;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
+import com.thommil.libgdx.runtime.tools.RuntimeProfiler;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
 import com.thommil.softbuddy.screens.LoadingScreen;
@@ -43,7 +44,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 	@Override
 	protected void onCreate(Settings settings) {
 		settings.viewport.type = Settings.Viewport.FILL;
-		final float screenRatio = Gdx.graphics.getWidth() / Gdx.graphics.getHeight();
+		final float screenRatio = (float)Gdx.graphics.getWidth() / (float)Gdx.graphics.getHeight();
 		// 4/3
 		if(screenRatio <= (4f/3f)){
 			settings.viewport.width = SAFE_WORLD_WIDTH;
@@ -71,6 +72,8 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		final FileHandleResolver resolver = new InternalFileHandleResolver();
 		this.getAssetManager().setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
 		this.getAssetManager().setLoader(BitmapFont.class, ".ttf", new FreetypeFontLoader(resolver));
+
+		//settings.physics.debug = true;
 	}
 
 	@Override
@@ -103,6 +106,8 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		Gdx.input.setCatchBackKey(true);
 		Gdx.input.setInputProcessor(this.currentLevel);
 		this.currentLevel.start();
+
+		//RuntimeProfiler.profile();
 	}
 
 	@Override

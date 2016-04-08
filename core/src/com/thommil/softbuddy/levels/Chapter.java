@@ -7,6 +7,8 @@ import com.thommil.softbuddy.levels.mountain.Mountain;
 
 public abstract class Chapter implements Disposable{
 
+    public static final String TITLE_LABEL = "chapter_title";
+
     protected ChapterResources chapterResources;
 
     private static Array<Chapter> chapters;
