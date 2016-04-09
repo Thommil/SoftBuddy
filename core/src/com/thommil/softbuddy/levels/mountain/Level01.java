@@ -1,6 +1,6 @@
 package com.thommil.softbuddy.levels.mountain;
 
-import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -29,31 +29,37 @@ public class Level01 extends Level{
 
     private static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
 
-    private Vector2 tmpVector = new Vector2();
-
     private float levelWorldWidth;
     private float levelWorldHeight;
 
     private float time;
 
-    private float TITLE_FADE_START = 2f;
-    private float TITLE_FADE_PAUSE = TITLE_FADE_START + 2f;
-    private float TITLE_FADE_END = TITLE_FADE_PAUSE + 1f;
+    private static final float TITLE_FADE_START = 2f;
+    private static final float TITLE_FADE_PAUSE = TITLE_FADE_START + 2f;
+    private static final float TITLE_FADE_END = TITLE_FADE_PAUSE + 1f;
 
-    private float SCROLL_DOWN_START = TITLE_FADE_END;
-    private float SCROLL_DOWN_STEP = 3f;
-    private float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
+    private static final float SCROLL_DOWN_START = TITLE_FADE_END;
+    private static final float SCROLL_DOWN_STEP = 3f;
+    private static final float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
 
-    private float SAUCER_FLY_START = SCROLL_DOWN_END;
-    private float SAUCER_FLY_END = SAUCER_FLY_START + 1f;
+    private static final float SAUCER_FLY_START = SCROLL_DOWN_END;
+    private static final float[] SAUCER_FLY_AMBIENT_COLOR = new float[]{0.3f, 0.3f, 0.3f, 1f};
+    private static final float[] SAUCER_FLY_SPOT_COLOR = new float[]{0,0,1f,1f};
+    private static final float[] SAUCER_FLY_LEFT = new float[]{-10f, 2f};
+    private static final float[] SAUCER_FLY_RIGHT = new float[]{10, 2f};
+    private static final float[] SAUCER_FLY_SPOT_FALLOFF = new float[]{0.1f,1,10};
+    private static final float SAUCER_FLY_END = SCROLL_DOWN_END + 2f;
 
-    private float SUNRISE_START = 11f;
-    private float SUNRISE_END = SUNRISE_START + 2f;
+    private static final float SUNRISE_START = SAUCER_FLY_END + 1f;
+    private static final float SUNRISE_END = SUNRISE_START + 2f;
 
-    private float SAUCER_CRASH_START = 100f;
-    private float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.5f;
+    private static final float SAUCER_CRASH_START = 100f;
+    private static final float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.5f;
 
-    private float PLAY_START = SAUCER_CRASH_END + 1f;
+    private static final float PLAY_START = SAUCER_CRASH_END + 1f;
+
+    private Vector2 tmpVectorFrom;
+    private Vector2 tmpVectorTo;
 
     private Layer ticklayer;
     private SkyLayer skyLayer;
@@ -62,7 +68,6 @@ public class Level01 extends Level{
     private SpriteBatchLayer foregroundLayer;
 
     private IntroRenderer introRenderer;
-    private final Color ambientColor = new Color();
 
     @Override
     public String getResourcesPath() {
@@ -87,6 +92,8 @@ public class Level01 extends Level{
 
     @Override
     protected void build() {
+        this.tmpVectorFrom = new Vector2();
+        this.tmpVectorTo = new Vector2();
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
         this.levelWorldHeight = Runtime.getInstance().getSettings().viewport.height * 2;
         this.ticklayer = new Layer(Runtime.getInstance().getViewport(),0) {
@@ -118,9 +125,9 @@ public class Level01 extends Level{
         final SharedResources.LabelDef titleLableDef = this.softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
         final BitmapFontActor titleFontActor = new BitmapFontActor(0, this.assetManager.get(titleLableDef.assetName, BitmapFont.class));
         titleFontActor.setText(this.chapterResources.getChapterDef().title);
-        tmpVector.set(titleLableDef.position[0], titleLableDef.position[1]);
-        ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVector);
-        titleFontActor.setPosition(tmpVector.x, tmpVector.y);
+        tmpVectorFrom.set(titleLableDef.position[0], titleLableDef.position[1]);
+        ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVectorFrom);
+        titleFontActor.setPosition(tmpVectorFrom.x, tmpVectorFrom.y);
         titleFontActor.getBitmapFont().setColor(titleLableDef.color[0],titleLableDef.color[1],titleLableDef.color[2],0);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
         this.bitmapFontBatchLayer.addActor(titleFontActor);
@@ -190,35 +197,24 @@ public class Level01 extends Level{
         this.backgroundLayer.dispose();
         this.foregroundLayer.dispose();
         this.introRenderer.dispose();
+        this.ticklayer = null;
+        this.skyLayer = null;
+        this.bitmapFontBatchLayer = null;
+        this.backgroundLayer = null;
+        this.foregroundLayer = null;
+        this.introRenderer = null;
+        this.tmpVectorFrom = null;
+        this.tmpVectorTo = null;
     }
-
-    /*
-    private int TITLE_FADE_START = 1000;
-    private int TITLE_FADE_END = 3000;
-
-    private int SCROLL_DOWN_START = 4000;
-    private int SCROLL_DOWN_END = 8000;
-
-    private int SAUCER_FLY_START = 9000;
-    private int SAUCER_FLY_END = 10000;
-
-    private int SUNRISE_START = 11000;
-    private int SUNRISE_END = 13000;
-
-    private int SAUCER_CRASH_START = 11000;
-    private int SAUCER_CRASH_END = 12000;
-     */
 
     public void tick(float deltaTime){
         time += deltaTime;
 
         //Reset
         if(deltaTime == 0){
-            this.ambientColor.set(0.3f, 0.3f, 0.4f, 1f);
-            this.introRenderer.setAmbiantColor(this.ambientColor);
-            this.introRenderer.setLightColor(Color.YELLOW);
+            this.introRenderer.setAmbiantColor(SAUCER_FLY_AMBIENT_COLOR[0],SAUCER_FLY_AMBIENT_COLOR[1],SAUCER_FLY_AMBIENT_COLOR[2]);
+            this.introRenderer.setLightColor(SAUCER_FLY_SPOT_COLOR[0],SAUCER_FLY_SPOT_COLOR[1],SAUCER_FLY_SPOT_COLOR[2]);
             this.introRenderer.switchLight(false);
-            this.introRenderer.setLightPosition(200,200);
         }
 
         // Intro mode
@@ -248,16 +244,31 @@ public class Level01 extends Level{
                 Runtime.getInstance().getViewport().getCamera().position.set(0,(levelWorldWidth/2 * scrollTime),0);
                 Runtime.getInstance().getViewport().apply();
             }
-            else if(Runtime.getInstance().getViewport().getCamera().position.y != 0){
-                Runtime.getInstance().getViewport().getCamera().position.set(0,0,0);
-                Runtime.getInstance().getViewport().apply();
+            else{
+                if(Runtime.getInstance().getViewport().getCamera().position.y != 0){
+                    Runtime.getInstance().getViewport().getCamera().position.set(0,0,0);
+                    Runtime.getInstance().getViewport().apply();
+                }
+
+                //Fly state
+                if(time < SAUCER_FLY_END) {
+                    if (time > SAUCER_FLY_START) {
+                        this.introRenderer.switchLight(true);
+                        this.introRenderer.setFallOff(SAUCER_FLY_SPOT_FALLOFF[0], SAUCER_FLY_SPOT_FALLOFF[1], SAUCER_FLY_SPOT_FALLOFF[2]);
+                        final float delta = 1 - ((SAUCER_FLY_END - time) / (SAUCER_FLY_END - SAUCER_FLY_START));
+                        this.tmpVectorFrom.set(SAUCER_FLY_LEFT[0], SAUCER_FLY_LEFT[1]);
+                        this.tmpVectorTo.set(SAUCER_FLY_RIGHT[0], SAUCER_FLY_RIGHT[1]);
+                        this.tmpVectorFrom.lerp(this.tmpVectorTo, delta);
+                        Runtime.getInstance().getViewport().project(this.tmpVectorFrom);
+                        this.introRenderer.setLightPosition((int)this.tmpVectorFrom.x, (int)this.tmpVectorFrom.y);
+                    }
+                }
+                else{
+                    this.introRenderer.switchLight(false);
+                }
             }
 
-            if(time > SCROLL_DOWN_END) {
-                this.introRenderer.switchLight(true);
-                this.introRenderer.setFallOff(0.4f,3,20);
-                this.introRenderer.setLightPosition(pos += 50, 800);
-            }
+
             //this.skyLayer.setTime(time/10);
         }
     }

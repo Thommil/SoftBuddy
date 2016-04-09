@@ -85,18 +85,22 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		Timer.schedule(new Timer.Task() {
 			@Override
 			public void run() {
-				SoftBuddyGame.this.sharedResources = new SharedResources();
-				SoftBuddyGame.this.sharedResources.load(SoftBuddyGame.this.getAssetManager());
-				SoftBuddyGame.this.loadingScreen = new LoadingScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
-				SoftBuddyGame.this.mainScreen = new MainScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
-				SoftBuddyGame.this.loadingScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-				SoftBuddyGame.this.mainScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-				SoftBuddyGame.this.chapters = new Array<Chapter>(true, 5);
-				SoftBuddyGame.this.chapters.add(new Mountain());
+				initialize(viewport);
 				showScreen(SoftBuddyGame.this.mainScreen);
 				SoftBuddyGame.this.splashScreen.dispose();
 			}
 		},1);
+	}
+
+	private void initialize(final Viewport viewport){
+		this.sharedResources = new SharedResources();
+		this.sharedResources.load(SoftBuddyGame.this.getAssetManager());
+		this.loadingScreen = new LoadingScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
+		this.mainScreen = new MainScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
+		this.loadingScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		this.mainScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		this.chapters = new Array<Chapter>(true, 5);
+		this.chapters.add(new Mountain());
 	}
 
 	@Override
@@ -219,6 +223,12 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			this.mustResetLevel = restart;
 			this.showScreen(Runtime.getInstance());
 		}
+	}
+
+	@Override
+	public void restartLevel() {
+		this.mustResetLevel = true;
+		this.showScreen(Runtime.getInstance());
 	}
 
 	@Override

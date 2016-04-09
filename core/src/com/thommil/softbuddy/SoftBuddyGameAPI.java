@@ -15,7 +15,7 @@ public interface SoftBuddyGameAPI {
     float SAFE_WORLD_WIDTH = 13;
     float SAFE_WORLD_HEIGHT = 9;
 
-    int SPRITE_BATCH_SIZE = 1000;
+    int SPRITE_BATCH_SIZE = 100;
 
     /**
      * Screens
@@ -31,6 +31,7 @@ public interface SoftBuddyGameAPI {
     SharedResources getSharedResources();
 
     void startLevel(final int chapter, final int level, final boolean restart);
+    void restartLevel();
     void pauseLevel();
     void resumeLevel();
     void quit();
