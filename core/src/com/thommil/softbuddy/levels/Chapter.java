@@ -11,20 +11,11 @@ public abstract class Chapter implements Disposable{
 
     protected ChapterResources chapterResources;
 
-    private static Array<Chapter> chapters;
     protected Array<Level> levels;
 
     public Chapter() {
         super();
         this.chapterResources = new ChapterResources(this.getResourcesPath());
-    }
-
-    public static Array<Chapter> getChapters(){
-        if(Chapter.chapters == null){
-            Chapter.chapters = new Array<Chapter>(true,5);
-            Chapter.chapters.add(new Mountain());
-        }
-        return Chapter.chapters;
     }
 
     public void load(final AssetManager assetManager){
@@ -44,11 +35,5 @@ public abstract class Chapter implements Disposable{
     }
 
     @Override
-    public void dispose() {
-        if(this.levels != null) {
-            for (final Level level : this.levels) {
-                level.dispose();
-            }
-        }
-    }
+    public abstract void dispose();
 }

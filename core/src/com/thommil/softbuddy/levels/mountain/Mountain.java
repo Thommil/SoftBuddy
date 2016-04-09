@@ -1,9 +1,7 @@
 package com.thommil.softbuddy.levels.mountain;
 
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.utils.Array;
 import com.thommil.softbuddy.levels.Chapter;
-import com.thommil.softbuddy.levels.ChapterResources;
 import com.thommil.softbuddy.levels.Level;
 
 public class Mountain extends Chapter {
@@ -22,5 +20,10 @@ public class Mountain extends Chapter {
             this.levels.add(new Level01());
         }
         return this.levels;
+    }
+
+    @Override
+    public void dispose() {
+
     }
 }

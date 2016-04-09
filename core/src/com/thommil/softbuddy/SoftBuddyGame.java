@@ -17,6 +17,7 @@ import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.tools.RuntimeProfiler;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
+import com.thommil.softbuddy.levels.mountain.Mountain;
 import com.thommil.softbuddy.screens.LoadingScreen;
 import com.thommil.softbuddy.screens.MainScreen;
 import com.thommil.softbuddy.screens.SplashScreen;
@@ -87,10 +88,11 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 				SoftBuddyGame.this.sharedResources = new SharedResources();
 				SoftBuddyGame.this.sharedResources.load(SoftBuddyGame.this.getAssetManager());
 				SoftBuddyGame.this.loadingScreen = new LoadingScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
-				SoftBuddyGame.this.chapters = Chapter.getChapters();
 				SoftBuddyGame.this.mainScreen = new MainScreen(viewport, SoftBuddyGame.this, SoftBuddyGame.this.getAssetManager());
 				SoftBuddyGame.this.loadingScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 				SoftBuddyGame.this.mainScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+				SoftBuddyGame.this.chapters = new Array<Chapter>(true, 5);
+				SoftBuddyGame.this.chapters.add(new Mountain());
 				showScreen(SoftBuddyGame.this.mainScreen);
 				SoftBuddyGame.this.splashScreen.dispose();
 			}
@@ -186,12 +188,14 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			this.mustReloadChapter = true;
 			if(this.currentChapter != null){
 				this.currentChapter.unload(this.getAssetManager());
+				this.currentChapter.dispose();
 			}
 			this.currentChapter = selectedChapter;
 			this.mustReloadLevel = true;
 			this.mustRebuildLevel = true;
 			if(this.currentLevel != null){
 				this.currentLevel.unload(this.getAssetManager());
+				this.currentLevel.dispose();
 			}
 			this.currentLevel = selectedLevel;
 			this.mustResetLevel = true;
@@ -203,6 +207,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 			this.mustRebuildLevel = true;
 			if(this.currentLevel != null){
 				this.currentLevel.unload(this.getAssetManager());
+				this.currentLevel.dispose();
 			}
 			this.currentLevel = selectedLevel;
 			this.mustResetLevel = true;
@@ -228,6 +233,12 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	public void quit() {
+		if(this.currentLevel != null){
+			this.currentLevel.dispose();
+		}
+		if(this.currentChapter != null){
+			this.currentChapter.dispose();
+		}
 		Gdx.app.exit();
 	}
 }
