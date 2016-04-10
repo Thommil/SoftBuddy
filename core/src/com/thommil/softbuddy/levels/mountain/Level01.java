@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.Array;
 import com.thommil.libgdx.runtime.Runtime;
+import com.thommil.libgdx.runtime.actor.Actor;
 import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
 import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
 import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
@@ -42,16 +43,22 @@ public class Level01 extends Level{
     private static final float SCROLL_DOWN_STEP = 3f;
     private static final float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
 
-    private static final float SAUCER_FLY_START = SCROLL_DOWN_END;
+    private static final float SAUCER_FLY_START = SCROLL_DOWN_END + 2f;
     private static final float[] SAUCER_FLY_AMBIENT_COLOR = new float[]{0.3f, 0.3f, 0.3f, 1f};
     private static final float[] SAUCER_FLY_SPOT_COLOR = new float[]{0,0,1f,1f};
-    private static final float[] SAUCER_FLY_LEFT = new float[]{-10f, 2f};
-    private static final float[] SAUCER_FLY_RIGHT = new float[]{10, 2f};
-    private static final float[] SAUCER_FLY_SPOT_FALLOFF = new float[]{0.1f,1,10};
-    private static final float SAUCER_FLY_END = SCROLL_DOWN_END + 2f;
+    private static final float[] SAUCER_FLY_LEFT = new float[]{-20f, 3f};
+    private static final float[] SAUCER_FLY_RIGHT = new float[]{20, 3f};
+    private static final float[] SAUCER_FLY_SPOT_FALLOFF = new float[]{0.01f,0.1f,1f};
+    private static final float SAUCER_FLY_END = SAUCER_FLY_START + 1f;
 
-    private static final float SUNRISE_START = SAUCER_FLY_END + 1f;
-    private static final float SUNRISE_END = SUNRISE_START + 2f;
+    private static final float SUNRISE_START = SAUCER_FLY_END + 2f;
+    private static final float[] SUNRISE_AMBIENT_COLOR_START = new float[]{0.3f, 0.3f, 0.3f, 1f};
+    private static final float[] SUNRISE_AMBIENT_COLOR_END = new float[]{0.6f, 0.6f, 0.6f, 1f};
+    private static final float[] SUNRISE_SPOT_COLOR = new float[]{1f,0.9f,1f,1f};
+    private static final float[] SUNRISE_BOTTOM = new float[]{100f, -20f};
+    private static final float[] SUNRISE_TOP = new float[]{-20f, 20f};
+    private static final float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
+    private static final float SUNRISE_END = SUNRISE_START + 10f;
 
     private static final float SAUCER_CRASH_START = 100f;
     private static final float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.5f;
@@ -77,11 +84,12 @@ public class Level01 extends Level{
     @Override
     public void reset() {
         this.time = 0;
+        this.tick(0);
     }
 
     @Override
     public void start() {
-        this.tick(0);
+
     }
 
     @Override
@@ -193,8 +201,17 @@ public class Level01 extends Level{
         Runtime.getInstance().removeLayer(this.ticklayer);
         this.ticklayer.dispose();
         this.skyLayer.dispose();
+        for(final Actor actor : this.bitmapFontBatchLayer.listActors()){
+            actor.dispose();
+        }
         this.bitmapFontBatchLayer.dispose();
+        for(final Actor actor : this.backgroundLayer.listActors()){
+            actor.dispose();
+        }
         this.backgroundLayer.dispose();
+        for(final Actor actor : this.foregroundLayer.listActors()){
+            actor.dispose();
+        }
         this.foregroundLayer.dispose();
         this.introRenderer.dispose();
         this.ticklayer = null;
@@ -264,12 +281,32 @@ public class Level01 extends Level{
                     }
                 }
                 else{
-                    this.introRenderer.switchLight(false);
+                    //Sunrise state
+                    if(time < SUNRISE_END) {
+                        if(time > SUNRISE_START) {
+                            this.introRenderer.switchLight(true);
+                            final float delta = 1 - ((SUNRISE_END - time) / (SUNRISE_END - SUNRISE_START));
+                            this.introRenderer.setFallOff(SUNRISE_SPOT_FALLOFF[0], SUNRISE_SPOT_FALLOFF[1], SUNRISE_SPOT_FALLOFF[2]);
+                            this.tmpVectorFrom.set(SUNRISE_BOTTOM[0], SUNRISE_BOTTOM[1]);
+                            this.tmpVectorTo.set(SUNRISE_TOP[0], SUNRISE_TOP[1]);
+                            this.tmpVectorFrom.lerp(this.tmpVectorTo, delta);
+                            this.introRenderer.setLightColor(SUNRISE_SPOT_COLOR[0] * delta, SUNRISE_SPOT_COLOR[1] * delta, SUNRISE_SPOT_COLOR[2] * delta);
+                            this.introRenderer.setAmbiantColor(SUNRISE_AMBIENT_COLOR_START[0] + ((SUNRISE_AMBIENT_COLOR_END[0] - SUNRISE_AMBIENT_COLOR_START[0]) * delta)
+                                    , SUNRISE_AMBIENT_COLOR_START[1] + ((SUNRISE_AMBIENT_COLOR_END[1] - SUNRISE_AMBIENT_COLOR_START[1]) * delta)
+                                    , SUNRISE_AMBIENT_COLOR_START[2] + ((SUNRISE_AMBIENT_COLOR_END[2] - SUNRISE_AMBIENT_COLOR_START[2]) * delta));
+                            Runtime.getInstance().getViewport().project(this.tmpVectorFrom);
+                            this.introRenderer.setLightPosition((int) this.tmpVectorFrom.x, (int) this.tmpVectorFrom.y);
+                            this.skyLayer.setTime(delta);
+                        }
+                    }
+                    else{
+                        //Saucer crash
+                        if(time < SAUCER_CRASH_END) {
+
+                        }
+                    }
                 }
             }
-
-
-            //this.skyLayer.setTime(time/10);
         }
     }
     int pos=-1000;
