@@ -13,7 +13,6 @@ public abstract class Level implements Disposable, InputProcessor{
     protected final static String FOREGROUND_BODY_NAME = "foreground";
     protected final static String FOREGROUND_IMAGE_NAME = "foreground";
 
-
     protected LevelResources levelResources;
     protected ChapterResources chapterResources;
     protected SoftBuddyGameAPI softBuddyGameAPI;
