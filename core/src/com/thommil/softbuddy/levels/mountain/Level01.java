@@ -18,6 +18,7 @@ import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
 import com.thommil.libgdx.runtime.layer.Layer;
+import com.thommil.libgdx.runtime.layer.ParticlesEffectBatchLayer;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.tools.RubeLoader;
 import com.thommil.softbuddy.SharedResources;
@@ -95,6 +96,9 @@ public class Level01 extends Level{
     //Sprites
     private SpriteBatchLayer saucerLayer;
     private SpriteActor flyingSaucerActor;
+
+    //Particles
+    private ParticlesEffectBatchLayer particlesEffectBatchLayer;
 
     //HUD
     private BitmapFontBatchLayer bitmapFontBatchLayer;
@@ -215,6 +219,11 @@ public class Level01 extends Level{
         flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
         flyingSaucerActor.setOriginCenter();
         Runtime.getInstance().addLayer(this.saucerLayer);
+
+        this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
+
+
+        Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
 
     private void buildHUD(){
@@ -226,7 +235,6 @@ public class Level01 extends Level{
         titleFontActor.setPosition(tmpVectorFrom.x, tmpVectorFrom.y);
         titleFontActor.getBitmapFont().setColor(titleLableDef.color[0],titleLableDef.color[1],titleLableDef.color[2],0);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
-        this.bitmapFontBatchLayer.addActor(titleFontActor);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
     }
 
@@ -237,27 +245,17 @@ public class Level01 extends Level{
         Runtime.getInstance().removeLayer(this.foregroundLayer);
         Runtime.getInstance().removeLayer(this.backgroundLayer);
         Runtime.getInstance().removeLayer(this.saucerLayer);
+        Runtime.getInstance().removeLayer(this.particlesEffectBatchLayer);
         Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
 
-        this.ticklayer.dispose();
-        this.skyLayer.dispose();
-        for(final Actor actor : this.backgroundLayer.listActors()){
-            actor.dispose();
-        }
-        this.backgroundLayer.dispose();
-        for(final Actor actor : this.foregroundLayer.listActors()){
-            actor.dispose();
-        }
-        this.foregroundLayer.dispose();
-        for(final Actor actor : this.saucerLayer.listActors()){
-            actor.dispose();
-        }
+        this.ticklayer.dispose(true);
+        this.skyLayer.dispose(true);
+        this.backgroundLayer.dispose(true);
+        this.foregroundLayer.dispose(true);
+        this.saucerLayer.dispose(true);
+        this.bitmapFontBatchLayer.dispose(true);
+        this.particlesEffectBatchLayer.dispose(true);
         this.introRenderer.dispose();
-        this.saucerLayer.dispose();
-        for(final Actor actor : this.bitmapFontBatchLayer.listActors()){
-            actor.dispose();
-        }
-        this.bitmapFontBatchLayer.dispose();
 
         this.ticklayer = null;
         this.skyLayer = null;
@@ -298,6 +296,7 @@ public class Level01 extends Level{
                         Runtime.getInstance().getViewport().apply();
                     }
                     else{
+                        this.titleFontActor.getBitmapFont().getColor().a = 0;
                         this.bitmapFontBatchLayer.removeActor(this.titleFontActor);
                         state = STATE_SCROLL_DOWN;
                     }
