@@ -38,6 +38,7 @@ public class Level01 extends Level{
     public static class Config{
 
         public String FLYING_SAUCER_ID = "flying_saucer";
+        public String CRASHED_SAUCER_ID = "crashed_saucer";
 
         public float TITLE_FADE_START = 2f;
         public float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
@@ -51,7 +52,7 @@ public class Level01 extends Level{
         public float[] SAUCER_FLY_AMBIENT_COLOR = new float[]{0.3f, 0.3f, 0.3f, 1f};
         public float[] SAUCER_FLY_SPOT_COLOR = new float[]{0,0,1f,1f};
         public float[] SAUCER_FLY_HALO_OFFSET = new float[]{-3f, 0f};
-        public float[] SAUCER_FLY_REACTOR_OFFSET = new float[]{-0.5f, 0.5f};
+        public float[] SAUCER_FLY_REACTOR_OFFSET = new float[]{-0.5f, 0.5f, 0.01f};
         public float[] SAUCER_FLY_LEFT = new float[]{-30f, 3f};
         public float[] SAUCER_FLY_RIGHT = new float[]{30f, 3f};
         public float[] SAUCER_FLY_SPOT_FALLOFF = new float[]{0.01f,0.1f,1f};
@@ -62,22 +63,22 @@ public class Level01 extends Level{
         public float[] SUNRISE_AMBIENT_COLOR_START = new float[]{0.3f, 0.3f, 0.3f, 1f};
         public float[] SUNRISE_AMBIENT_COLOR_END = new float[]{0.6f, 0.6f, 0.6f, 1f};
         public float[] SUNRISE_SPOT_COLOR = new float[]{1f,1f,1f,1f};
-        public float[] SUNRISE_BOTTOM = new float[]{40f, -10f};
+        public float[] SUNRISE_BOTTOM = new float[]{30f, -10f};
         public float[] SUNRISE_TOP = new float[]{-40f, 30f};
         public float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
         public float SUNRISE_END = SUNRISE_START + 10f;
 
-        public float SAUCER_CRASH_START = 100f;
-        public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.5f;
-
-        public float PLAY_START = SAUCER_CRASH_END + 1f;
+        public float SAUCER_CRASH_START = SUNRISE_END;
+        public float[] SAUCER_CRASH_TOP = new float[]{-7f, 8f};
+        public float[] SAUCER_CRASH_BOTTOM = new float[]{-5.5f, -1f};
+        public float SAUCER_CRASH_SMOKE = SAUCER_CRASH_START + 0.1f;
+        public float[] SAUCER_CRASH_PARTICLES = new float[]{-5f, 1f, 0.01f, 0f, 20f};
+        public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.2f;
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
             public float apply(float a) {
-
-                    return (float) (1 - Math.pow(1 - (2*a),5))/2;
-
+                return (float) (1 - Math.pow(1 - (2*a),5))/2;
             }
         };
     }
@@ -115,6 +116,7 @@ public class Level01 extends Level{
     //Sprites
     private SpriteBatchLayer saucerLayer;
     private SpriteActor flyingSaucerActor;
+    private SpriteActor crashedSaucerActor;
 
     //Particles
     private ParticlesEffectBatchLayer particlesEffectBatchLayer;
@@ -165,7 +167,7 @@ public class Level01 extends Level{
 
             @Override
             public void render(float deltaTime) {
-                if(Level01.this.time < config.PLAY_START) {
+                if(state != STATE_PLAY) {
                     tick(deltaTime);
                 }
             }
@@ -204,6 +206,25 @@ public class Level01 extends Level{
     }
 
     protected void buildForeground() {
+        this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
+        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(config.FLYING_SAUCER_ID);
+        this.flyingSaucerActor = new SpriteActor(config.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
+                ,flyingSaucerImageDef.regionX
+                ,flyingSaucerImageDef.regionY
+                ,flyingSaucerImageDef.regionWidth
+                ,flyingSaucerImageDef.regionHeight);
+        flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
+        flyingSaucerActor.setOriginCenter();
+        final SceneLoader.ImageDef crashedSaucerImageDef = this.levelResources.getImageDefinition(config.CRASHED_SAUCER_ID);
+        this.crashedSaucerActor = new SpriteActor(config.CRASHED_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(crashedSaucerImageDef.path, Texture.class))
+                ,crashedSaucerImageDef.regionX
+                ,crashedSaucerImageDef.regionY
+                ,crashedSaucerImageDef.regionWidth
+                ,crashedSaucerImageDef.regionHeight);
+        crashedSaucerActor.setSize(crashedSaucerImageDef.width, crashedSaucerImageDef.height);
+        crashedSaucerActor.setOriginCenter();
+        Runtime.getInstance().addLayer(this.saucerLayer);
+
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
         final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(FOREGROUND_BODY_NAME);
         final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(FOREGROUND_IMAGE_NAME);
@@ -232,21 +253,13 @@ public class Level01 extends Level{
         this.foregroundLayer.addActor(foregroundStaticBodyActor);
         Runtime.getInstance().addLayer(this.foregroundLayer);
 
-        this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
-        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(config.FLYING_SAUCER_ID);
-        this.flyingSaucerActor = new SpriteActor(config.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
-                ,flyingSaucerImageDef.regionX
-                ,flyingSaucerImageDef.regionY
-                ,flyingSaucerImageDef.regionWidth
-                ,flyingSaucerImageDef.regionHeight);
-        flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
-        flyingSaucerActor.setOriginCenter();
-        Runtime.getInstance().addLayer(this.saucerLayer);
-
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
         this.flyingSaucerParticlesEffect = new ParticleEffect();
         this.flyingSaucerParticlesEffect.load(Gdx.files.internal(this.levelResources.getParticlesEffectDefinition(config.FLYING_SAUCER_ID).path), this.levelResources.getTextureAtlas(this.assetManager));
-        this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
+        this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,100);
+        this.crashedSaucerParticlesEffect = new ParticleEffect();
+        this.crashedSaucerParticlesEffect.load(Gdx.files.internal(this.levelResources.getParticlesEffectDefinition(config.CRASHED_SAUCER_ID).path), this.levelResources.getTextureAtlas(this.assetManager));
+        this.crashedSaucerParticlesActor = new ParticleEffectActor(config.CRASHED_SAUCER_ID.hashCode(), this.crashedSaucerParticlesEffect,100);
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
 
@@ -281,10 +294,11 @@ public class Level01 extends Level{
         this.bitmapFontBatchLayer.dispose(true);
 
         this.flyingSaucerActor.dispose();
+        this.crashedSaucerActor.dispose();
         this.flyingSaucerParticlesActor.dispose();
         this.flyingSaucerParticlesEffect.dispose();
-        //this.crashedSaucerParticlesActor.dispose();
-        //this.crashedSaucerParticlesEffect.dispose();
+        this.crashedSaucerParticlesActor.dispose();
+        this.crashedSaucerParticlesEffect.dispose();
         this.introRenderer.dispose();
 
         this.ticklayer = null;
@@ -295,10 +309,11 @@ public class Level01 extends Level{
         this.bitmapFontBatchLayer = null;
 
         this.flyingSaucerActor = null;
+        this.crashedSaucerActor = null;
         this.flyingSaucerParticlesActor = null;
         this.flyingSaucerParticlesEffect = null;
-        //this.crashedSaucerParticlesActor = null;
-        //this.crashedSaucerParticlesEffect = null;
+        this.crashedSaucerParticlesActor = null;
+        this.crashedSaucerParticlesEffect = null;
         this.introRenderer = null;
         this.tmpVector = null;
         this.config = null;
@@ -351,8 +366,9 @@ public class Level01 extends Level{
                     this.particlesEffectBatchLayer.addActor(this.flyingSaucerParticlesActor);
                     this.introRenderer.switchLight(false);
                     this.introRenderer.setFallOff(config.SAUCER_FLY_SPOT_FALLOFF[0], config.SAUCER_FLY_SPOT_FALLOFF[1], config.SAUCER_FLY_SPOT_FALLOFF[2]);
-                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, -1000, -1000, false, false, 0.01f);
+                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, -1000, -1000, false, false, config.SAUCER_FLY_REACTOR_OFFSET[2]);
                     state = STATE_SAUCER_FLY;
+                    this.tick(0);
                 }
                 break;
             case STATE_SAUCER_FLY :
@@ -371,6 +387,7 @@ public class Level01 extends Level{
                         }
                         else{
                             this.flyingSaucerActor.setFlip(true, false);
+                            this.flyingSaucerParticlesEffect.setFlip(true, false);
                             final float delta = 1f - ((config.SAUCER_FLY_END - time) / (config.SAUCER_FLY_END - config.SAUCER_FLY_MIDDLE));
                             this.tmpVector.x = config.flyInterpolation.apply(config.SAUCER_FLY_RIGHT[0], config.SAUCER_FLY_LEFT[0], delta) - this.flyingSaucerActor.width/2;
                             this.tmpVector.y = config.flyInterpolation.apply(config.SAUCER_FLY_RIGHT[1], config.SAUCER_FLY_LEFT[1], delta);
@@ -389,6 +406,7 @@ public class Level01 extends Level{
                     this.introRenderer.switchLight(false);
                     this.introRenderer.setFallOff(config.SUNRISE_SPOT_FALLOFF[0], config.SUNRISE_SPOT_FALLOFF[1], config.SUNRISE_SPOT_FALLOFF[2]);
                     state = STATE_SUNRISE;
+                    this.tick(0);
                 }
                 break;
             case STATE_SUNRISE :
@@ -407,8 +425,34 @@ public class Level01 extends Level{
                         this.skyLayer.setTime(delta);
                     }
                 }
+                else{
+                    this.saucerLayer.addActor(this.crashedSaucerActor);
+                    this.crashedSaucerActor.setPosition(-5.5f,-0.5f);
+                    this.particlesEffectBatchLayer.addActor(this.crashedSaucerParticlesActor);
+                    config.SAUCER_CRASH_PARTICLES[3] = 0f;
+                    state = STATE_SAUCER_CRASH;
+                    this.tick(0);
+                }
                 break;
             case STATE_SAUCER_CRASH :
+                if(time <= config.SAUCER_CRASH_END) {
+                    if (time > config.SAUCER_CRASH_START) {
+                        final float delta = 1f - ((config.SAUCER_CRASH_END - time) / (config.SAUCER_CRASH_END - config.SAUCER_CRASH_START));
+                        this.tmpVector.x = Interpolation.linear.apply(config.SAUCER_CRASH_TOP[0], config.SAUCER_CRASH_BOTTOM[0], delta);
+                        this.tmpVector.y = Interpolation.linear.apply(config.SAUCER_CRASH_TOP[1], config.SAUCER_CRASH_BOTTOM[1], delta);
+                        if(time >= config.SAUCER_CRASH_SMOKE && config.SAUCER_CRASH_PARTICLES[3] == 0f ){
+                            for(int i= 0; i < config.SAUCER_CRASH_PARTICLES[4] ; i++) {
+                                this.crashedSaucerParticlesActor.spawn(true, config.SAUCER_CRASH_PARTICLES[0], config.SAUCER_CRASH_PARTICLES[1], false, false, config.SAUCER_CRASH_PARTICLES[2]);
+                            }
+                            config.SAUCER_CRASH_PARTICLES[3] = 1f;
+                        }
+                        this.crashedSaucerActor.setPosition(this.tmpVector.x, this.tmpVector.y);
+                    }
+                }
+                else{
+                    this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
+                    state = STATE_PLAY;
+                }
                 break;
         }
     }

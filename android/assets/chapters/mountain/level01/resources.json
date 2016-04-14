@@ -528,6 +528,45 @@
 			[
 
 				{
+					"int" : 340,
+					"name" : "regionHeight"
+				},
+
+				{
+					"int" : 260,
+					"name" : "regionWidth"
+				},
+
+				{
+					"int" : 0,
+					"name" : "regionX"
+				},
+
+				{
+					"int" : 0,
+					"name" : "regionY"
+				},
+
+				{
+					"float" : 3,
+					"name" : "height"
+				},
+
+				{
+					"float" : 1.2,
+					"name" : "width"
+				}
+			],
+			"file" : "chapters/mountain/level01/main.png",
+			"name" : "crashed_saucer"
+		},
+		{
+			"body" : -1,
+			"center" : 0,
+			"customProperties" :
+			[
+
+				{
 					"int" : 125,
 					"name" : "regionHeight"
 				},
@@ -559,6 +598,45 @@
 			],
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "flying_saucer_reactor"
+		},
+		{
+			"body" : -1,
+			"center" : 0,
+			"customProperties" :
+			[
+
+				{
+					"int" : 125,
+					"name" : "regionHeight"
+				},
+
+				{
+					"int" : 412,
+					"name" : "regionWidth"
+				},
+
+				{
+					"int" : 40,
+					"name" : "regionX"
+				},
+
+				{
+					"int" : 500,
+					"name" : "regionY"
+				},
+
+				{
+					"float" : 0.6067961165,
+					"name" : "height"
+				},
+
+				{
+					"float" : 2.0,
+					"name" : "width"
+				}
+			],
+			"file" : "chapters/mountain/level01/main.png",
+			"name" : "crashed_saucer_smoke"
 		}
 	],
 	"particles_effect" :
@@ -566,6 +644,10 @@
 		{
 			"name": "flying_saucer",
 			"file": "chapters/mountain/level01/flying_saucer.p"
+		},
+		{
+			"name": "crashed_saucer",
+			"file": "chapters/mountain/level01/crashed_saucer.p"
 		}
 	]
 }
