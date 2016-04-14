@@ -31,54 +31,59 @@ import com.thommil.softbuddy.levels.mountain.renderers.IntroRenderer;
 
 public class Level01 extends Level{
 
-    private static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
+    public static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
 
-    protected final static String FLYING_SAUCER_ID = "flying_saucer";
+    public static class Config{
+
+        public String FLYING_SAUCER_ID = "flying_saucer";
+
+        public float TITLE_FADE_START = 2f;
+        public float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
+        public float TITLE_FADE_END = TITLE_FADE_PAUSE + 1f;
+
+        public float SCROLL_DOWN_START = TITLE_FADE_END;
+        public float SCROLL_DOWN_STEP = 3f;
+        public float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
+
+        public float SAUCER_FLY_START = SCROLL_DOWN_END + 2f;
+        public float[] SAUCER_FLY_AMBIENT_COLOR = new float[]{0.3f, 0.3f, 0.3f, 1f};
+        public float[] SAUCER_FLY_SPOT_COLOR = new float[]{0,0,1f,1f};
+        public float[] SAUCER_FLY_LEFT = new float[]{-20f, 3f};
+        public float[] SAUCER_FLY_RIGHT = new float[]{20f, 3f};
+        public float[] SAUCER_FLY_SPOT_FALLOFF = new float[]{0.01f,0.1f,1f};
+        public float SAUCER_FLY_END = SAUCER_FLY_START + 1f;
+
+        public float SUNRISE_START = SAUCER_FLY_END + 2f;
+        public float[] SUNRISE_AMBIENT_COLOR_START = new float[]{0.3f, 0.3f, 0.3f, 1f};
+        public float[] SUNRISE_AMBIENT_COLOR_END = new float[]{0.6f, 0.6f, 0.6f, 1f};
+        public float[] SUNRISE_SPOT_COLOR = new float[]{1f,1f,1f,1f};
+        public float[] SUNRISE_BOTTOM = new float[]{40f, -10f};
+        public float[] SUNRISE_TOP = new float[]{-40f, 30f};
+        public float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
+        public float SUNRISE_END = SUNRISE_START + 10f;
+
+        public float SAUCER_CRASH_START = 100f;
+        public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.5f;
+
+        public float PLAY_START = SAUCER_CRASH_END + 1f;
+    }
+
+    private static final int STATE_INIT = 0;
+    private static final int STATE_TITLE = 1;
+    private static final int STATE_SCROLL_DOWN = 2;
+    private static final int STATE_SAUCER_FLY = 3;
+    private static final int STATE_SUNRISE = 4;
+    private static final int STATE_SAUCER_CRASH = 5;
+    private static final int STATE_PLAY = 6;
+
+    private Config config;
 
     private float levelWorldWidth;
     private float levelWorldHeight;
 
     private float time;
 
-    private final static int STATE_INIT = 0;
-    private final static int STATE_TITLE = 1;
-    private final static int STATE_SCROLL_DOWN = 2;
-    private final static int STATE_SAUCER_FLY = 3;
-    private final static int STATE_SUNRISE = 4;
-    private final static int STATE_SAUCER_CRASH = 5;
-    private final static int STATE_PLAY = 6;
-
-    private int state = STATE_TITLE;
-
-    private static final float TITLE_FADE_START = 2f;
-    private static final float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
-    private static final float TITLE_FADE_END = TITLE_FADE_PAUSE + 1f;
-
-    private static final float SCROLL_DOWN_START = TITLE_FADE_END;
-    private static final float SCROLL_DOWN_STEP = 3f;
-    private static final float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
-
-    private static final float SAUCER_FLY_START = SCROLL_DOWN_END + 2f;
-    private static final float[] SAUCER_FLY_AMBIENT_COLOR = new float[]{0.3f, 0.3f, 0.3f, 1f};
-    private static final float[] SAUCER_FLY_SPOT_COLOR = new float[]{0,0,1f,1f};
-    private static final float[] SAUCER_FLY_LEFT = new float[]{-20f, 3f};
-    private static final float[] SAUCER_FLY_RIGHT = new float[]{20f, 3f};
-    private static final float[] SAUCER_FLY_SPOT_FALLOFF = new float[]{0.01f,0.1f,1f};
-    private static final float SAUCER_FLY_END = SAUCER_FLY_START + 5f;
-
-    private static final float SUNRISE_START = SAUCER_FLY_END + 2f;
-    private static final float[] SUNRISE_AMBIENT_COLOR_START = new float[]{0.3f, 0.3f, 0.3f, 1f};
-    private static final float[] SUNRISE_AMBIENT_COLOR_END = new float[]{0.6f, 0.6f, 0.6f, 1f};
-    private static final float[] SUNRISE_SPOT_COLOR = new float[]{1f,1f,1f,1f};
-    private static final float[] SUNRISE_BOTTOM = new float[]{40f, -10f};
-    private static final float[] SUNRISE_TOP = new float[]{-40f, 30f};
-    private static final float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
-    private static final float SUNRISE_END = SUNRISE_START + 10f;
-
-    private static final float SAUCER_CRASH_START = 100f;
-    private static final float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.5f;
-
-    private static final float PLAY_START = SAUCER_CRASH_END + 1f;
+    private int state;
 
     private Vector2 tmpVectorFrom;
     private Vector2 tmpVectorTo;
@@ -134,6 +139,7 @@ public class Level01 extends Level{
 
     @Override
     protected void build() {
+        this.config = new Config();
         this.tmpVectorFrom = new Vector2();
         this.tmpVectorTo = new Vector2();
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
@@ -147,7 +153,7 @@ public class Level01 extends Level{
 
             @Override
             public void render(float deltaTime) {
-                if(Level01.this.time < PLAY_START) {
+                if(Level01.this.time < config.PLAY_START) {
                     tick(deltaTime);
                 }
             }
@@ -215,8 +221,8 @@ public class Level01 extends Level{
         Runtime.getInstance().addLayer(this.foregroundLayer);
 
         this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
-        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(FLYING_SAUCER_ID);
-        this.flyingSaucerActor = new SpriteActor(FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
+        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(config.FLYING_SAUCER_ID);
+        this.flyingSaucerActor = new SpriteActor(config.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
                 ,flyingSaucerImageDef.regionX
                 ,flyingSaucerImageDef.regionY
                 ,flyingSaucerImageDef.regionWidth
@@ -227,8 +233,8 @@ public class Level01 extends Level{
 
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
         this.flyingSaucerParticlesEffect = new ParticleEffect();
-        this.flyingSaucerParticlesEffect.load(Gdx.files.internal(this.levelResources.getParticlesEffectDefinition(FLYING_SAUCER_ID).path), this.levelResources.getTextureAtlas(this.assetManager));
-        this.flyingSaucerParticlesActor = new ParticleEffectActor(FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
+        this.flyingSaucerParticlesEffect.load(Gdx.files.internal(this.levelResources.getParticlesEffectDefinition(config.FLYING_SAUCER_ID).path), this.levelResources.getTextureAtlas(this.assetManager));
+        this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
 
@@ -284,29 +290,30 @@ public class Level01 extends Level{
         this.introRenderer = null;
         this.tmpVectorFrom = null;
         this.tmpVectorTo = null;
+        this.config = null;
     }
 
     public void tick(float deltaTime){
         time += deltaTime;
         switch(state){
             case STATE_INIT :
-                this.introRenderer.setAmbiantColor(SAUCER_FLY_AMBIENT_COLOR[0],SAUCER_FLY_AMBIENT_COLOR[1],SAUCER_FLY_AMBIENT_COLOR[2]);
-                this.introRenderer.setLightColor(SAUCER_FLY_SPOT_COLOR[0],SAUCER_FLY_SPOT_COLOR[1],SAUCER_FLY_SPOT_COLOR[2]);
+                this.introRenderer.setAmbiantColor(config.SAUCER_FLY_AMBIENT_COLOR[0],config.SAUCER_FLY_AMBIENT_COLOR[1],config.SAUCER_FLY_AMBIENT_COLOR[2]);
+                this.introRenderer.setLightColor(config.SAUCER_FLY_SPOT_COLOR[0],config.SAUCER_FLY_SPOT_COLOR[1],config.SAUCER_FLY_SPOT_COLOR[2]);
                 this.titleFontActor.getBitmapFont().getColor().a = 0f;
                 this.bitmapFontBatchLayer.addActor(this.titleFontActor);
                 state = STATE_TITLE;
                 this.tick(0);
                 break;
             case STATE_TITLE :
-                if(time < TITLE_FADE_START){
-                    final float fadeTime = 1f - ((TITLE_FADE_START - time) / TITLE_FADE_START);
+                if(time < config.TITLE_FADE_START){
+                    final float fadeTime = 1f - ((config.TITLE_FADE_START - time) / config.TITLE_FADE_START);
                     this.titleFontActor.getBitmapFont().getColor().a = fadeTime;
                     Runtime.getInstance().getViewport().getCamera().position.set(0,levelWorldWidth/2,0);
                     Runtime.getInstance().getViewport().apply();
                 }
-                else if(time >= TITLE_FADE_PAUSE){
-                    if(time < SCROLL_DOWN_START) {
-                        final float fadeTime = ((TITLE_FADE_END - time) / (TITLE_FADE_END - TITLE_FADE_PAUSE));
+                else if(time >= config.TITLE_FADE_PAUSE){
+                    if(time < config.SCROLL_DOWN_START) {
+                        final float fadeTime = ((config.TITLE_FADE_END - time) / (config.TITLE_FADE_END - config.TITLE_FADE_PAUSE));
                         this.titleFontActor.getBitmapFont().getColor().a = fadeTime;
                         Runtime.getInstance().getViewport().getCamera().position.set(0, levelWorldWidth / 2, 0);
                         Runtime.getInstance().getViewport().apply();
@@ -319,9 +326,9 @@ public class Level01 extends Level{
                 }
                 break;
             case STATE_SCROLL_DOWN :
-                if(time < SCROLL_DOWN_END){
-                    final float scrollTime = ((SCROLL_DOWN_END - time) / (SCROLL_DOWN_END - SCROLL_DOWN_START));
-                    this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-SCROLL_DOWN_STEP);
+                if(time < config.SCROLL_DOWN_END){
+                    final float scrollTime = ((config.SCROLL_DOWN_END - time) / (config.SCROLL_DOWN_END - config.SCROLL_DOWN_START));
+                    this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-config.SCROLL_DOWN_STEP);
                     Runtime.getInstance().getViewport().getCamera().position.set(0,(levelWorldWidth/2 * scrollTime),0);
                     Runtime.getInstance().getViewport().apply();
                 }
@@ -332,21 +339,21 @@ public class Level01 extends Level{
                     this.saucerLayer.addActor(this.flyingSaucerActor);
                     this.particlesEffectBatchLayer.addActor(this.flyingSaucerParticlesActor);
                     this.introRenderer.switchLight(false);
-                    this.introRenderer.setFallOff(SAUCER_FLY_SPOT_FALLOFF[0], SAUCER_FLY_SPOT_FALLOFF[1], SAUCER_FLY_SPOT_FALLOFF[2]);
-                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, -1000, -1000, false, false, 0.1f);
+                    this.introRenderer.setFallOff(config.SAUCER_FLY_SPOT_FALLOFF[0], config.SAUCER_FLY_SPOT_FALLOFF[1], config.SAUCER_FLY_SPOT_FALLOFF[2]);
+                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, -1000, -1000, false, false, 0.01f);
                     state = STATE_SAUCER_FLY;
                 }
                 break;
             case STATE_SAUCER_FLY :
-                if(time <= SAUCER_FLY_END) {
-                    if (time > SAUCER_FLY_START) {
+                if(time <= config.SAUCER_FLY_END) {
+                    if (time > config.SAUCER_FLY_START) {
                         this.introRenderer.switchLight(true);
-                        final float delta = 1f - ((SAUCER_FLY_END - time) / (SAUCER_FLY_END - SAUCER_FLY_START));
-                        this.tmpVectorFrom.set(SAUCER_FLY_LEFT[0], SAUCER_FLY_LEFT[1]);
-                        this.tmpVectorTo.set(SAUCER_FLY_RIGHT[0], SAUCER_FLY_RIGHT[1]);
+                        final float delta = 1f - ((config.SAUCER_FLY_END - time) / (config.SAUCER_FLY_END - config.SAUCER_FLY_START));
+                        this.tmpVectorFrom.set(config.SAUCER_FLY_LEFT[0], config.SAUCER_FLY_LEFT[1]);
+                        this.tmpVectorTo.set(config.SAUCER_FLY_RIGHT[0], config.SAUCER_FLY_RIGHT[1]);
                         this.tmpVectorFrom.lerp(this.tmpVectorTo, delta);
                         this.flyingSaucerActor.setPosition(this.tmpVectorFrom.x + 3f, this.tmpVectorFrom.y);
-                        this.flyingSaucerParticlesEffect.setPosition(this.tmpVectorFrom.x, this.tmpVectorFrom.y);
+                        this.flyingSaucerParticlesEffect.setPosition(this.tmpVectorFrom.x + 2.5f, this.tmpVectorFrom.y);
                         Runtime.getInstance().getViewport().project(this.tmpVectorFrom);
                         this.introRenderer.setLightPosition((int)this.tmpVectorFrom.x, (int)this.tmpVectorFrom.y);
                     }
@@ -356,22 +363,22 @@ public class Level01 extends Level{
                     this.flyingSaucerParticlesActor.release(this.flyingSaucerParticlesEffect);
                     this.particlesEffectBatchLayer.removeActor(this.flyingSaucerParticlesActor);
                     this.introRenderer.switchLight(false);
-                    this.introRenderer.setFallOff(SUNRISE_SPOT_FALLOFF[0], SUNRISE_SPOT_FALLOFF[1], SUNRISE_SPOT_FALLOFF[2]);
+                    this.introRenderer.setFallOff(config.SUNRISE_SPOT_FALLOFF[0], config.SUNRISE_SPOT_FALLOFF[1], config.SUNRISE_SPOT_FALLOFF[2]);
                     state = STATE_SUNRISE;
                 }
                 break;
             case STATE_SUNRISE :
-                if(time <= SUNRISE_END) {
-                    if(time > SUNRISE_START) {
+                if(time <= config.SUNRISE_END) {
+                    if(time > config.SUNRISE_START) {
                         this.introRenderer.switchLight(true);
-                        final float delta = 1 - ((SUNRISE_END - time) / (SUNRISE_END - SUNRISE_START));
-                        this.tmpVectorFrom.set(SUNRISE_BOTTOM[0], SUNRISE_BOTTOM[1]);
-                        this.tmpVectorTo.set(SUNRISE_TOP[0], SUNRISE_TOP[1]);
+                        final float delta = 1 - ((config.SUNRISE_END - time) / (config.SUNRISE_END - config.SUNRISE_START));
+                        this.tmpVectorFrom.set(config.SUNRISE_BOTTOM[0], config.SUNRISE_BOTTOM[1]);
+                        this.tmpVectorTo.set(config.SUNRISE_TOP[0], config.SUNRISE_TOP[1]);
                         this.tmpVectorFrom.lerp(this.tmpVectorTo, delta);
-                        this.introRenderer.setLightColor(SUNRISE_SPOT_COLOR[0] * delta, SUNRISE_SPOT_COLOR[1] * delta, SUNRISE_SPOT_COLOR[2] * delta);
-                        this.introRenderer.setAmbiantColor(SUNRISE_AMBIENT_COLOR_START[0] + ((SUNRISE_AMBIENT_COLOR_END[0] - SUNRISE_AMBIENT_COLOR_START[0]) * delta)
-                                , SUNRISE_AMBIENT_COLOR_START[1] + ((SUNRISE_AMBIENT_COLOR_END[1] - SUNRISE_AMBIENT_COLOR_START[1]) * delta)
-                                , SUNRISE_AMBIENT_COLOR_START[2] + ((SUNRISE_AMBIENT_COLOR_END[2] - SUNRISE_AMBIENT_COLOR_START[2]) * delta));
+                        this.introRenderer.setLightColor(config.SUNRISE_SPOT_COLOR[0] * delta, config.SUNRISE_SPOT_COLOR[1] * delta, config.SUNRISE_SPOT_COLOR[2] * delta);
+                        this.introRenderer.setAmbiantColor(config.SUNRISE_AMBIENT_COLOR_START[0] + ((config.SUNRISE_AMBIENT_COLOR_END[0] - config.SUNRISE_AMBIENT_COLOR_START[0]) * delta)
+                                , config.SUNRISE_AMBIENT_COLOR_START[1] + ((config.SUNRISE_AMBIENT_COLOR_END[1] - config.SUNRISE_AMBIENT_COLOR_START[1]) * delta)
+                                , config.SUNRISE_AMBIENT_COLOR_START[2] + ((config.SUNRISE_AMBIENT_COLOR_END[2] - config.SUNRISE_AMBIENT_COLOR_START[2]) * delta));
                         Runtime.getInstance().getViewport().project(this.tmpVectorFrom);
                         this.introRenderer.setLightPosition((int) this.tmpVectorFrom.x, (int) this.tmpVectorFrom.y);
                         this.skyLayer.setTime(delta);

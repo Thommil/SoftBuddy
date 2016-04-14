@@ -509,12 +509,12 @@
 				},
 
 				{
-					"float" : 0.6067961165,
+					"float" : 1.2,
 					"name" : "height"
 				},
 
 				{
-					"float" : 2.0,
+					"float" : 4.0,
 					"name" : "width"
 				}
 			],

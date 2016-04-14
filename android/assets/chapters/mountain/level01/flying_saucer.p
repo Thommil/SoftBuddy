@@ -10,8 +10,8 @@ max: 1000
 - Emission -
 lowMin: 0.0
 lowMax: 0.0
-highMin: 3.0
-highMax: 3.0
+highMin: 10.0
+highMax: 10.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -20,8 +20,8 @@ timeline0: 0.0
 - Life -
 lowMin: 0.0
 lowMax: 0.0
-highMin: 3000.0
-highMax: 3000.0
+highMin: 1000.0
+highMax: 1000.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -34,12 +34,12 @@ active: false
 - Y Offset -
 active: false
 - Spawn Shape -
-shape: square
+shape: point
 - Spawn Width -
 lowMin: 0.0
 lowMax: 0.0
-highMin: 180.0
-highMax: 180.0
+highMin: 0.0
+highMax: 0.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -48,8 +48,8 @@ timeline0: 0.0
 - Spawn Height -
 lowMin: 0.0
 lowMax: 0.0
-highMin: 110.0
-highMax: 110.0
+highMin: 0.0
+highMax: 0.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -58,8 +58,8 @@ timeline0: 0.0
 - Scale -
 lowMin: 0.0
 lowMax: 0.0
-highMin: 256.0
-highMax: 256.0
+highMin: 80.0
+highMax: 80.0
 relative: false
 scalingCount: 1
 scaling0: 1.0
@@ -67,17 +67,15 @@ timelineCount: 1
 timeline0: 0.0
 - Velocity -
 active: true
-lowMin: -25.0
-lowMax: -25.0
-highMin: 25.0
-highMax: 25.0
+lowMin: 0.0
+lowMax: 0.0
+highMin: 50.0
+highMax: 50.0
 relative: false
-scalingCount: 2
-scaling0: 0.0
-scaling1: 1.0
-timelineCount: 2
+scalingCount: 1
+scaling0: 1.0
+timelineCount: 1
 timeline0: 0.0
-timeline1: 1.0
 - Angle -
 active: true
 lowMin: 0.0
@@ -93,8 +91,8 @@ timeline0: 0.0
 active: true
 lowMin: 1.0
 lowMax: 360.0
-highMin: -30.0
-highMax: 30.0
+highMin: -180.0
+highMax: 180.0
 relative: true
 scalingCount: 2
 scaling0: 0.0
@@ -107,16 +105,12 @@ active: false
 - Gravity -
 active: false
 - Tint -
-colorsCount: 6
-colors0: 1.0
+colorsCount: 3
+colors0: 0.0
 colors1: 0.0
-colors2: 0.0
-colors3: 1.0
-colors4: 0.9843137
-colors5: 0.0
-timelineCount: 2
+colors2: 1.0
+timelineCount: 1
 timeline0: 0.0
-timeline1: 1.0
 - Transparency -
 lowMin: 0.0
 lowMax: 0.0
@@ -124,15 +118,15 @@ highMin: 1.0
 highMax: 1.0
 relative: false
 scalingCount: 3
-scaling0: 0.0
-scaling1: 0.49122807
+scaling0: 1.0
+scaling1: 1.0
 scaling2: 0.0
 timelineCount: 3
 timeline0: 0.0
-timeline1: 0.5068493
+timeline1: 0.6712329
 timeline2: 1.0
 - Options -
-attached: false
+attached: true
 continuous: true
 aligned: false
 additive: true
