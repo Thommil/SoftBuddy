@@ -528,22 +528,22 @@
 			[
 
 				{
-					"int" : 340,
+					"int" : 313,
 					"name" : "regionHeight"
 				},
 
 				{
-					"int" : 260,
+					"int" : 243,
 					"name" : "regionWidth"
 				},
 
 				{
-					"int" : 0,
+					"int" : 13,
 					"name" : "regionX"
 				},
 
 				{
-					"int" : 0,
+					"int" : 11,
 					"name" : "regionY"
 				},
 
@@ -649,5 +649,29 @@
 			"name": "crashed_saucer",
 			"file": "chapters/mountain/level01/crashed_saucer.p"
 		}
+	],
+	"animation" :
+	[
+		{
+			"name": "crashed_saucer",
+			"file" : "chapters/mountain/level01/main.png",
+			"playMode" : "NORMAL",
+			"frameDuration" :  0.1,
+			"keyFrames" : [
+				{
+					"regionX" : 254,
+					"regionY" : 11,
+					"regionWidth" : 243,
+					"regionHeight" : 313
+				},
+				{
+					"regionX" : 497,
+					"regionY" : 11,
+					"regionWidth" : 242,
+					"regionHeight" : 313
+				}
+			]
+		}
+
 	]
 }

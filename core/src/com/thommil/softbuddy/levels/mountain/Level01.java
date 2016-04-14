@@ -3,8 +3,10 @@ package com.thommil.softbuddy.levels.mountain;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -70,8 +72,8 @@ public class Level01 extends Level{
 
         public float SAUCER_CRASH_START = SUNRISE_END;
         public float[] SAUCER_CRASH_TOP = new float[]{-7f, 8f};
-        public float[] SAUCER_CRASH_BOTTOM = new float[]{-5.5f, -1f};
-        public float SAUCER_CRASH_SMOKE = SAUCER_CRASH_START + 0.1f;
+        public float[] SAUCER_CRASH_BOTTOM = new float[]{-5.5f, -0.5f};
+        public float SAUCER_CRASH_ANIMATION_START = SAUCER_CRASH_START + 0.1f;
         public float[] SAUCER_CRASH_PARTICLES = new float[]{-5f, 1f, 0.01f, 0f, 20f};
         public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.2f;
 
@@ -117,6 +119,7 @@ public class Level01 extends Level{
     private SpriteBatchLayer saucerLayer;
     private SpriteActor flyingSaucerActor;
     private SpriteActor crashedSaucerActor;
+    private Animation crashedSaucerAnimation;
 
     //Particles
     private ParticlesEffectBatchLayer particlesEffectBatchLayer;
@@ -223,6 +226,7 @@ public class Level01 extends Level{
                 ,crashedSaucerImageDef.regionHeight);
         crashedSaucerActor.setSize(crashedSaucerImageDef.width, crashedSaucerImageDef.height);
         crashedSaucerActor.setOriginCenter();
+        this.crashedSaucerAnimation = this.levelResources.getAnimation(config.CRASHED_SAUCER_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
@@ -253,12 +257,10 @@ public class Level01 extends Level{
         this.foregroundLayer.addActor(foregroundStaticBodyActor);
         Runtime.getInstance().addLayer(this.foregroundLayer);
 
-        this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
-        this.flyingSaucerParticlesEffect = new ParticleEffect();
-        this.flyingSaucerParticlesEffect.load(Gdx.files.internal(this.levelResources.getParticlesEffectDefinition(config.FLYING_SAUCER_ID).path), this.levelResources.getTextureAtlas(this.assetManager));
+        this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),2);
+        this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(config.FLYING_SAUCER_ID, this.assetManager);
         this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,100);
-        this.crashedSaucerParticlesEffect = new ParticleEffect();
-        this.crashedSaucerParticlesEffect.load(Gdx.files.internal(this.levelResources.getParticlesEffectDefinition(config.CRASHED_SAUCER_ID).path), this.levelResources.getTextureAtlas(this.assetManager));
+        this.crashedSaucerParticlesEffect = this.levelResources.getParticleEffect(config.CRASHED_SAUCER_ID, this.assetManager);
         this.crashedSaucerParticlesActor = new ParticleEffectActor(config.CRASHED_SAUCER_ID.hashCode(), this.crashedSaucerParticlesEffect,100);
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
@@ -310,6 +312,7 @@ public class Level01 extends Level{
 
         this.flyingSaucerActor = null;
         this.crashedSaucerActor = null;
+        this.crashedSaucerAnimation = null;
         this.flyingSaucerParticlesActor = null;
         this.flyingSaucerParticlesEffect = null;
         this.crashedSaucerParticlesActor = null;
@@ -440,11 +443,16 @@ public class Level01 extends Level{
                         final float delta = 1f - ((config.SAUCER_CRASH_END - time) / (config.SAUCER_CRASH_END - config.SAUCER_CRASH_START));
                         this.tmpVector.x = Interpolation.linear.apply(config.SAUCER_CRASH_TOP[0], config.SAUCER_CRASH_BOTTOM[0], delta);
                         this.tmpVector.y = Interpolation.linear.apply(config.SAUCER_CRASH_TOP[1], config.SAUCER_CRASH_BOTTOM[1], delta);
-                        if(time >= config.SAUCER_CRASH_SMOKE && config.SAUCER_CRASH_PARTICLES[3] == 0f ){
-                            for(int i= 0; i < config.SAUCER_CRASH_PARTICLES[4] ; i++) {
-                                this.crashedSaucerParticlesActor.spawn(true, config.SAUCER_CRASH_PARTICLES[0], config.SAUCER_CRASH_PARTICLES[1], false, false, config.SAUCER_CRASH_PARTICLES[2]);
+
+                        if(time >= config.SAUCER_CRASH_ANIMATION_START){
+                            if(config.SAUCER_CRASH_PARTICLES[3] == 0f ) {
+                                for (int i = 0; i < config.SAUCER_CRASH_PARTICLES[4]; i++) {
+                                    this.crashedSaucerParticlesActor.spawn(true, config.SAUCER_CRASH_PARTICLES[0], config.SAUCER_CRASH_PARTICLES[1], false, false, config.SAUCER_CRASH_PARTICLES[2]);
+                                }
+                                config.SAUCER_CRASH_PARTICLES[3] = 1f;
                             }
-                            config.SAUCER_CRASH_PARTICLES[3] = 1f;
+                            final TextureRegion crashedSaucerRegion = this.crashedSaucerAnimation.getKeyFrame(1f - (config.SAUCER_CRASH_END - time));
+                            this.crashedSaucerActor.setRegion(crashedSaucerRegion.getRegionX(), crashedSaucerRegion.getRegionY(), crashedSaucerRegion.getRegionWidth(), crashedSaucerRegion.getRegionHeight());
                         }
                         this.crashedSaucerActor.setPosition(this.tmpVector.x, this.tmpVector.y);
                     }
