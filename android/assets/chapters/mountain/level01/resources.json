@@ -377,266 +377,113 @@
 	},
 	"image" : 
 	[
-		
+
 		{
-			"body" : 0,
-			"center" : {
-				"x" : 0,
-				"y" : -1.875
+			"body": 0,
+			"x": 0,
+			"y": -1.875,
+			"width" : 16.0,
+			"height" : 6.25,
+			"regionX" : 0,
+			"regionY" : 826,
+			"regionWidth" : 512,
+			"regionHeight" : 200,
+			"normalOffset" :
+			{
+				"x" : 512.0,
+				"y" : 0
 			},
-			"customProperties" :
-			[
-				
-				{
-					"int" : 200,
-					"name" : "regionHeight"
-				},
-				
-				{
-					"int" : 512,
-					"name" : "regionWidth"
-				},
-				
-				{
-					"int" : 0,
-					"name" : "regionX"
-				},
-				
-				{
-					"int" : 0,
-					"name" : "regionY"
-				},
-				
-				{
-					"float" : 6.25,
-					"name" : "height"
-				},
-				
-				{
-					"float" : 16.0,
-					"name" : "width"
-				},
-				{
-					"name" : "normalOffset",
-					"vec2" :
-					{
-						"x" : 512.0,
-						"y" : 0
-					}
-				}
-			],
 			"file" : "chapters/mountain/level01/main.png",
-			"name" : "foreground",
-			"opacity" : 1
+			"name" : "foreground"
 		},
-		
 		{
-			"body" : -1,
-			"center" : {
-				"x" : 0,
-				"y" : -1.875
+			"body": -1,
+			"x": 0,
+			"y": -1.875,
+			"width" : 16.0,
+			"height" : 6.25,
+			"regionX" : 0,
+			"regionY" : 626,
+			"regionWidth" : 512,
+			"regionHeight" : 200,
+			"normalOffset" :
+			{
+				"x" : 512.0,
+				"y" : 0
 			},
-			"customProperties" :
-			[
-				
-				{
-					"int" : 200,
-					"name" : "regionHeight"
-				},
-				
-				{
-					"int" : 512,
-					"name" : "regionWidth"
-				},
-				
-				{
-					"int" : 0,
-					"name" : "regionX"
-				},
-				
-				{
-					"int" : 200,
-					"name" : "regionY"
-				},
-				
-				{
-					"float" : 6.25,
-					"name" : "height"
-				},
-				
-				{
-					"float" : 16.0,
-					"name" : "width"
-				},
-				{
-					"name" : "normalOffset",
-					"vec2" :
-					{
-						"x" : 512.0,
-						"y" : 0
-					}
-				}
-			],
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "background"
-		}
-	,
 
+		},
 		{
-			"body" : -1,
-			"center" : 0,
-			"customProperties" :
-			[
-
-				{
-					"int" : 125,
-					"name" : "regionHeight"
-				},
-
-				{
-					"int" : 412,
-					"name" : "regionWidth"
-				},
-
-				{
-					"int" : 40,
-					"name" : "regionX"
-				},
-
-				{
-					"int" : 500,
-					"name" : "regionY"
-				},
-
-				{
-					"float" : 1.2,
-					"name" : "height"
-				},
-
-				{
-					"float" : 4.0,
-					"name" : "width"
-				}
-			],
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 4.0,
+			"height" : 1.2,
+			"regionX" : 40,
+			"regionY" : 500,
+			"regionWidth" : 412,
+			"regionHeight" : 125,
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "flying_saucer"
+
 		},
 		{
-			"body" : -1,
-			"center" : 0,
-			"customProperties" :
-			[
-
-				{
-					"int" : 313,
-					"name" : "regionHeight"
-				},
-
-				{
-					"int" : 243,
-					"name" : "regionWidth"
-				},
-
-				{
-					"int" : 13,
-					"name" : "regionX"
-				},
-
-				{
-					"int" : 11,
-					"name" : "regionY"
-				},
-
-				{
-					"float" : 3,
-					"name" : "height"
-				},
-
-				{
-					"float" : 1.2,
-					"name" : "width"
-				}
-			],
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 1.2,
+			"height" : 3,
+			"regionX" : 13,
+			"regionY" : 11,
+			"regionWidth" : 243,
+			"regionHeight" : 313,
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "crashed_saucer"
+
 		},
 		{
-			"body" : -1,
-			"center" : 0,
-			"customProperties" :
-			[
-
-				{
-					"int" : 125,
-					"name" : "regionHeight"
-				},
-
-				{
-					"int" : 412,
-					"name" : "regionWidth"
-				},
-
-				{
-					"int" : 40,
-					"name" : "regionX"
-				},
-
-				{
-					"int" : 500,
-					"name" : "regionY"
-				},
-
-				{
-					"float" : 0.6067961165,
-					"name" : "height"
-				},
-
-				{
-					"float" : 2.0,
-					"name" : "width"
-				}
-			],
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 2.0,
+			"height" : 0.6,
+			"regionX" : 40,
+			"regionY" : 500,
+			"regionWidth" : 412,
+			"regionHeight" : 125,
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "flying_saucer_reactor"
+
 		},
 		{
-			"body" : -1,
-			"center" : 0,
-			"customProperties" :
-			[
-
-				{
-					"int" : 125,
-					"name" : "regionHeight"
-				},
-
-				{
-					"int" : 412,
-					"name" : "regionWidth"
-				},
-
-				{
-					"int" : 40,
-					"name" : "regionX"
-				},
-
-				{
-					"int" : 500,
-					"name" : "regionY"
-				},
-
-				{
-					"float" : 0.6067961165,
-					"name" : "height"
-				},
-
-				{
-					"float" : 2.0,
-					"name" : "width"
-				}
-			],
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 2.0,
+			"height" : 0.6,
+			"regionX" : 40,
+			"regionY" : 500,
+			"regionWidth" : 412,
+			"regionHeight" : 125,
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "crashed_saucer_smoke"
+
+		},
+		{
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 2.0,
+			"height" : 2.0,
+			"regionX" : 27,
+			"regionY" : 346,
+			"regionWidth" : 129,
+			"regionHeight" : 140,
+			"file" : "chapters/mountain/level01/main.png",
+			"name" : "touch_helper"
+
 		}
 	],
 	"particles_effect" :

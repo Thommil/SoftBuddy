@@ -4,14 +4,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.utils.Disposable;
+import com.thommil.libgdx.runtime.Runtime;
+import com.thommil.libgdx.runtime.events.TouchDispatcher;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
 
 public abstract class Level implements Disposable, InputProcessor{
-
-    protected final static String BACKGROUND_IMAGE_NAME = "background";
-
-    protected final static String FOREGROUND_BODY_NAME = "foreground";
-    protected final static String FOREGROUND_IMAGE_NAME = "foreground";
 
     protected LevelResources levelResources;
     protected ChapterResources chapterResources;

@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -19,6 +19,7 @@ import com.thommil.libgdx.runtime.actor.graphics.ParticleEffectActor;
 import com.thommil.libgdx.runtime.actor.graphics.SpriteActor;
 import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
 import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
+import com.thommil.libgdx.runtime.events.TouchDispatcher;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
@@ -39,8 +40,11 @@ public class Level01 extends Level{
 
     public static class Config{
 
+        public String BACKGROUND_ID = "background";
+        public String FOREGROUND_ID = "foreground";
         public String FLYING_SAUCER_ID = "flying_saucer";
         public String CRASHED_SAUCER_ID = "crashed_saucer";
+        public String TILT_HELP_ID = "touch_helper";
 
         public float TITLE_FADE_START = 2f;
         public float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
@@ -74,8 +78,11 @@ public class Level01 extends Level{
         public float[] SAUCER_CRASH_TOP = new float[]{-7f, 8f};
         public float[] SAUCER_CRASH_BOTTOM = new float[]{-5.5f, -0.5f};
         public float SAUCER_CRASH_ANIMATION_START = SAUCER_CRASH_START + 0.1f;
-        public float[] SAUCER_CRASH_PARTICLES = new float[]{-5f, 1f, 0.01f, 0f, 20f};
+        public float[] SAUCER_CRASH_PARTICLES = new float[]{SAUCER_CRASH_BOTTOM[0] + 0.5f, SAUCER_CRASH_BOTTOM[1] + 1.5f, 0.01f, 0f, 20f};
         public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.2f;
+
+        public float PLAY_START = SAUCER_CRASH_END + 3f;
+        public float[] TOUCH_HELPER_POSITION = new float[]{SAUCER_CRASH_BOTTOM[0] + 0f, SAUCER_CRASH_BOTTOM[1]+ 0.5f};
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
@@ -131,6 +138,11 @@ public class Level01 extends Level{
     //HUD
     private BitmapFontBatchLayer bitmapFontBatchLayer;
     private BitmapFontActor titleFontActor;
+    private SpriteBatchLayer helpLayer;
+    private StaticActor touchHelperActor;
+
+    //Events
+    private TouchDispatcher touchDispatcher;
 
     @Override
     public String getResourcesPath() {
@@ -146,7 +158,7 @@ public class Level01 extends Level{
 
     @Override
     public void start() {
-
+        this.touchDispatcher.bind();
     }
 
     @Override
@@ -159,6 +171,7 @@ public class Level01 extends Level{
     protected void build() {
         this.config = new Config();
         this.tmpVector = new Vector2();
+        this.touchDispatcher = new TouchDispatcher(Runtime.getInstance().getViewport());
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
         this.levelWorldHeight = Runtime.getInstance().getSettings().viewport.height * 2;
         this.ticklayer = new Layer(Runtime.getInstance().getViewport(),0) {
@@ -189,19 +202,19 @@ public class Level01 extends Level{
         Runtime.getInstance().addLayer(this.skyLayer);
 
         this.backgroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1,this.introRenderer);
-        final SceneLoader.ImageDef backgroundImageDef = this.levelResources.getImageDefinition(BACKGROUND_IMAGE_NAME);
+        final SceneLoader.ImageDef backgroundImageDef = this.levelResources.getImageDefinition(config.BACKGROUND_ID);
         final Texture backgroundTexture = this.assetManager.get(backgroundImageDef.path, Texture.class);
         this.introRenderer.setNormalOffset(backgroundImageDef.normalOffset.x/backgroundTexture.getWidth(),backgroundImageDef.normalOffset.y/backgroundTexture.getHeight());
-        final StaticActor backgroundActor = new StaticActor(0
+        final StaticActor backgroundActor = new StaticActor(config.BACKGROUND_ID.hashCode()
                 ,new TextureSet(backgroundTexture)
-                ,backgroundImageDef.center.x - backgroundImageDef.width/2
-                ,backgroundImageDef.center.y - backgroundImageDef.height/2
+                ,backgroundImageDef.x - backgroundImageDef.width/2
+                ,backgroundImageDef.y - backgroundImageDef.height/2
                 ,backgroundImageDef.width
                 ,backgroundImageDef.height
                 ,backgroundImageDef.regionX
                 ,backgroundImageDef.regionY
-                ,backgroundImageDef.regionX + backgroundImageDef.regionWidth
-                ,backgroundImageDef.regionY + backgroundImageDef.regionHeight
+                ,backgroundImageDef.regionWidth
+                ,backgroundImageDef.regionHeight
                 ,Color.WHITE.toFloatBits());
 
         this.backgroundLayer.addActor(backgroundActor);
@@ -223,25 +236,32 @@ public class Level01 extends Level{
                 ,crashedSaucerImageDef.regionX
                 ,crashedSaucerImageDef.regionY
                 ,crashedSaucerImageDef.regionWidth
-                ,crashedSaucerImageDef.regionHeight);
+                ,crashedSaucerImageDef.regionHeight){
+
+            @Override
+            public boolean onTouchDown(float worldX, float worldY, int button) {
+                onTouchSaucer();
+                return true;
+            }
+        };
         crashedSaucerActor.setSize(crashedSaucerImageDef.width, crashedSaucerImageDef.height);
         crashedSaucerActor.setOriginCenter();
         this.crashedSaucerAnimation = this.levelResources.getAnimation(config.CRASHED_SAUCER_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
-        final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(FOREGROUND_BODY_NAME);
-        final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(FOREGROUND_IMAGE_NAME);
-        final StaticBodyActor foregroundStaticBodyActor = new StaticBodyActor(0
+        final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(config.FOREGROUND_ID);
+        final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(config.FOREGROUND_ID);
+        final StaticBodyActor foregroundStaticBodyActor = new StaticBodyActor(config.FOREGROUND_ID.hashCode()
                 ,new TextureSet(this.assetManager.get(foregroundImageDef.path, Texture.class))
-                ,foregroundBodyDef.position.x + foregroundImageDef.center.x - foregroundImageDef.width/2
-                ,foregroundBodyDef.position.y + foregroundImageDef.center.y - foregroundImageDef.height/2
+                ,foregroundBodyDef.position.x + foregroundImageDef.x - foregroundImageDef.width/2
+                ,foregroundBodyDef.position.y + foregroundImageDef.y - foregroundImageDef.height/2
                 ,foregroundImageDef.width
                 ,foregroundImageDef.height
                 ,foregroundImageDef.regionX
                 ,foregroundImageDef.regionY
-                ,foregroundImageDef.regionX + foregroundImageDef.regionWidth
-                ,foregroundImageDef.regionY + foregroundImageDef.regionHeight
+                ,foregroundImageDef.regionWidth
+                ,foregroundImageDef.regionHeight
                 ,Color.WHITE.toFloatBits()) {
             @Override
             public BodyDef getDefinition() {
@@ -258,6 +278,7 @@ public class Level01 extends Level{
         Runtime.getInstance().addLayer(this.foregroundLayer);
 
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),2);
+        this.particlesEffectBatchLayer.setAdditive(true);
         this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(config.FLYING_SAUCER_ID, this.assetManager);
         this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,100);
         this.crashedSaucerParticlesEffect = this.levelResources.getParticleEffect(config.CRASHED_SAUCER_ID, this.assetManager);
@@ -266,6 +287,21 @@ public class Level01 extends Level{
     }
 
     private void buildHUD(){
+        this.helpLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(), 1);
+        final SceneLoader.ImageDef helperImageDef = this.levelResources.getImageDefinition(config.TILT_HELP_ID);
+        this.touchHelperActor = new StaticActor(config.TILT_HELP_ID.hashCode()
+                ,new TextureSet(this.assetManager.get(helperImageDef.path, Texture.class))
+                ,config.TOUCH_HELPER_POSITION[0]
+                ,config.TOUCH_HELPER_POSITION[1]
+                ,helperImageDef.width
+                ,helperImageDef.height
+                ,helperImageDef.regionX
+                ,helperImageDef.regionY
+                ,helperImageDef.regionWidth
+                ,helperImageDef.regionHeight
+                ,Color.WHITE.toFloatBits());
+        Runtime.getInstance().addLayer(this.helpLayer);
+
         final SharedResources.LabelDef titleLableDef = this.softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
         this.titleFontActor = new BitmapFontActor(0, this.assetManager.get(titleLableDef.assetName, BitmapFont.class));
         titleFontActor.setText(this.chapterResources.getChapterDef().title);
@@ -286,6 +322,7 @@ public class Level01 extends Level{
         Runtime.getInstance().removeLayer(this.saucerLayer);
         Runtime.getInstance().removeLayer(this.particlesEffectBatchLayer);
         Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
+        Runtime.getInstance().removeLayer(this.helpLayer);
 
         this.ticklayer.dispose(true);
         this.skyLayer.dispose(true);
@@ -294,6 +331,7 @@ public class Level01 extends Level{
         this.saucerLayer.dispose(true);
         this.particlesEffectBatchLayer.dispose(true);
         this.bitmapFontBatchLayer.dispose(true);
+        this.helpLayer.dispose(true);
 
         this.flyingSaucerActor.dispose();
         this.crashedSaucerActor.dispose();
@@ -309,6 +347,7 @@ public class Level01 extends Level{
         this.foregroundLayer = null;
         this.saucerLayer = null;
         this.bitmapFontBatchLayer = null;
+        this.helpLayer = null;
 
         this.flyingSaucerActor = null;
         this.crashedSaucerActor = null;
@@ -320,6 +359,7 @@ public class Level01 extends Level{
         this.introRenderer = null;
         this.tmpVector = null;
         this.config = null;
+        this.touchDispatcher = null;
     }
 
     public void tick(float deltaTime){
@@ -330,26 +370,28 @@ public class Level01 extends Level{
                 this.introRenderer.setLightColor(config.SAUCER_FLY_SPOT_COLOR[0],config.SAUCER_FLY_SPOT_COLOR[1],config.SAUCER_FLY_SPOT_COLOR[2]);
                 this.titleFontActor.getBitmapFont().getColor().a = 0f;
                 this.bitmapFontBatchLayer.addActor(this.titleFontActor);
+                this.bitmapFontBatchLayer.show();
                 state = STATE_TITLE;
                 this.tick(0);
                 break;
             case STATE_TITLE :
                 if(time < config.TITLE_FADE_START){
                     final float fadeTime = 1f - ((config.TITLE_FADE_START - time) / config.TITLE_FADE_START);
-                    this.titleFontActor.getBitmapFont().getColor().a = fadeTime;
+                    this.titleFontActor.getBitmapFont().getColor().a = Interpolation.fade.apply(fadeTime);
                     Runtime.getInstance().getViewport().getCamera().position.set(0,levelWorldWidth/2,0);
                     Runtime.getInstance().getViewport().apply();
                 }
                 else if(time >= config.TITLE_FADE_PAUSE){
                     if(time < config.SCROLL_DOWN_START) {
                         final float fadeTime = ((config.TITLE_FADE_END - time) / (config.TITLE_FADE_END - config.TITLE_FADE_PAUSE));
-                        this.titleFontActor.getBitmapFont().getColor().a = fadeTime;
+                        this.titleFontActor.getBitmapFont().getColor().a = Interpolation.fade.apply(fadeTime);
                         Runtime.getInstance().getViewport().getCamera().position.set(0, levelWorldWidth / 2, 0);
                         Runtime.getInstance().getViewport().apply();
                     }
                     else{
                         this.titleFontActor.getBitmapFont().getColor().a = 0;
                         this.bitmapFontBatchLayer.removeActor(this.titleFontActor);
+                        this.bitmapFontBatchLayer.hide();
                         state = STATE_SCROLL_DOWN;
                     }
                 }
@@ -458,10 +500,22 @@ public class Level01 extends Level{
                     }
                 }
                 else{
-                    this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
-                    state = STATE_PLAY;
+                    if(time > config.PLAY_START) {
+                        if(!this.helpLayer.listActors().contains(this.touchHelperActor,true)){
+                            this.helpLayer.addActor(this.touchHelperActor);
+                            this.touchDispatcher.addListener(this.crashedSaucerActor);
+                        }
+                    }
+                    else{
+                        this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
+                    }
                 }
                 break;
         }
+    }
+
+    private void onTouchSaucer(){
+        this.helpLayer.removeActor(this.touchHelperActor);
+        state = STATE_PLAY;
     }
 }
