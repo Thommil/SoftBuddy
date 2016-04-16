@@ -1,6 +1,5 @@
 package com.thommil.softbuddy.levels.mountain;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,11 +8,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
 import com.thommil.libgdx.runtime.actor.graphics.ParticleEffectActor;
@@ -43,6 +42,7 @@ public class Level01 extends Level{
         public String FOREGROUND_ID = "foreground";
         public String FLYING_SAUCER_ID = "flying_saucer";
         public String CRASHED_SAUCER_ID = "crashed_saucer";
+        public String COCKPIT_BREAK_ID = "cockpit_break";
         public String TOUCH_HELP_ID = "touch_helper";
         public String TILT_HELP_ID = "tilt_helper";
 
@@ -79,9 +79,12 @@ public class Level01 extends Level{
         public float[] SAUCER_CRASH_BOTTOM = new float[]{-5.5f, -0.5f};
         public float SAUCER_CRASH_ANIMATION_START = SAUCER_CRASH_START + 0.1f;
         public float[] SAUCER_CRASH_PARTICLES = new float[]{SAUCER_CRASH_BOTTOM[0] + 0.5f, SAUCER_CRASH_BOTTOM[1] + 1.5f, 0.01f, 0f, 20f};
+        public float[] COCKPIT_BREAK = new float[]{SAUCER_CRASH_BOTTOM[0] + 0.2f, SAUCER_CRASH_BOTTOM[1] + 1.5f};
+        public int COCKPIT_BREAK_COUNT = 3;
         public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.2f;
 
         public float TOUCH_HELPER_START = SAUCER_CRASH_END + 3f;
+        public float TILT_HELPER_START = 1f;
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
@@ -112,6 +115,7 @@ public class Level01 extends Level{
 
     private Vector2 tmpVector;
     private int pauseCounter = 0;
+    private int cockitBreakCounter = 0;
 
     //Tick
     private Layer ticklayer;
@@ -133,6 +137,8 @@ public class Level01 extends Level{
     private SpriteActor flyingSaucerActor;
     private SpriteActor crashedSaucerActor;
     private Animation crashedSaucerAnimation;
+    private SpriteActor cockpitBreakActor;
+    private Animation cockpitBreakAnimation;
 
     //Particles
     private ParticlesEffectBatchLayer particlesEffectBatchLayer;
@@ -238,12 +244,13 @@ public class Level01 extends Level{
                 ,flyingSaucerImageDef.regionHeight);
         flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
         flyingSaucerActor.setOriginCenter();
-        final SceneLoader.ImageDef crashedSaucerImageDef = this.levelResources.getImageDefinition(config.CRASHED_SAUCER_ID);
-        this.crashedSaucerActor = new SpriteActor(config.CRASHED_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(crashedSaucerImageDef.path, Texture.class))
-                ,crashedSaucerImageDef.regionX
-                ,crashedSaucerImageDef.regionY
-                ,crashedSaucerImageDef.regionWidth
-                ,crashedSaucerImageDef.regionHeight){
+        final SceneLoader.AnimationDef crashedSaucerAnimationDef = this.levelResources.getAnimationDefinition(config.CRASHED_SAUCER_ID);
+        this.crashedSaucerAnimation = this.levelResources.getAnimation(config.CRASHED_SAUCER_ID, this.assetManager);
+        this.crashedSaucerActor = new SpriteActor(config.CRASHED_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(crashedSaucerAnimationDef.path, Texture.class))
+                ,crashedSaucerAnimationDef.keyFrames[0].regionX
+                ,crashedSaucerAnimationDef.keyFrames[0].regionY
+                ,crashedSaucerAnimationDef.keyFrames[0].regionWidth
+                ,crashedSaucerAnimationDef.keyFrames[0].regionHeight){
 
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
@@ -251,9 +258,20 @@ public class Level01 extends Level{
                 return true;
             }
         };
-        crashedSaucerActor.setSize(crashedSaucerImageDef.width, crashedSaucerImageDef.height);
+        crashedSaucerActor.setSize(crashedSaucerAnimationDef.keyFrames[0].width, crashedSaucerAnimationDef.keyFrames[0].height);
         crashedSaucerActor.setOriginCenter();
-        this.crashedSaucerAnimation = this.levelResources.getAnimation(config.CRASHED_SAUCER_ID, this.assetManager);
+
+        final SceneLoader.AnimationDef cockpitBreakAnimationDef = this.levelResources.getAnimationDefinition(config.COCKPIT_BREAK_ID);
+        this.cockpitBreakAnimation = this.levelResources.getAnimation(config.COCKPIT_BREAK_ID, this.assetManager);
+        this.cockpitBreakActor = new SpriteActor(config.COCKPIT_BREAK_ID.hashCode(), new TextureSet(this.assetManager.get(cockpitBreakAnimationDef.path, Texture.class))
+                ,cockpitBreakAnimationDef.keyFrames[0].regionX
+                ,cockpitBreakAnimationDef.keyFrames[0].regionY
+                ,cockpitBreakAnimationDef.keyFrames[0].regionWidth
+                ,cockpitBreakAnimationDef.keyFrames[0].regionHeight);
+        cockpitBreakActor.setSize(cockpitBreakAnimationDef.keyFrames[0].width, cockpitBreakAnimationDef.keyFrames[0].height);
+        cockpitBreakActor.setPosition(config.COCKPIT_BREAK[0],config.COCKPIT_BREAK[1]);
+        cockpitBreakActor.setOriginCenter();
+
         Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
@@ -358,6 +376,7 @@ public class Level01 extends Level{
 
         this.flyingSaucerActor.dispose();
         this.crashedSaucerActor.dispose();
+        this.cockpitBreakActor.dispose();
         this.flyingSaucerParticlesActor.dispose();
         this.flyingSaucerParticlesEffect.dispose();
         this.crashedSaucerParticlesActor.dispose();
@@ -381,6 +400,7 @@ public class Level01 extends Level{
         this.flyingSaucerActor = null;
         this.crashedSaucerActor = null;
         this.crashedSaucerAnimation = null;
+        this.cockpitBreakAnimation = null;
         this.flyingSaucerParticlesActor = null;
         this.flyingSaucerParticlesEffect = null;
         this.crashedSaucerParticlesActor = null;
@@ -406,6 +426,7 @@ public class Level01 extends Level{
                 this.titleFontActor.getBitmapFont().getColor().a = 0f;
                 this.bitmapFontBatchLayer.addActor(this.titleFontActor);
                 this.bitmapFontBatchLayer.show();
+                this.helpLayer.hide();
                 state = STATE_TITLE;
                 this.tick(0);
                 break;
@@ -538,6 +559,8 @@ public class Level01 extends Level{
                 }
                 else{
                     this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
+                    this.saucerLayer.addActor(this.cockpitBreakActor);
+                    this.cockitBreakCounter = 0;
                     pauseCounter = 3;
                     state = STATE_TOUCH_TUTORIAL;
                 }
@@ -545,6 +568,7 @@ public class Level01 extends Level{
             case STATE_TOUCH_TUTORIAL :
                 if(time > config.TOUCH_HELPER_START ){
                     if(this.pauseCounter == 3 ) {
+                        this.helpLayer.show();
                         this.helpLayer.addActor(this.touchHelperActor);
                         this.touchDispatcher.addListener(this.crashedSaucerActor);
                     }
@@ -556,6 +580,7 @@ public class Level01 extends Level{
                 break;
             case STATE_TILT_TUTORIAL :
                 if(this.pauseCounter == 3 ) {
+                    this.helpLayer.show();
                     this.helpLayer.addActor(this.tiltHelperActor);
                 }
                 else if(this.pauseCounter == 0 ) {
@@ -568,7 +593,17 @@ public class Level01 extends Level{
     }
 
     private void onTouchSaucer(){
-
+        final TextureRegion cockpitBreakRegion = this.cockpitBreakAnimation.getKeyFrames()[++this.cockitBreakCounter];
+        this.cockpitBreakActor.setRegion(cockpitBreakRegion.getRegionX(), cockpitBreakRegion.getRegionY(), cockpitBreakRegion.getRegionWidth(), cockpitBreakRegion.getRegionHeight());
+        if(this.cockitBreakCounter == config.COCKPIT_BREAK_COUNT) {
+            this.touchDispatcher.removeListener(this.crashedSaucerActor);
+            Timer.schedule(new Timer.Task() {
+                @Override
+                public void run() {
+                    state = STATE_TILT_TUTORIAL;
+                }
+            },config.TILT_HELPER_START);
+        }
     }
 
     @Override
@@ -577,12 +612,14 @@ public class Level01 extends Level{
             case STATE_TOUCH_TUTORIAL :
                 Runtime.getInstance().resume();
                 this.helpLayer.removeActor(this.touchHelperActor);
+                this.helpLayer.hide();
                 pauseCounter = 3;
                 state = STATE_PLAY;
                 break;
             case STATE_TILT_TUTORIAL :
                 Runtime.getInstance().resume();
                 this.helpLayer.removeActor(this.tiltHelperActor);
+                this.helpLayer.hide();
                 state = STATE_PLAY;
                 break;
         }

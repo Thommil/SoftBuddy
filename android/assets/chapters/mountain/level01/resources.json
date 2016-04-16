@@ -433,20 +433,6 @@
 			"body": -1,
 			"x": 0,
 			"y": 0,
-			"width" : 1.2,
-			"height" : 3,
-			"regionX" : 13,
-			"regionY" : 11,
-			"regionWidth" : 243,
-			"regionHeight" : 313,
-			"file" : "chapters/mountain/level01/main.png",
-			"name" : "crashed_saucer"
-
-		},
-		{
-			"body": -1,
-			"x": 0,
-			"y": 0,
 			"width" : 2.0,
 			"height" : 0.6,
 			"regionX" : 40,
@@ -520,6 +506,14 @@
 			"frameDuration" :  0.1,
 			"keyFrames" : [
 				{
+					"width" : 1.2,
+					"height" : 3,
+					"regionX" : 13,
+					"regionY" : 11,
+					"regionWidth" : 243,
+					"regionHeight" : 313
+				},
+				{
 					"regionX" : 254,
 					"regionY" : 11,
 					"regionWidth" : 243,
@@ -530,6 +524,40 @@
 					"regionY" : 11,
 					"regionWidth" : 242,
 					"regionHeight" : 313
+				}
+			]
+		},
+		{
+			"name": "cockpit_break",
+			"file" : "chapters/mountain/level01/main.png",
+			"playMode" : "NORMAL",
+			"frameDuration" :  0,
+			"keyFrames" : [
+				{
+					"width" : 1,
+					"height" : 1,
+					"regionX" : 940,
+					"regionY" : 0,
+					"regionWidth" : 75,
+					"regionHeight" : 75
+				},
+				{
+					"regionX" : 850,
+					"regionY" : 20,
+					"regionWidth" : 75,
+					"regionHeight" : 75
+				},
+				{
+					"regionX" : 850,
+					"regionY" : 100,
+					"regionWidth" : 75,
+					"regionHeight" : 75
+				},
+				{
+					"regionX" : 850,
+					"regionY" : 175,
+					"regionWidth" : 75,
+					"regionHeight" : 75
 				}
 			]
 		}
