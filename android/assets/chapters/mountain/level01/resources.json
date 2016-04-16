@@ -484,6 +484,20 @@
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "touch_helper"
 
+		},
+		{
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 2.0,
+			"height" : 2.0,
+			"regionX" : 27,
+			"regionY" : 346,
+			"regionWidth" : 129,
+			"regionHeight" : 140,
+			"file" : "chapters/mountain/level01/main.png",
+			"name" : "tilt_helper"
+
 		}
 	],
 	"particles_effect" :

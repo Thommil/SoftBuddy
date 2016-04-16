@@ -43,7 +43,8 @@ public class Level01 extends Level{
         public String FOREGROUND_ID = "foreground";
         public String FLYING_SAUCER_ID = "flying_saucer";
         public String CRASHED_SAUCER_ID = "crashed_saucer";
-        public String TILT_HELP_ID = "touch_helper";
+        public String TOUCH_HELP_ID = "touch_helper";
+        public String TILT_HELP_ID = "tilt_helper";
 
         public float TITLE_FADE_START = 2f;
         public float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
@@ -80,8 +81,7 @@ public class Level01 extends Level{
         public float[] SAUCER_CRASH_PARTICLES = new float[]{SAUCER_CRASH_BOTTOM[0] + 0.5f, SAUCER_CRASH_BOTTOM[1] + 1.5f, 0.01f, 0f, 20f};
         public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.2f;
 
-        public float PLAY_START = SAUCER_CRASH_END + 3f;
-        public float[] TOUCH_HELPER_POSITION = new float[]{SAUCER_CRASH_BOTTOM[0] + 0f, SAUCER_CRASH_BOTTOM[1]+ 0.5f};
+        public float TOUCH_HELPER_START = SAUCER_CRASH_END + 3f;
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
@@ -97,7 +97,9 @@ public class Level01 extends Level{
     private static final int STATE_SAUCER_FLY = 3;
     private static final int STATE_SUNRISE = 4;
     private static final int STATE_SAUCER_CRASH = 5;
-    private static final int STATE_PLAY = 6;
+    private static final int STATE_TOUCH_TUTORIAL = 6;
+    private static final int STATE_TILT_TUTORIAL = 7;
+    private static final int STATE_PLAY = 8;
 
     private Config config;
 
@@ -109,8 +111,7 @@ public class Level01 extends Level{
     private int state;
 
     private Vector2 tmpVector;
-    private boolean pauseAsked = false;
-    private boolean mustPause = false;
+    private int pauseCounter = 0;
 
     //Tick
     private Layer ticklayer;
@@ -145,6 +146,7 @@ public class Level01 extends Level{
     private BitmapFontActor titleFontActor;
     private SpriteBatchLayer helpLayer;
     private StaticActor touchHelperActor;
+    private StaticActor tiltHelperActor;
 
     //Events
     private TouchDispatcher touchDispatcher;
@@ -188,17 +190,7 @@ public class Level01 extends Level{
 
             @Override
             public void render(float deltaTime) {
-                if(Level01.this.pauseAsked){
-                    Level01.this.pauseAsked = false;
-                    Level01.this.mustPause = true;
-                }
-                else if(Level01.this.mustPause){
-                    Runtime.getInstance().pause();
-                    Level01.this.mustPause = false;
-                }
-                if(state != STATE_PLAY) {
-                    tick(deltaTime);
-                }
+                tick(deltaTime);
             }
 
             @Override public void dispose() {}
@@ -305,17 +297,29 @@ public class Level01 extends Level{
 
     private void buildHUD(){
         this.helpLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(), 1);
-        final SceneLoader.ImageDef helperImageDef = this.levelResources.getImageDefinition(config.TILT_HELP_ID);
-        this.touchHelperActor = new StaticActor(config.TILT_HELP_ID.hashCode()
-                ,new TextureSet(this.assetManager.get(helperImageDef.path, Texture.class))
-                ,config.TOUCH_HELPER_POSITION[0]
-                ,config.TOUCH_HELPER_POSITION[1]
-                ,helperImageDef.width
-                ,helperImageDef.height
-                ,helperImageDef.regionX
-                ,helperImageDef.regionY
-                ,helperImageDef.regionWidth
-                ,helperImageDef.regionHeight
+        final SceneLoader.ImageDef touchHelperImageDef = this.levelResources.getImageDefinition(config.TILT_HELP_ID);
+        this.touchHelperActor = new StaticActor(config.TOUCH_HELP_ID.hashCode()
+                ,new TextureSet(this.assetManager.get(touchHelperImageDef.path, Texture.class))
+                ,-touchHelperImageDef.width/2
+                ,-touchHelperImageDef.height/2
+                ,touchHelperImageDef.width
+                ,touchHelperImageDef.height
+                ,touchHelperImageDef.regionX
+                ,touchHelperImageDef.regionY
+                ,touchHelperImageDef.regionWidth
+                ,touchHelperImageDef.regionHeight
+                ,Color.WHITE.toFloatBits());
+        final SceneLoader.ImageDef tiltHelperImageDef = this.levelResources.getImageDefinition(config.TILT_HELP_ID);
+        this.tiltHelperActor = new StaticActor(config.TILT_HELP_ID.hashCode()
+                ,new TextureSet(this.assetManager.get(tiltHelperImageDef.path, Texture.class))
+                ,-tiltHelperImageDef.width/2
+                ,-tiltHelperImageDef.height/2
+                ,tiltHelperImageDef.width
+                ,tiltHelperImageDef.height
+                ,tiltHelperImageDef.regionX
+                ,tiltHelperImageDef.regionY
+                ,tiltHelperImageDef.regionWidth
+                ,tiltHelperImageDef.regionHeight
                 ,Color.WHITE.toFloatBits());
         Runtime.getInstance().addLayer(this.helpLayer);
 
@@ -358,6 +362,8 @@ public class Level01 extends Level{
         this.flyingSaucerParticlesEffect.dispose();
         this.crashedSaucerParticlesActor.dispose();
         this.crashedSaucerParticlesEffect.dispose();
+        this.touchHelperActor.dispose();
+        this.tiltHelperActor.dispose();
         this.backgroundOffScreenRenderer.dispose();
         this.foregroundOffScreenRenderer.dispose();
         this.introRenderer.dispose();
@@ -379,6 +385,8 @@ public class Level01 extends Level{
         this.flyingSaucerParticlesEffect = null;
         this.crashedSaucerParticlesActor = null;
         this.crashedSaucerParticlesEffect = null;
+        this.touchHelperActor = null;
+        this.tiltHelperActor = null;
         this.introRenderer = null;
         this.backgroundOffScreenRenderer = null;
         this.foregroundOffScreenRenderer = null;
@@ -529,25 +537,56 @@ public class Level01 extends Level{
                     }
                 }
                 else{
-                    if(time > config.PLAY_START) {
-                        this.helpLayer.addActor(this.touchHelperActor);
-                        this.touchDispatcher.addListener(this.crashedSaucerActor);
-                        this.pauseAsked = true;
-                        state = STATE_PLAY;
-
-                    }
-                    else{
-                        this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
-                    }
+                    this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
+                    pauseCounter = 3;
+                    state = STATE_TOUCH_TUTORIAL;
                 }
                 break;
+            case STATE_TOUCH_TUTORIAL :
+                if(time > config.TOUCH_HELPER_START ){
+                    if(this.pauseCounter == 3 ) {
+                        this.helpLayer.addActor(this.touchHelperActor);
+                        this.touchDispatcher.addListener(this.crashedSaucerActor);
+                    }
+                    else if(this.pauseCounter == 0 ) {
+                        Runtime.getInstance().pause();
+                    }
+                    pauseCounter --;
+                }
+                break;
+            case STATE_TILT_TUTORIAL :
+                if(this.pauseCounter == 3 ) {
+                    this.helpLayer.addActor(this.tiltHelperActor);
+                }
+                else if(this.pauseCounter == 0 ) {
+                    Runtime.getInstance().pause();
+                }
+                pauseCounter --;
+                break;
+
         }
     }
 
     private void onTouchSaucer(){
-        if(Runtime.getInstance().isPaused()){
-            Runtime.getInstance().resume();
-        }
-        this.helpLayer.removeActor(this.touchHelperActor);
+
     }
+
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        switch (state){
+            case STATE_TOUCH_TUTORIAL :
+                Runtime.getInstance().resume();
+                this.helpLayer.removeActor(this.touchHelperActor);
+                pauseCounter = 3;
+                state = STATE_PLAY;
+                break;
+            case STATE_TILT_TUTORIAL :
+                Runtime.getInstance().resume();
+                this.helpLayer.removeActor(this.tiltHelperActor);
+                state = STATE_PLAY;
+                break;
+        }
+        return false;
+    }
+
 }

@@ -44,6 +44,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 
 	@Override
 	protected void onCreate(Settings settings) {
+		settings.graphics.clearScreen = false;
 		settings.viewport.type = Settings.Viewport.FILL;
 		final float screenRatio = (float)Gdx.graphics.getWidth() / (float)Gdx.graphics.getHeight();
 		// 4/3
