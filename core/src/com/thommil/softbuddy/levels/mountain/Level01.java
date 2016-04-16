@@ -2,6 +2,7 @@ package com.thommil.softbuddy.levels.mountain;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -22,10 +23,8 @@ import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
 import com.thommil.libgdx.runtime.events.TouchDispatcher;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
-import com.thommil.libgdx.runtime.layer.BitmapFontBatchLayer;
-import com.thommil.libgdx.runtime.layer.Layer;
-import com.thommil.libgdx.runtime.layer.ParticlesEffectBatchLayer;
-import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
+import com.thommil.libgdx.runtime.graphics.renderer.buffer.OffScreenRenderer;
+import com.thommil.libgdx.runtime.layer.*;
 import com.thommil.libgdx.runtime.tools.SceneLoader;
 import com.thommil.softbuddy.SharedResources;
 import com.thommil.softbuddy.SoftBuddyGameAPI;
@@ -121,7 +120,11 @@ public class Level01 extends Level{
 
     //Background & Foreground
     private SpriteBatchLayer backgroundLayer;
+    private OffScreenLayer<SpriteBatchLayer> backgroundOffScreenLayer;
     private SpriteBatchLayer foregroundLayer;
+    private OffScreenLayer<SpriteBatchLayer> foregroundOffScreenLayer;
+    private OffScreenRenderer backgroundOffScreenRenderer;
+    private OffScreenRenderer foregroundOffScreenRenderer;
     private IntroRenderer introRenderer;
 
     //Sprites
@@ -228,7 +231,9 @@ public class Level01 extends Level{
                 ,Color.WHITE.toFloatBits());
 
         this.backgroundLayer.addActor(backgroundActor);
-        Runtime.getInstance().addLayer(this.backgroundLayer);
+        this.backgroundOffScreenRenderer = new OffScreenRenderer(Runtime.getInstance().getViewport(), Pixmap.Format.RGBA4444,true,true);
+        this.backgroundOffScreenLayer = new OffScreenLayer<SpriteBatchLayer>(Runtime.getInstance().getViewport(),this.backgroundLayer, this.backgroundOffScreenRenderer);
+        Runtime.getInstance().addLayer(this.backgroundOffScreenLayer);
     }
 
     protected void buildForeground() {
@@ -285,7 +290,9 @@ public class Level01 extends Level{
         };
 
         this.foregroundLayer.addActor(foregroundStaticBodyActor);
-        Runtime.getInstance().addLayer(this.foregroundLayer);
+        this.foregroundOffScreenRenderer = new OffScreenRenderer(Runtime.getInstance().getViewport(), Pixmap.Format.RGBA4444,true,true);
+        this.foregroundOffScreenLayer = new OffScreenLayer<SpriteBatchLayer>(Runtime.getInstance().getViewport(),this.foregroundLayer, this.foregroundOffScreenRenderer);
+        Runtime.getInstance().addLayer(this.foregroundOffScreenLayer);
 
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),2);
         this.particlesEffectBatchLayer.setAdditive(true);
@@ -327,8 +334,8 @@ public class Level01 extends Level{
     public void dispose() {
         Runtime.getInstance().removeLayer(this.ticklayer);
         Runtime.getInstance().removeLayer(this.skyLayer);
-        Runtime.getInstance().removeLayer(this.foregroundLayer);
-        Runtime.getInstance().removeLayer(this.backgroundLayer);
+        Runtime.getInstance().removeLayer(this.foregroundOffScreenLayer);
+        Runtime.getInstance().removeLayer(this.backgroundOffScreenLayer);
         Runtime.getInstance().removeLayer(this.saucerLayer);
         Runtime.getInstance().removeLayer(this.particlesEffectBatchLayer);
         Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
@@ -337,7 +344,9 @@ public class Level01 extends Level{
         this.ticklayer.dispose(true);
         this.skyLayer.dispose(true);
         this.backgroundLayer.dispose(true);
+        this.backgroundOffScreenLayer.dispose();
         this.foregroundLayer.dispose(true);
+        this.foregroundOffScreenLayer.dispose();
         this.saucerLayer.dispose(true);
         this.particlesEffectBatchLayer.dispose(true);
         this.bitmapFontBatchLayer.dispose(true);
@@ -349,12 +358,16 @@ public class Level01 extends Level{
         this.flyingSaucerParticlesEffect.dispose();
         this.crashedSaucerParticlesActor.dispose();
         this.crashedSaucerParticlesEffect.dispose();
+        this.backgroundOffScreenRenderer.dispose();
+        this.foregroundOffScreenRenderer.dispose();
         this.introRenderer.dispose();
 
         this.ticklayer = null;
         this.skyLayer = null;
         this.backgroundLayer = null;
+        this.backgroundOffScreenLayer = null;
         this.foregroundLayer = null;
+        this.foregroundOffScreenLayer = null;
         this.saucerLayer = null;
         this.bitmapFontBatchLayer = null;
         this.helpLayer = null;
@@ -367,6 +380,8 @@ public class Level01 extends Level{
         this.crashedSaucerParticlesActor = null;
         this.crashedSaucerParticlesEffect = null;
         this.introRenderer = null;
+        this.backgroundOffScreenRenderer = null;
+        this.foregroundOffScreenRenderer = null;
         this.tmpVector = null;
         this.config = null;
         this.touchDispatcher = null;
@@ -376,6 +391,8 @@ public class Level01 extends Level{
         time += deltaTime;
         switch(state){
             case STATE_INIT :
+                this.backgroundOffScreenLayer.setOffScreenRendering(false);
+                this.foregroundOffScreenLayer.setOffScreenRendering(false);
                 this.introRenderer.setAmbiantColor(config.SAUCER_FLY_AMBIENT_COLOR[0],config.SAUCER_FLY_AMBIENT_COLOR[1],config.SAUCER_FLY_AMBIENT_COLOR[2]);
                 this.introRenderer.setLightColor(config.SAUCER_FLY_SPOT_COLOR[0],config.SAUCER_FLY_SPOT_COLOR[1],config.SAUCER_FLY_SPOT_COLOR[2]);
                 this.titleFontActor.getBitmapFont().getColor().a = 0f;
@@ -484,6 +501,8 @@ public class Level01 extends Level{
                     this.saucerLayer.addActor(this.crashedSaucerActor);
                     this.crashedSaucerActor.setPosition(-5.5f,-0.5f);
                     this.particlesEffectBatchLayer.addActor(this.crashedSaucerParticlesActor);
+                    this.backgroundOffScreenLayer.setOffScreenRendering(true);
+                    this.foregroundOffScreenLayer.setOffScreenRendering(true);
                     config.SAUCER_CRASH_PARTICLES[3] = 0f;
                     state = STATE_SAUCER_CRASH;
                     this.tick(0);
