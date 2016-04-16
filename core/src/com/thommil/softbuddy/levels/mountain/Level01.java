@@ -110,6 +110,8 @@ public class Level01 extends Level{
     private int state;
 
     private Vector2 tmpVector;
+    private boolean pauseAsked = false;
+    private boolean mustPause = false;
 
     //Tick
     private Layer ticklayer;
@@ -183,6 +185,14 @@ public class Level01 extends Level{
 
             @Override
             public void render(float deltaTime) {
+                if(Level01.this.pauseAsked){
+                    Level01.this.pauseAsked = false;
+                    Level01.this.mustPause = true;
+                }
+                else if(Level01.this.mustPause){
+                    Runtime.getInstance().pause();
+                    Level01.this.mustPause = false;
+                }
                 if(state != STATE_PLAY) {
                     tick(deltaTime);
                 }
@@ -501,10 +511,11 @@ public class Level01 extends Level{
                 }
                 else{
                     if(time > config.PLAY_START) {
-                        if(!this.helpLayer.listActors().contains(this.touchHelperActor,true)){
-                            this.helpLayer.addActor(this.touchHelperActor);
-                            this.touchDispatcher.addListener(this.crashedSaucerActor);
-                        }
+                        this.helpLayer.addActor(this.touchHelperActor);
+                        this.touchDispatcher.addListener(this.crashedSaucerActor);
+                        this.pauseAsked = true;
+                        state = STATE_PLAY;
+
                     }
                     else{
                         this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
@@ -515,7 +526,9 @@ public class Level01 extends Level{
     }
 
     private void onTouchSaucer(){
+        if(Runtime.getInstance().isPaused()){
+            Runtime.getInstance().resume();
+        }
         this.helpLayer.removeActor(this.touchHelperActor);
-        state = STATE_PLAY;
     }
 }
