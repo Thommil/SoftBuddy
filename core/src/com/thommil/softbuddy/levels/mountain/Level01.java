@@ -1,5 +1,6 @@
 package com.thommil.softbuddy.levels.mountain;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,11 +19,13 @@ import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
 import com.thommil.libgdx.runtime.actor.graphics.ParticleEffectActor;
 import com.thommil.libgdx.runtime.actor.graphics.SpriteActor;
 import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
+import com.thommil.libgdx.runtime.actor.physics.ParticleSystemActor;
 import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
 import com.thommil.libgdx.runtime.events.TouchDispatcher;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
 import com.thommil.libgdx.runtime.graphics.renderer.buffer.OffScreenRenderer;
+import com.thommil.libgdx.runtime.graphics.renderer.particles.TexturedParticlesBatchRenderer;
 import com.thommil.libgdx.runtime.layer.*;
 import com.thommil.libgdx.runtime.tools.SceneLoader;
 import com.thommil.softbuddy.SharedResources;
@@ -30,6 +33,8 @@ import com.thommil.softbuddy.SoftBuddyGameAPI;
 import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
 import com.thommil.softbuddy.levels.common.layers.SkyLayer;
+import com.thommil.softbuddy.levels.common.renderers.SoftBuddyRenderer;
+import com.thommil.softbuddy.levels.mountain.actors.SoftBuddyActor;
 import com.thommil.softbuddy.levels.mountain.renderers.IntroRenderer;
 
 public class Level01 extends Level{
@@ -45,6 +50,7 @@ public class Level01 extends Level{
         public String COCKPIT_BREAK_ID = "cockpit_break";
         public String TOUCH_HELP_ID = "touch_helper";
         public String TILT_HELP_ID = "tilt_helper";
+        public String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
 
         public float TITLE_FADE_START = 2f;
         public float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
@@ -86,6 +92,9 @@ public class Level01 extends Level{
         public float TOUCH_HELPER_START = SAUCER_CRASH_END + 3f;
         public float TILT_HELPER_START = 1f;
 
+        public int SOFTBUDDY_MAX_PARTICLES = 400;
+        public float[] SOFTBUDDY_PARTICLES_SIZE = new float[]{0.05f,2f};
+
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
             public float apply(float a) {
@@ -94,15 +103,14 @@ public class Level01 extends Level{
         };
     }
 
-    private static final int STATE_INIT = 0;
-    private static final int STATE_TITLE = 1;
-    private static final int STATE_SCROLL_DOWN = 2;
-    private static final int STATE_SAUCER_FLY = 3;
-    private static final int STATE_SUNRISE = 4;
-    private static final int STATE_SAUCER_CRASH = 5;
-    private static final int STATE_TOUCH_TUTORIAL = 6;
-    private static final int STATE_TILT_TUTORIAL = 7;
-    private static final int STATE_PLAY = 8;
+    private static final int STATE_TITLE = 0;
+    private static final int STATE_SCROLL_DOWN = 1;
+    private static final int STATE_SAUCER_FLY = 2;
+    private static final int STATE_SUNRISE = 3;
+    private static final int STATE_SAUCER_CRASH = 4;
+    private static final int STATE_TOUCH_TUTORIAL = 5;
+    private static final int STATE_TILT_TUTORIAL = 6;
+    private static final int STATE_PLAY = 7;
 
     private Config config;
 
@@ -140,6 +148,13 @@ public class Level01 extends Level{
     private SpriteActor cockpitBreakActor;
     private Animation cockpitBreakAnimation;
 
+    //ParticleSystem
+    private ParticlesBatchLayer softBuddyLayer;
+    private OffScreenLayer<ParticlesBatchLayer> softBuddyOffScreenLayer;
+    private TexturedParticlesBatchRenderer softBuddyParticlesRenderer;
+    private SoftBuddyRenderer softBuddyRenderer;
+    private SoftBuddyActor softBuddyActor;
+
     //Particles
     private ParticlesEffectBatchLayer particlesEffectBatchLayer;
     private ParticleEffectActor flyingSaucerParticlesActor;
@@ -164,9 +179,16 @@ public class Level01 extends Level{
 
     @Override
     public void reset() {
-        this.state = STATE_INIT;
         this.time = 0;
-        this.tick(0);
+        this.backgroundOffScreenLayer.setOffScreenRendering(false);
+        this.foregroundOffScreenLayer.setOffScreenRendering(false);
+        this.introRenderer.setAmbiantColor(config.SAUCER_FLY_AMBIENT_COLOR[0],config.SAUCER_FLY_AMBIENT_COLOR[1],config.SAUCER_FLY_AMBIENT_COLOR[2]);
+        this.introRenderer.setLightColor(config.SAUCER_FLY_SPOT_COLOR[0],config.SAUCER_FLY_SPOT_COLOR[1],config.SAUCER_FLY_SPOT_COLOR[2]);
+        this.titleFontActor.getBitmapFont().getColor().a = 0f;
+        this.bitmapFontBatchLayer.addActor(this.titleFontActor);
+        this.bitmapFontBatchLayer.show();
+        this.helpLayer.hide();
+        state = STATE_TITLE;
     }
 
     @Override
@@ -274,6 +296,16 @@ public class Level01 extends Level{
 
         Runtime.getInstance().addLayer(this.saucerLayer);
 
+        final SceneLoader.ImageDef softBuddyParticleImageDef = this.chapterResources.getImageDefinition(config.SOFTBUFFY_PARTICLE_ID);
+        this.softBuddyParticlesRenderer = new TexturedParticlesBatchRenderer(config.SOFTBUDDY_MAX_PARTICLES);
+        this.softBuddyLayer = new ParticlesBatchLayer(Runtime.getInstance().getViewport(),1, this.softBuddyParticlesRenderer);
+        this.softBuddyActor = new SoftBuddyActor(config.SOFTBUFFY_PARTICLE_ID.hashCode(), config.SOFTBUDDY_PARTICLES_SIZE[0], new TextureSet(new Texture(Gdx.files.internal(softBuddyParticleImageDef.path))));
+        this.softBuddyLayer.addActor(this.softBuddyActor);
+        this.softBuddyLayer.setScaleFactor(config.SOFTBUDDY_PARTICLES_SIZE[1]);
+        this.softBuddyRenderer = new SoftBuddyRenderer(Runtime.getInstance().getViewport());
+        this.softBuddyOffScreenLayer = new OffScreenLayer<ParticlesBatchLayer>(Runtime.getInstance().getViewport(),this.softBuddyLayer,this.softBuddyRenderer);
+        Runtime.getInstance().addLayer(this.softBuddyOffScreenLayer);
+
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
         final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(config.FOREGROUND_ID);
         final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(config.FOREGROUND_ID);
@@ -357,6 +389,7 @@ public class Level01 extends Level{
         Runtime.getInstance().removeLayer(this.ticklayer);
         Runtime.getInstance().removeLayer(this.skyLayer);
         Runtime.getInstance().removeLayer(this.foregroundOffScreenLayer);
+        Runtime.getInstance().removeLayer(this.softBuddyOffScreenLayer);
         Runtime.getInstance().removeLayer(this.backgroundOffScreenLayer);
         Runtime.getInstance().removeLayer(this.saucerLayer);
         Runtime.getInstance().removeLayer(this.particlesEffectBatchLayer);
@@ -367,6 +400,8 @@ public class Level01 extends Level{
         this.skyLayer.dispose(true);
         this.backgroundLayer.dispose(true);
         this.backgroundOffScreenLayer.dispose();
+        this.softBuddyOffScreenLayer.dispose(true);
+        this.softBuddyLayer.dispose(true);
         this.foregroundLayer.dispose(true);
         this.foregroundOffScreenLayer.dispose();
         this.saucerLayer.dispose(true);
@@ -383,6 +418,9 @@ public class Level01 extends Level{
         this.crashedSaucerParticlesEffect.dispose();
         this.touchHelperActor.dispose();
         this.tiltHelperActor.dispose();
+        this.softBuddyActor.dispose();
+        this.softBuddyRenderer.dispose();
+        this.softBuddyParticlesRenderer.dispose();
         this.backgroundOffScreenRenderer.dispose();
         this.foregroundOffScreenRenderer.dispose();
         this.introRenderer.dispose();
@@ -391,6 +429,8 @@ public class Level01 extends Level{
         this.skyLayer = null;
         this.backgroundLayer = null;
         this.backgroundOffScreenLayer = null;
+        this.softBuddyLayer = null;
+        this.softBuddyOffScreenLayer = null;
         this.foregroundLayer = null;
         this.foregroundOffScreenLayer = null;
         this.saucerLayer = null;
@@ -407,7 +447,10 @@ public class Level01 extends Level{
         this.crashedSaucerParticlesEffect = null;
         this.touchHelperActor = null;
         this.tiltHelperActor = null;
+        this.softBuddyActor = null;
         this.introRenderer = null;
+        this.softBuddyRenderer = null;
+        this.softBuddyParticlesRenderer = null;
         this.backgroundOffScreenRenderer = null;
         this.foregroundOffScreenRenderer = null;
         this.tmpVector = null;
@@ -418,18 +461,6 @@ public class Level01 extends Level{
     public void tick(float deltaTime){
         time += deltaTime;
         switch(state){
-            case STATE_INIT :
-                this.backgroundOffScreenLayer.setOffScreenRendering(false);
-                this.foregroundOffScreenLayer.setOffScreenRendering(false);
-                this.introRenderer.setAmbiantColor(config.SAUCER_FLY_AMBIENT_COLOR[0],config.SAUCER_FLY_AMBIENT_COLOR[1],config.SAUCER_FLY_AMBIENT_COLOR[2]);
-                this.introRenderer.setLightColor(config.SAUCER_FLY_SPOT_COLOR[0],config.SAUCER_FLY_SPOT_COLOR[1],config.SAUCER_FLY_SPOT_COLOR[2]);
-                this.titleFontActor.getBitmapFont().getColor().a = 0f;
-                this.bitmapFontBatchLayer.addActor(this.titleFontActor);
-                this.bitmapFontBatchLayer.show();
-                this.helpLayer.hide();
-                state = STATE_TITLE;
-                this.tick(0);
-                break;
             case STATE_TITLE :
                 if(time < config.TITLE_FADE_START){
                     final float fadeTime = 1f - ((config.TITLE_FADE_START - time) / config.TITLE_FADE_START);
@@ -588,7 +619,15 @@ public class Level01 extends Level{
                 }
                 pauseCounter --;
                 break;
+            case STATE_PLAY:
+                Runtime.getInstance().runOnPhysicsThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Level01.this.softBuddyActor.createParticle(config.SAUCER_CRASH_BOTTOM[0]+1f, config.SAUCER_CRASH_BOTTOM[1]+2f,5f,0);
+                    }
+                });
 
+                break;
         }
     }
 

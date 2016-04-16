@@ -8,6 +8,7 @@ public class Mountain extends Chapter {
 
     private static final String RESOURCES_FILE = "chapters/mountain/resources.json";
 
+
     @Override
     public String getResourcesPath() {
         return RESOURCES_FILE;
