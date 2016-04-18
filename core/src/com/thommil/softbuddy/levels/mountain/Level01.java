@@ -19,7 +19,6 @@ import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
 import com.thommil.libgdx.runtime.actor.graphics.ParticleEffectActor;
 import com.thommil.libgdx.runtime.actor.graphics.SpriteActor;
 import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
-import com.thommil.libgdx.runtime.actor.physics.ParticleSystemActor;
 import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
 import com.thommil.libgdx.runtime.events.TouchDispatcher;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
@@ -46,10 +45,7 @@ public class Level01 extends Level{
         public String BACKGROUND_ID = "background";
         public String FOREGROUND_ID = "foreground";
         public String FLYING_SAUCER_ID = "flying_saucer";
-        public String CRASHED_SAUCER_ID = "crashed_saucer";
-        public String COCKPIT_BREAK_ID = "cockpit_break";
-        public String TOUCH_HELP_ID = "touch_helper";
-        public String TILT_HELP_ID = "tilt_helper";
+        public String LANDING_SAUCER_ID = "landing_saucer";
         public String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
 
         public float TITLE_FADE_START = 2f;
@@ -80,20 +76,14 @@ public class Level01 extends Level{
         public float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
         public float SUNRISE_END = SUNRISE_START + 10f;
 
-        public float SAUCER_CRASH_START = SUNRISE_END;
-        public float[] SAUCER_CRASH_TOP = new float[]{-7f, 8f};
-        public float[] SAUCER_CRASH_BOTTOM = new float[]{-5.5f, -0.5f};
-        public float SAUCER_CRASH_ANIMATION_START = SAUCER_CRASH_START + 0.1f;
-        public float[] SAUCER_CRASH_PARTICLES = new float[]{SAUCER_CRASH_BOTTOM[0] + 0.5f, SAUCER_CRASH_BOTTOM[1] + 1.5f, 0.01f, 0f, 20f};
-        public float[] COCKPIT_BREAK = new float[]{SAUCER_CRASH_BOTTOM[0] + 0.2f, SAUCER_CRASH_BOTTOM[1] + 1.5f};
-        public int COCKPIT_BREAK_COUNT = 3;
-        public float SAUCER_CRASH_END = SAUCER_CRASH_START + 0.2f;
-
-        public float TOUCH_HELPER_START = SAUCER_CRASH_END + 3f;
-        public float TILT_HELPER_START = 1f;
+        public float SAUCER_LANDING_START = SUNRISE_END;
+        public float[] SAUCER_LANDING_TOP = new float[]{-0.5f, 6f};
+        public float[] SAUCER_LANDING_BOTTOM = new float[]{-0.5f, 0.5f};
+        public float SAUCER_LANDING_END = SAUCER_LANDING_START + 3f;
 
         public int SOFTBUDDY_MAX_PARTICLES = 400;
-        public float[] SOFTBUDDY_PARTICLES_SIZE = new float[]{0.05f,2f};
+        public float[] SOFTBUDDY_GROUP = new float[]{SAUCER_LANDING_BOTTOM[0] + 1.5f, SAUCER_LANDING_BOTTOM[1] + 1.5f , 1.5f , 1.5f};
+        public float[] SOFTBUDDY_PARTICLES_SIZE = new float[]{0.04f,2f};
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
@@ -107,10 +97,8 @@ public class Level01 extends Level{
     private static final int STATE_SCROLL_DOWN = 1;
     private static final int STATE_SAUCER_FLY = 2;
     private static final int STATE_SUNRISE = 3;
-    private static final int STATE_SAUCER_CRASH = 4;
-    private static final int STATE_TOUCH_TUTORIAL = 5;
-    private static final int STATE_TILT_TUTORIAL = 6;
-    private static final int STATE_PLAY = 7;
+    private static final int STATE_SAUCER_LANDING = 4;
+    private static final int STATE_PLAY = 5;
 
     private Config config;
 
@@ -122,8 +110,6 @@ public class Level01 extends Level{
     private int state;
 
     private Vector2 tmpVector;
-    private int pauseCounter = 0;
-    private int cockitBreakCounter = 0;
 
     //Tick
     private Layer ticklayer;
@@ -143,10 +129,7 @@ public class Level01 extends Level{
     //Sprites
     private SpriteBatchLayer saucerLayer;
     private SpriteActor flyingSaucerActor;
-    private SpriteActor crashedSaucerActor;
-    private Animation crashedSaucerAnimation;
-    private SpriteActor cockpitBreakActor;
-    private Animation cockpitBreakAnimation;
+    private SpriteActor landingSaucerActor;
 
     //ParticleSystem
     private ParticlesBatchLayer softBuddyLayer;
@@ -159,18 +142,13 @@ public class Level01 extends Level{
     private ParticlesEffectBatchLayer particlesEffectBatchLayer;
     private ParticleEffectActor flyingSaucerParticlesActor;
     private ParticleEffect flyingSaucerParticlesEffect;
-    private ParticleEffectActor crashedSaucerParticlesActor;
-    private ParticleEffect crashedSaucerParticlesEffect;
 
     //HUD
     private BitmapFontBatchLayer bitmapFontBatchLayer;
     private BitmapFontActor titleFontActor;
-    private SpriteBatchLayer helpLayer;
-    private StaticActor touchHelperActor;
-    private StaticActor tiltHelperActor;
 
     //Events
-    private TouchDispatcher touchDispatcher;
+    //private TouchDispatcher touchDispatcher;
 
     @Override
     public String getResourcesPath() {
@@ -187,13 +165,12 @@ public class Level01 extends Level{
         this.titleFontActor.getBitmapFont().getColor().a = 0f;
         this.bitmapFontBatchLayer.addActor(this.titleFontActor);
         this.bitmapFontBatchLayer.show();
-        this.helpLayer.hide();
         state = STATE_TITLE;
     }
 
     @Override
     public void start() {
-        this.touchDispatcher.bind();
+        //this.touchDispatcher.bind();
     }
 
     @Override
@@ -206,7 +183,7 @@ public class Level01 extends Level{
     protected void build() {
         this.config = new Config();
         this.tmpVector = new Vector2();
-        this.touchDispatcher = new TouchDispatcher(Runtime.getInstance().getViewport());
+        //this.touchDispatcher = new TouchDispatcher(Runtime.getInstance().getViewport());
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
         this.levelWorldHeight = Runtime.getInstance().getSettings().viewport.height * 2;
         this.ticklayer = new Layer(Runtime.getInstance().getViewport(),0) {
@@ -257,45 +234,6 @@ public class Level01 extends Level{
     }
 
     protected void buildForeground() {
-        this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
-        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(config.FLYING_SAUCER_ID);
-        this.flyingSaucerActor = new SpriteActor(config.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
-                ,flyingSaucerImageDef.regionX
-                ,flyingSaucerImageDef.regionY
-                ,flyingSaucerImageDef.regionWidth
-                ,flyingSaucerImageDef.regionHeight);
-        flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
-        flyingSaucerActor.setOriginCenter();
-        final SceneLoader.AnimationDef crashedSaucerAnimationDef = this.levelResources.getAnimationDefinition(config.CRASHED_SAUCER_ID);
-        this.crashedSaucerAnimation = this.levelResources.getAnimation(config.CRASHED_SAUCER_ID, this.assetManager);
-        this.crashedSaucerActor = new SpriteActor(config.CRASHED_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(crashedSaucerAnimationDef.path, Texture.class))
-                ,crashedSaucerAnimationDef.keyFrames[0].regionX
-                ,crashedSaucerAnimationDef.keyFrames[0].regionY
-                ,crashedSaucerAnimationDef.keyFrames[0].regionWidth
-                ,crashedSaucerAnimationDef.keyFrames[0].regionHeight){
-
-            @Override
-            public boolean onTouchDown(float worldX, float worldY, int button) {
-                onTouchSaucer();
-                return true;
-            }
-        };
-        crashedSaucerActor.setSize(crashedSaucerAnimationDef.keyFrames[0].width, crashedSaucerAnimationDef.keyFrames[0].height);
-        crashedSaucerActor.setOriginCenter();
-
-        final SceneLoader.AnimationDef cockpitBreakAnimationDef = this.levelResources.getAnimationDefinition(config.COCKPIT_BREAK_ID);
-        this.cockpitBreakAnimation = this.levelResources.getAnimation(config.COCKPIT_BREAK_ID, this.assetManager);
-        this.cockpitBreakActor = new SpriteActor(config.COCKPIT_BREAK_ID.hashCode(), new TextureSet(this.assetManager.get(cockpitBreakAnimationDef.path, Texture.class))
-                ,cockpitBreakAnimationDef.keyFrames[0].regionX
-                ,cockpitBreakAnimationDef.keyFrames[0].regionY
-                ,cockpitBreakAnimationDef.keyFrames[0].regionWidth
-                ,cockpitBreakAnimationDef.keyFrames[0].regionHeight);
-        cockpitBreakActor.setSize(cockpitBreakAnimationDef.keyFrames[0].width, cockpitBreakAnimationDef.keyFrames[0].height);
-        cockpitBreakActor.setPosition(config.COCKPIT_BREAK[0],config.COCKPIT_BREAK[1]);
-        cockpitBreakActor.setOriginCenter();
-
-        Runtime.getInstance().addLayer(this.saucerLayer);
-
         final SceneLoader.ImageDef softBuddyParticleImageDef = this.chapterResources.getImageDefinition(config.SOFTBUFFY_PARTICLE_ID);
         this.softBuddyParticlesRenderer = new TexturedParticlesBatchRenderer(config.SOFTBUDDY_MAX_PARTICLES);
         this.softBuddyLayer = new ParticlesBatchLayer(Runtime.getInstance().getViewport(),1, this.softBuddyParticlesRenderer);
@@ -305,6 +243,27 @@ public class Level01 extends Level{
         this.softBuddyRenderer = new SoftBuddyRenderer(Runtime.getInstance().getViewport());
         this.softBuddyOffScreenLayer = new OffScreenLayer<ParticlesBatchLayer>(Runtime.getInstance().getViewport(),this.softBuddyLayer,this.softBuddyRenderer);
         Runtime.getInstance().addLayer(this.softBuddyOffScreenLayer);
+
+        this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
+        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(config.FLYING_SAUCER_ID);
+        this.flyingSaucerActor = new SpriteActor(config.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
+                ,flyingSaucerImageDef.regionX
+                ,flyingSaucerImageDef.regionY
+                ,flyingSaucerImageDef.regionWidth
+                ,flyingSaucerImageDef.regionHeight);
+        this.flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
+        this.flyingSaucerActor.setOriginCenter();
+
+        final SceneLoader.AnimationDef landingSaucerAnimationDef = this.levelResources.getAnimationDefinition(config.LANDING_SAUCER_ID);
+        this.landingSaucerActor = new SpriteActor(config.LANDING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(landingSaucerAnimationDef.path, Texture.class))
+                ,landingSaucerAnimationDef.keyFrames[0].regionX
+                ,landingSaucerAnimationDef.keyFrames[0].regionY
+                ,landingSaucerAnimationDef.keyFrames[0].regionWidth
+                ,landingSaucerAnimationDef.keyFrames[0].regionHeight);
+        this.landingSaucerActor.setSize(landingSaucerAnimationDef.keyFrames[0].width, landingSaucerAnimationDef.keyFrames[0].height);
+        this.landingSaucerActor.setOriginCenter();
+
+        Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
         final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(config.FOREGROUND_ID);
@@ -340,39 +299,10 @@ public class Level01 extends Level{
         this.particlesEffectBatchLayer.setAdditive(true);
         this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(config.FLYING_SAUCER_ID, this.assetManager);
         this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,100);
-        this.crashedSaucerParticlesEffect = this.levelResources.getParticleEffect(config.CRASHED_SAUCER_ID, this.assetManager);
-        this.crashedSaucerParticlesActor = new ParticleEffectActor(config.CRASHED_SAUCER_ID.hashCode(), this.crashedSaucerParticlesEffect,100);
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
 
     private void buildHUD(){
-        this.helpLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(), 1);
-        final SceneLoader.ImageDef touchHelperImageDef = this.levelResources.getImageDefinition(config.TILT_HELP_ID);
-        this.touchHelperActor = new StaticActor(config.TOUCH_HELP_ID.hashCode()
-                ,new TextureSet(this.assetManager.get(touchHelperImageDef.path, Texture.class))
-                ,-touchHelperImageDef.width/2
-                ,-touchHelperImageDef.height/2
-                ,touchHelperImageDef.width
-                ,touchHelperImageDef.height
-                ,touchHelperImageDef.regionX
-                ,touchHelperImageDef.regionY
-                ,touchHelperImageDef.regionWidth
-                ,touchHelperImageDef.regionHeight
-                ,Color.WHITE.toFloatBits());
-        final SceneLoader.ImageDef tiltHelperImageDef = this.levelResources.getImageDefinition(config.TILT_HELP_ID);
-        this.tiltHelperActor = new StaticActor(config.TILT_HELP_ID.hashCode()
-                ,new TextureSet(this.assetManager.get(tiltHelperImageDef.path, Texture.class))
-                ,-tiltHelperImageDef.width/2
-                ,-tiltHelperImageDef.height/2
-                ,tiltHelperImageDef.width
-                ,tiltHelperImageDef.height
-                ,tiltHelperImageDef.regionX
-                ,tiltHelperImageDef.regionY
-                ,tiltHelperImageDef.regionWidth
-                ,tiltHelperImageDef.regionHeight
-                ,Color.WHITE.toFloatBits());
-        Runtime.getInstance().addLayer(this.helpLayer);
-
         final SharedResources.LabelDef titleLableDef = this.softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
         this.titleFontActor = new BitmapFontActor(0, this.assetManager.get(titleLableDef.assetName, BitmapFont.class));
         titleFontActor.setText(this.chapterResources.getChapterDef().title);
@@ -394,7 +324,6 @@ public class Level01 extends Level{
         Runtime.getInstance().removeLayer(this.saucerLayer);
         Runtime.getInstance().removeLayer(this.particlesEffectBatchLayer);
         Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
-        Runtime.getInstance().removeLayer(this.helpLayer);
 
         this.ticklayer.dispose(true);
         this.skyLayer.dispose(true);
@@ -407,17 +336,11 @@ public class Level01 extends Level{
         this.saucerLayer.dispose(true);
         this.particlesEffectBatchLayer.dispose(true);
         this.bitmapFontBatchLayer.dispose(true);
-        this.helpLayer.dispose(true);
 
         this.flyingSaucerActor.dispose();
-        this.crashedSaucerActor.dispose();
-        this.cockpitBreakActor.dispose();
+        this.landingSaucerActor.dispose();
         this.flyingSaucerParticlesActor.dispose();
         this.flyingSaucerParticlesEffect.dispose();
-        this.crashedSaucerParticlesActor.dispose();
-        this.crashedSaucerParticlesEffect.dispose();
-        this.touchHelperActor.dispose();
-        this.tiltHelperActor.dispose();
         this.softBuddyActor.dispose();
         this.softBuddyRenderer.dispose();
         this.softBuddyParticlesRenderer.dispose();
@@ -435,18 +358,11 @@ public class Level01 extends Level{
         this.foregroundOffScreenLayer = null;
         this.saucerLayer = null;
         this.bitmapFontBatchLayer = null;
-        this.helpLayer = null;
 
         this.flyingSaucerActor = null;
-        this.crashedSaucerActor = null;
-        this.crashedSaucerAnimation = null;
-        this.cockpitBreakAnimation = null;
+        this.landingSaucerActor = null;
         this.flyingSaucerParticlesActor = null;
         this.flyingSaucerParticlesEffect = null;
-        this.crashedSaucerParticlesActor = null;
-        this.crashedSaucerParticlesEffect = null;
-        this.touchHelperActor = null;
-        this.tiltHelperActor = null;
         this.softBuddyActor = null;
         this.introRenderer = null;
         this.softBuddyRenderer = null;
@@ -455,7 +371,7 @@ public class Level01 extends Level{
         this.foregroundOffScreenRenderer = null;
         this.tmpVector = null;
         this.config = null;
-        this.touchDispatcher = null;
+        //this.touchDispatcher = null;
     }
 
     public void tick(float deltaTime){
@@ -558,111 +474,38 @@ public class Level01 extends Level{
                     }
                 }
                 else{
-                    this.saucerLayer.addActor(this.crashedSaucerActor);
-                    this.crashedSaucerActor.setPosition(-5.5f,-0.5f);
-                    this.particlesEffectBatchLayer.addActor(this.crashedSaucerParticlesActor);
                     this.backgroundOffScreenLayer.setOffScreenRendering(true);
                     this.foregroundOffScreenLayer.setOffScreenRendering(true);
-                    config.SAUCER_CRASH_PARTICLES[3] = 0f;
-                    state = STATE_SAUCER_CRASH;
+                    this.landingSaucerActor.setPosition(-1000,-1000);
+                    this.saucerLayer.addActor(this.landingSaucerActor);
+                    state = STATE_SAUCER_LANDING;
                     this.tick(0);
                 }
                 break;
-            case STATE_SAUCER_CRASH :
-                if(time <= config.SAUCER_CRASH_END) {
-                    if (time > config.SAUCER_CRASH_START) {
-                        final float delta = 1f - ((config.SAUCER_CRASH_END - time) / (config.SAUCER_CRASH_END - config.SAUCER_CRASH_START));
-                        this.tmpVector.x = Interpolation.linear.apply(config.SAUCER_CRASH_TOP[0], config.SAUCER_CRASH_BOTTOM[0], delta);
-                        this.tmpVector.y = Interpolation.linear.apply(config.SAUCER_CRASH_TOP[1], config.SAUCER_CRASH_BOTTOM[1], delta);
-
-                        if(time >= config.SAUCER_CRASH_ANIMATION_START){
-                            if(config.SAUCER_CRASH_PARTICLES[3] == 0f ) {
-                                for (int i = 0; i < config.SAUCER_CRASH_PARTICLES[4]; i++) {
-                                    this.crashedSaucerParticlesActor.spawn(true, config.SAUCER_CRASH_PARTICLES[0], config.SAUCER_CRASH_PARTICLES[1], false, false, config.SAUCER_CRASH_PARTICLES[2]);
-                                }
-                                config.SAUCER_CRASH_PARTICLES[3] = 1f;
-                            }
-                            final TextureRegion crashedSaucerRegion = this.crashedSaucerAnimation.getKeyFrame(1f - (config.SAUCER_CRASH_END - time));
-                            this.crashedSaucerActor.setRegion(crashedSaucerRegion.getRegionX(), crashedSaucerRegion.getRegionY(), crashedSaucerRegion.getRegionWidth(), crashedSaucerRegion.getRegionHeight());
-                        }
-                        this.crashedSaucerActor.setPosition(this.tmpVector.x, this.tmpVector.y);
+            case STATE_SAUCER_LANDING :
+                if(time <= config.SAUCER_LANDING_END) {
+                    if (time > config.SAUCER_LANDING_START) {
+                        final float delta = 1f - ((config.SAUCER_LANDING_END - time) / (config.SAUCER_LANDING_END - config.SAUCER_LANDING_START));
+                        this.tmpVector.x = config.SAUCER_LANDING_BOTTOM[0];
+                        this.tmpVector.y = Interpolation.fade.apply(config.SAUCER_LANDING_TOP[1], config.SAUCER_LANDING_BOTTOM[1], delta);
+                        this.landingSaucerActor.setPosition(this.tmpVector.x, this.tmpVector.y);
                     }
                 }
                 else{
-                    this.crashedSaucerActor.setPosition(config.SAUCER_CRASH_BOTTOM[0], config.SAUCER_CRASH_BOTTOM[1]);
-                    this.saucerLayer.addActor(this.cockpitBreakActor);
-                    this.cockitBreakCounter = 0;
-                    pauseCounter = 3;
-                    state = STATE_TOUCH_TUTORIAL;
+                    this.softBuddyActor.createGroup(config.SOFTBUDDY_GROUP[0],config.SOFTBUDDY_GROUP[1],config.SOFTBUDDY_GROUP[2],config.SOFTBUDDY_GROUP[3]);
+                    state = STATE_PLAY;
                 }
-                break;
-            case STATE_TOUCH_TUTORIAL :
-                if(time > config.TOUCH_HELPER_START ){
-                    if(this.pauseCounter == 3 ) {
-                        this.helpLayer.show();
-                        this.helpLayer.addActor(this.touchHelperActor);
-                        this.touchDispatcher.addListener(this.crashedSaucerActor);
-                    }
-                    else if(this.pauseCounter == 0 ) {
-                        Runtime.getInstance().pause();
-                    }
-                    pauseCounter --;
-                }
-                break;
-            case STATE_TILT_TUTORIAL :
-                if(this.pauseCounter == 3 ) {
-                    this.helpLayer.show();
-                    this.helpLayer.addActor(this.tiltHelperActor);
-                }
-                else if(this.pauseCounter == 0 ) {
-                    Runtime.getInstance().pause();
-                }
-                pauseCounter --;
                 break;
             case STATE_PLAY:
                 Runtime.getInstance().runOnPhysicsThread(new Runnable() {
                     @Override
                     public void run() {
-                        Level01.this.softBuddyActor.createParticle(config.SAUCER_CRASH_BOTTOM[0]+1f, config.SAUCER_CRASH_BOTTOM[1]+2f,5f,0);
+                        Level01.this.tmpVector.set(-Gdx.input.getPitch(), 0);
+                        Level01.this.softBuddyActor.getParticleGroup().applyForce(Level01.this.tmpVector);
+
                     }
                 });
-
                 break;
         }
     }
-
-    private void onTouchSaucer(){
-        final TextureRegion cockpitBreakRegion = this.cockpitBreakAnimation.getKeyFrames()[++this.cockitBreakCounter];
-        this.cockpitBreakActor.setRegion(cockpitBreakRegion.getRegionX(), cockpitBreakRegion.getRegionY(), cockpitBreakRegion.getRegionWidth(), cockpitBreakRegion.getRegionHeight());
-        if(this.cockitBreakCounter == config.COCKPIT_BREAK_COUNT) {
-            this.touchDispatcher.removeListener(this.crashedSaucerActor);
-            Timer.schedule(new Timer.Task() {
-                @Override
-                public void run() {
-                    state = STATE_TILT_TUTORIAL;
-                }
-            },config.TILT_HELPER_START);
-        }
-    }
-
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        switch (state){
-            case STATE_TOUCH_TUTORIAL :
-                Runtime.getInstance().resume();
-                this.helpLayer.removeActor(this.touchHelperActor);
-                this.helpLayer.hide();
-                pauseCounter = 3;
-                state = STATE_PLAY;
-                break;
-            case STATE_TILT_TUTORIAL :
-                Runtime.getInstance().resume();
-                this.helpLayer.removeActor(this.tiltHelperActor);
-                this.helpLayer.hide();
-                state = STATE_PLAY;
-                break;
-        }
-        return false;
-    }
-
 }

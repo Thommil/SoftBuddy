@@ -35,14 +35,11 @@ public class SoftBuddyRenderer extends OffScreenRenderer {
                 + "void main()\n"//
                 + "{\n" //
                 + "  vec4 color = texture2D("+ TextureSet.UNIFORM_TEXTURE_0+", v_texCoords);\n" //
-                + "  if( color.r < 0.15){\n" //
+                + "  if( color.r < 0.3){\n" //
                 + "     color = vec4(0,0,0,0);\n" //
                 + "  }\n" //
-                + "  else if( color.r < 0.5){\n" //
-                + "     color = vec4(1,1,1,0.5);\n" //
-                + "  }\n" //
                 + "  else{\n" //
-                + "     color = vec4(0.0,1.0,0.0,0.2);\n" //
+                + "     color = vec4(0.0,1.0,0.0,0.8);\n" //
                 + "  }\n" //
                 + "  gl_FragColor = color;\n" //
                 + "}";

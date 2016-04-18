@@ -442,48 +442,6 @@
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "flying_saucer_reactor"
 
-		},
-		{
-			"body": -1,
-			"x": 0,
-			"y": 0,
-			"width" : 2.0,
-			"height" : 0.6,
-			"regionX" : 40,
-			"regionY" : 500,
-			"regionWidth" : 412,
-			"regionHeight" : 125,
-			"file" : "chapters/mountain/level01/main.png",
-			"name" : "crashed_saucer_smoke"
-
-		},
-		{
-			"body": -1,
-			"x": 0,
-			"y": 0,
-			"width" : 2.0,
-			"height" : 2.0,
-			"regionX" : 27,
-			"regionY" : 346,
-			"regionWidth" : 129,
-			"regionHeight" : 140,
-			"file" : "chapters/mountain/level01/main.png",
-			"name" : "touch_helper"
-
-		},
-		{
-			"body": -1,
-			"x": 0,
-			"y": 0,
-			"width" : 2.0,
-			"height" : 2.0,
-			"regionX" : 27,
-			"regionY" : 346,
-			"regionWidth" : 129,
-			"regionHeight" : 140,
-			"file" : "chapters/mountain/level01/main.png",
-			"name" : "tilt_helper"
-
 		}
 	],
 	"particles_effect" :
@@ -491,76 +449,25 @@
 		{
 			"name": "flying_saucer",
 			"file": "chapters/mountain/level01/flying_saucer.p"
-		},
-		{
-			"name": "crashed_saucer",
-			"file": "chapters/mountain/level01/crashed_saucer.p"
 		}
 	],
 	"animation" :
 	[
 		{
-			"name": "crashed_saucer",
+			"name": "landing_saucer",
 			"file" : "chapters/mountain/level01/main.png",
 			"playMode" : "NORMAL",
 			"frameDuration" :  0.1,
 			"keyFrames" : [
 				{
-					"width" : 1.2,
+					"width" : 3,
 					"height" : 3,
 					"regionX" : 13,
 					"regionY" : 11,
 					"regionWidth" : 243,
 					"regionHeight" : 313
-				},
-				{
-					"regionX" : 254,
-					"regionY" : 11,
-					"regionWidth" : 243,
-					"regionHeight" : 313
-				},
-				{
-					"regionX" : 497,
-					"regionY" : 11,
-					"regionWidth" : 242,
-					"regionHeight" : 313
-				}
-			]
-		},
-		{
-			"name": "cockpit_break",
-			"file" : "chapters/mountain/level01/main.png",
-			"playMode" : "NORMAL",
-			"frameDuration" :  0,
-			"keyFrames" : [
-				{
-					"width" : 1,
-					"height" : 1,
-					"regionX" : 940,
-					"regionY" : 0,
-					"regionWidth" : 75,
-					"regionHeight" : 75
-				},
-				{
-					"regionX" : 850,
-					"regionY" : 20,
-					"regionWidth" : 75,
-					"regionHeight" : 75
-				},
-				{
-					"regionX" : 850,
-					"regionY" : 100,
-					"regionWidth" : 75,
-					"regionHeight" : 75
-				},
-				{
-					"regionX" : 850,
-					"regionY" : 175,
-					"regionWidth" : 75,
-					"regionHeight" : 75
 				}
 			]
 		}
-
 	]
 }
