@@ -16,6 +16,7 @@ public interface SoftBuddyGameAPI {
     float SAFE_WORLD_HEIGHT = 9;
 
     int SPRITE_BATCH_SIZE = 1000;
+    int PARTICLES_BATCH_SIZE = 4000;
 
     /**
      * Screens

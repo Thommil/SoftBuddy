@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.thommil.libgdx.runtime.Game;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.Settings;
+import com.thommil.libgdx.runtime.layer.ParticlesBatchLayer;
 import com.thommil.libgdx.runtime.layer.SpriteBatchLayer;
 import com.thommil.libgdx.runtime.tools.RuntimeProfiler;
 import com.thommil.softbuddy.levels.Chapter;
@@ -70,6 +71,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		settings.physics.enabled = true;
 
 		SpriteBatchLayer.setGlobalSize(SPRITE_BATCH_SIZE);
+		ParticlesBatchLayer.setGlobalSize(PARTICLES_BATCH_SIZE);
 
 		final FileHandleResolver resolver = new InternalFileHandleResolver();
 		this.getAssetManager().setLoader(FreeTypeFontGenerator.class, new FreeTypeFontGeneratorLoader(resolver));
