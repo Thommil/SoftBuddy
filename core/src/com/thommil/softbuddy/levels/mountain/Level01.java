@@ -77,8 +77,7 @@ public class Level01 extends Level{
         public float[] SAUCER_LANDING_BOTTOM = new float[]{-0.5f, 0.5f};
         public float SAUCER_LANDING_END = SAUCER_LANDING_START + 3f;
 
-        public int SOFTBUDDY_COUNT = 1000;
-        public float[] SOFTBUDDY_GROUP = new float[]{SAUCER_LANDING_BOTTOM[0] + 1.5f, SAUCER_LANDING_BOTTOM[1] + 1.5f , 1f};
+        public float[] SOFTBUDDY_GROUP = new float[]{SAUCER_LANDING_BOTTOM[0] + 1.5f, SAUCER_LANDING_BOTTOM[1] + 1.5f , 2f};
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
@@ -153,7 +152,7 @@ public class Level01 extends Level{
 
     @Override
     public void reset() {
-        this.time = config.SAUCER_LANDING_END;
+        this.time = 0;
         //TODO -> true reset
         this.backgroundOffScreenLayer.setOffScreenRendering(false);
         this.foregroundOffScreenLayer.setOffScreenRendering(false);
@@ -238,11 +237,11 @@ public class Level01 extends Level{
 
     protected void buildForeground() {
         final SceneLoader.ImageDef softBuddyParticleImageDef = this.chapterResources.getImageDefinition(config.SOFTBUFFY_PARTICLE_ID);
-        this.softBuddyParticlesRenderer = new TexturedParticlesBatchRenderer(SoftBuddyActor.SOFTBUDDY_MAX_PARTICLES);
+        this.softBuddyParticlesRenderer = new TexturedParticlesBatchRenderer(SoftBuddyGameAPI.PARTICLES_BATCH_SIZE);
         this.softBuddyLayer = new ParticlesBatchLayer(Runtime.getInstance().getViewport(),1, this.softBuddyParticlesRenderer);
         this.softBuddyActor = new SoftBuddyActor(config.SOFTBUFFY_PARTICLE_ID.hashCode(), new TextureSet(new Texture(Gdx.files.internal(softBuddyParticleImageDef.path))));
         this.softBuddyLayer.addActor(this.softBuddyActor);
-        this.softBuddyLayer.setScaleFactor(SoftBuddyActor.SOFTBUDDY_PARTICLES_SCALEFACTOR);
+        this.softBuddyLayer.setScaleFactor(SoftBuddyActor.DEFAULT_PARTICLES_SCALEFACTOR);
         this.softBuddyRenderer = new SoftBuddyRenderer(Runtime.getInstance().getViewport());
         this.softBuddyOffScreenLayer = new OffScreenLayer<ParticlesBatchLayer>(Runtime.getInstance().getViewport(),this.softBuddyLayer,this.softBuddyRenderer);
         Runtime.getInstance().addLayer(this.softBuddyOffScreenLayer);
@@ -506,7 +505,7 @@ public class Level01 extends Level{
     public void physicsTick(float deltaTime){
         switch (state){
             case STATE_SOFTBUDDY_IN :
-                this.softBuddyActor.createGroup(config.SOFTBUDDY_GROUP[0],config.SOFTBUDDY_GROUP[1],config.SOFTBUDDY_COUNT,config.SOFTBUDDY_GROUP[2]);
+                this.softBuddyActor.createGroup(config.SOFTBUDDY_GROUP[0],config.SOFTBUDDY_GROUP[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES,config.SOFTBUDDY_GROUP[2]);
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:

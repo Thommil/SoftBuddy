@@ -12,26 +12,24 @@ import finnstr.libgdx.liquidfun.ParticleSystemDef;
 
 public class SoftBuddyActor extends ParticleSystemActor{
 
-    public static final int SOFTBUDDY_MAX_PARTICLES = 1000;
-    public static final float SOFTBUDDY_PARTICLES_RADIUS = 0.01f;
-    public static final float SOFTBUDDY_PARTICLES_SCALEFACTOR = 2f;
+    public static final int DEFAULT_MAX_PARTICLES = 1000;
+    public static final float DEFAULT_PARTICLES_RADIUS = 0.03f;
+    public static final float DEFAULT_PARTICLES_SCALEFACTOR = 2f;
 
     protected ParticleGroup particleGroup;
 
     public SoftBuddyActor(final int id, final TextureSet textureSet) {
-        super(id, SOFTBUDDY_PARTICLES_RADIUS, textureSet);
+        super(id, DEFAULT_PARTICLES_RADIUS, textureSet);
+    }
+
+    public SoftBuddyActor(final int id, final float particlesRadius, final TextureSet textureSet) {
+        super(id, particlesRadius, textureSet);
     }
 
     @Override
     public ParticleSystemDef getDefinition() {
         final ParticleSystemDef particleSystemDef = super.getDefinition();
-        particleSystemDef.density = 1f;
-
-        particleSystemDef.dampingStrength= 1f;
-        particleSystemDef.surfaceTensionPressureStrength= 1f;
-        particleSystemDef.surfaceTensionNormalStrength= 1f;
-        particleSystemDef.viscousStrength= 0.1f;
-        //particleSystemDef.surfaceTensionPressureStrength= 0.1f;
+        particleSystemDef.density = 10f;
 
         return particleSystemDef;
     }
@@ -41,11 +39,13 @@ public class SoftBuddyActor extends ParticleSystemActor{
         particleGroupDef.flags.add(ParticleDef.ParticleType.b2_tensileParticle);
         particleGroupDef.flags.add(ParticleDef.ParticleType.b2_waterParticle);
         particleGroupDef.flags.add(ParticleDef.ParticleType.b2_viscousParticle);
+
         PolygonShape shape = new PolygonShape();
         particleGroupDef.position.set(x,y);
-        final float particlesPerLine = (shapeWidth / SOFTBUDDY_PARTICLES_RADIUS) + 3f;
-        shape.setAsBox(shapeWidth/2f,particlesCount/particlesPerLine/2f);
-        Gdx.app.log("",""+shapeWidth + " "+particlesCount/particlesPerLine);
+        final float stride = 0.75f * (this.particlesRadius * 2f);
+        final float particlesPerLine = (float)Math.ceil(shapeWidth / stride * 2f);
+        final float shapeHeight = particlesCount / particlesPerLine * stride * 2;
+        shape.setAsBox(shapeWidth/2f,shapeHeight/2f);
         particleGroupDef.shape = shape;
         this.particleGroup = this.particleSystem.createParticleGroup(particleGroupDef);
         shape.dispose();

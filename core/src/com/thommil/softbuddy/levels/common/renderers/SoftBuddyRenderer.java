@@ -39,10 +39,10 @@ public class SoftBuddyRenderer extends OffScreenRenderer {
                 + "     color = vec4(0,0,0,0);\n" //
                 + "  }\n" //
                 + "  else if( color.r < 0.3){\n" //
-                + "     color = vec4(0.0,1.0,0.0,0.5);\n" //
+                + "     color = vec4(0.0,1.0,0.0,color.a);\n" //
                 + "  }\n" //
                 + "  else{\n" //
-                + "     color = vec4(0.0,1.0,0.0,0.8);\n" //
+                + "     color = vec4(0.0,1.0,0.0,0.6);\n" //
                 + "  }\n" //
                 + "  gl_FragColor = color;\n" //
                 + "}";
