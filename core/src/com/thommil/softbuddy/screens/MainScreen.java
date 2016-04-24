@@ -49,10 +49,10 @@ public class MainScreen extends AbstractScreen implements InputProcessor{
         this.assetManager = assetManager;
         this.viewportLayout = new ViewportLayout(viewport);
         this.touchDispatcher = new TouchDispatcher(viewport);
-        this.build();
+        this.build(viewport);
     }
 
-    protected void build(){
+    protected void build(Viewport viewport){
         this.bgTextureSet = new TextureSet(this.assetManager.get(this.screenDef.backgroundPath, Texture.class));
         this.bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
         this.fgTextureSet = new TextureSet(this.assetManager.get(this.screenDef.buttons[0].widget.texturePath, Texture.class));
@@ -60,15 +60,15 @@ public class MainScreen extends AbstractScreen implements InputProcessor{
 
         //Main menu
         this.mainMenuBatchLayer = new SpriteBatchLayer(this.viewport,3);
-        this.mainMenuBatchLayer.addActor(new SpriteActor(0,this.bgTextureSet));
-        this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[0].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[0].widget.region){
+        this.mainMenuBatchLayer.addActor(new SpriteActor(0,this.bgTextureSet, viewport.getWorldWidth(), viewport.getWorldHeight()));
+        this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[0].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[0].widget.region, this.screenDef.buttons[0].size){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.startLevel(selectedChapter, selectedChapter, restartLevel);
                 return true;
             }
         });
-        this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[1].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[1].widget.region){
+        this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[1].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[1].widget.region, this.screenDef.buttons[1].size){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
                 softBuddyGameAPI.quit();
@@ -98,23 +98,15 @@ public class MainScreen extends AbstractScreen implements InputProcessor{
     }
 
     private void layout(){
-        //Background
-        SpriteActor actor = (SpriteActor) this.currentBatchLayer.getActor(0);
-        Rectangle rec = actor.getBoundingRectangle();
-        this.viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
-        actor.setPosition(rec.x, rec.y);
-        actor.setSize(rec.width, rec.height);
-
         //Main menu
         if(this.currentBatchLayer == this.mainMenuBatchLayer) {
             //Buttons
             final Vector2 buttonPos = new Vector2();
             for(SharedResources.ButtonDef button : this.screenDef.buttons){
-                actor = (SpriteActor) this.mainMenuBatchLayer.getActor(button.name.hashCode());
+                final SpriteActor actor = (SpriteActor) this.mainMenuBatchLayer.getActor(button.name.hashCode());
                 buttonPos.set(button.position[0], button.position[1]);
                 this.viewportLayout.adapt(buttonPos);
-                actor.setSize(button.size[0], button.size[1]);
-                actor.setCenter(buttonPos.x, buttonPos.y);
+                actor.setPosition(buttonPos.x, buttonPos.y);
             }
         }
     }
@@ -148,10 +140,11 @@ public class MainScreen extends AbstractScreen implements InputProcessor{
     }
 
     public static abstract class ButtonActor extends SpriteActor{
-        public ButtonActor(int id, TextureSet textureSet, final int[] buttonData) {
+        public ButtonActor(int id, TextureSet textureSet, final int[] buttonData, final float[] buttonSize) {
             super(id, textureSet,
                     buttonData[0],buttonData[1],
-                    buttonData[2],buttonData[3]);
+                    buttonData[2],buttonData[3],
+                    buttonSize[0], buttonSize[1]);
         }
     }
 

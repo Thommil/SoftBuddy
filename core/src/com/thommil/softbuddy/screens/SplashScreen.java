@@ -17,19 +17,13 @@ public class SplashScreen extends AbstractScreen {
 
     final TextureSet bgTextureSet;
     final SpriteBatchLayer spriteBatchLayer;
-    final ViewportLayout viewportLayout;
 
     public SplashScreen(Viewport viewport) {
         super(viewport);
         this.bgTextureSet = new TextureSet(new Texture(SPLASHSCREEN_BACKGROUND_TEXTURE));
         this.bgTextureSet.setWrapAll(Texture.TextureWrap.ClampToEdge, Texture.TextureWrap.ClampToEdge);
         this.spriteBatchLayer = new SpriteBatchLayer(viewport,1);
-        this.viewportLayout = new ViewportLayout(viewport);
-        this.create();
-    }
-
-    public void create(){
-        this.spriteBatchLayer.addActor(new SpriteActor(0,this.bgTextureSet));
+        this.spriteBatchLayer.addActor(new SpriteActor(0,this.bgTextureSet, viewport.getWorldWidth(), viewport.getWorldHeight()));
     }
 
     @Override
@@ -37,18 +31,9 @@ public class SplashScreen extends AbstractScreen {
         this.spriteBatchLayer.show();
     }
 
-    private void layout(){
-        final SpriteActor bgActor = (SpriteActor) this.spriteBatchLayer.getActor(0);
-        final Rectangle rec = bgActor.getBoundingRectangle();
-        this.viewportLayout.layout(rec, ViewportLayout.Align.CENTER, ViewportLayout.Align.CENTER, true, true);
-        bgActor.setPosition(rec.x, rec.y);
-        bgActor.setSize(rec.width, rec.height);
-    }
-
     @Override
     public void resize(int width, int height) {
-        this.viewportLayout.update(width, height);
-        this.layout();
+
     }
 
     @Override

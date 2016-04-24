@@ -442,6 +442,20 @@
 			"file" : "chapters/mountain/level01/main.png",
 			"name" : "flying_saucer_reactor"
 
+		},
+		{
+			"body": -1,
+			"x": 0,
+			"y": 0,
+			"width" : 2,
+			"height" : 2,
+			"regionX" : 13,
+			"regionY" : 11,
+			"regionWidth" : 243,
+			"regionHeight" : 323,
+			"file" : "chapters/mountain/level01/main.png",
+			"name" : "landing_saucer"
+
 		}
 	],
 	"particles_effect" :
@@ -454,20 +468,29 @@
 	"animation" :
 	[
 		{
-			"name": "landing_saucer",
-			"file" : "chapters/mountain/level01/main.png",
+			"name" : "title",
+			"type" : "COLOR",
 			"playMode" : "NORMAL",
-			"frameDuration" :  0.1,
+			"interpolator" : "LINEAR",
+			"frameDuration" : 2,
 			"keyFrames" : [
 				{
-					"width" : 3,
-					"height" : 3,
-					"regionX" : 13,
-					"regionY" : 11,
-					"regionWidth" : 243,
-					"regionHeight" : 313
+					"color" : [0,0,0,0]
+				},
+				{
+					"color" : [0,0,0,0]
+				},
+				{
+					"color" : [1,1,1,1]
+				},
+				{
+					"color" : [1,1,1,1]
+				},
+				{
+					"color" : [0,0,0,0]
 				}
 			]
 		}
+
 	]
 }

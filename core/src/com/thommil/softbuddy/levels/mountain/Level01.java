@@ -19,6 +19,7 @@ import com.thommil.libgdx.runtime.actor.graphics.StaticActor;
 import com.thommil.libgdx.runtime.actor.physics.StaticBodyActor;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
 import com.thommil.libgdx.runtime.graphics.ViewportLayout;
+import com.thommil.libgdx.runtime.graphics.animation.ColorAnimation;
 import com.thommil.libgdx.runtime.graphics.renderer.buffer.OffScreenRenderer;
 import com.thommil.libgdx.runtime.graphics.renderer.particles.TexturedParticlesBatchRenderer;
 import com.thommil.libgdx.runtime.layer.*;
@@ -40,15 +41,12 @@ public class Level01 extends Level{
 
         public String BACKGROUND_ID = "background";
         public String FOREGROUND_ID = "foreground";
+        public String TITLE_ID = "title";
         public String FLYING_SAUCER_ID = "flying_saucer";
         public String LANDING_SAUCER_ID = "landing_saucer";
         public String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
 
-        public float TITLE_FADE_START = 2f;
-        public float TITLE_FADE_PAUSE = TITLE_FADE_START + 1f;
-        public float TITLE_FADE_END = TITLE_FADE_PAUSE + 1f;
-
-        public float SCROLL_DOWN_START = TITLE_FADE_END;
+        public float SCROLL_DOWN_START = 0;
         public float SCROLL_DOWN_STEP = 3f;
         public float SCROLL_DOWN_END = SCROLL_DOWN_START + 4f;
 
@@ -141,9 +139,7 @@ public class Level01 extends Level{
     //HUD
     private BitmapFontBatchLayer bitmapFontBatchLayer;
     private BitmapFontActor titleFontActor;
-
-    //Events
-    //private TouchDispatcher touchDispatcher;
+    private ColorAnimation titleAnimation;
 
     @Override
     public String getResourcesPath() {
@@ -157,17 +153,26 @@ public class Level01 extends Level{
         this.backgroundOffScreenLayer.setOffScreenRendering(false);
         this.foregroundOffScreenLayer.setOffScreenRendering(false);
         this.softBuddyOffScreenLayer.setOffScreenRendering(false);
+
         this.introRenderer.setAmbiantColor(config.SAUCER_FLY_AMBIENT_COLOR[0],config.SAUCER_FLY_AMBIENT_COLOR[1],config.SAUCER_FLY_AMBIENT_COLOR[2]);
         this.introRenderer.setLightColor(config.SAUCER_FLY_SPOT_COLOR[0],config.SAUCER_FLY_SPOT_COLOR[1],config.SAUCER_FLY_SPOT_COLOR[2]);
         this.titleFontActor.getBitmapFont().getColor().a = 0f;
+
+        //Background
+
+        //Foreground
+
+        //HUD
+        this.titleFontActor.getBitmapFont().setColor(this.titleAnimation.getKeyFrame(0));
         this.bitmapFontBatchLayer.addActor(this.titleFontActor);
         this.bitmapFontBatchLayer.show();
+
         state = STATE_TITLE;
     }
 
     @Override
     public void start() {
-        //this.touchDispatcher.bind();
+
     }
 
     @Override
@@ -180,9 +185,9 @@ public class Level01 extends Level{
     protected void build() {
         this.config = new Config();
         this.tmpVector = new Vector2();
-        //this.touchDispatcher = new TouchDispatcher(Runtime.getInstance().getViewport());
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
         this.levelWorldHeight = Runtime.getInstance().getSettings().viewport.height * 2;
+
         this.ticklayer = new Layer(Runtime.getInstance().getViewport(),0) {
             @Override protected void onShow() {}
             @Override protected void onResize(int width, int height) {
@@ -203,13 +208,14 @@ public class Level01 extends Level{
             @Override public void dispose() {}
         };
         Runtime.getInstance().addLayer(this.ticklayer);
-        this.introRenderer = new IntroRenderer(1);
+
         this.buildBackground();
         this.buildForeground();
         this.buildHUD();
     }
 
     protected void buildBackground() {
+        this.introRenderer = new IntroRenderer(1);
         this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/4, this.levelWorldWidth, this.levelWorldHeight,this.levelWorldHeight/4);
         Runtime.getInstance().addLayer(this.skyLayer);
 
@@ -256,13 +262,13 @@ public class Level01 extends Level{
         this.flyingSaucerActor.setSize(flyingSaucerImageDef.width, flyingSaucerImageDef.height);
         this.flyingSaucerActor.setOriginCenter();
 
-        final SceneLoader.AnimationDef landingSaucerAnimationDef = this.levelResources.getAnimationDefinition(config.LANDING_SAUCER_ID);
-        this.landingSaucerActor = new SpriteActor(config.LANDING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(landingSaucerAnimationDef.path, Texture.class))
-                ,landingSaucerAnimationDef.keyFrames[0].regionX
-                ,landingSaucerAnimationDef.keyFrames[0].regionY
-                ,landingSaucerAnimationDef.keyFrames[0].regionWidth
-                ,landingSaucerAnimationDef.keyFrames[0].regionHeight);
-        this.landingSaucerActor.setSize(landingSaucerAnimationDef.keyFrames[0].width, landingSaucerAnimationDef.keyFrames[0].height);
+        final SceneLoader.ImageDef landingSaucerImageDef = this.levelResources.getImageDefinition(config.LANDING_SAUCER_ID);
+        this.landingSaucerActor = new SpriteActor(config.LANDING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(landingSaucerImageDef.path, Texture.class))
+                ,landingSaucerImageDef.regionX
+                ,landingSaucerImageDef.regionY
+                ,landingSaucerImageDef.regionWidth
+                ,landingSaucerImageDef.regionHeight);
+        this.landingSaucerActor.setSize(landingSaucerImageDef.width, landingSaucerImageDef.height);
         this.landingSaucerActor.setOriginCenter();
 
         Runtime.getInstance().addLayer(this.saucerLayer);
@@ -305,29 +311,39 @@ public class Level01 extends Level{
     }
 
     private void buildHUD(){
-        final SharedResources.LabelDef titleLableDef = this.softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
-        this.titleFontActor = new BitmapFontActor(0, this.assetManager.get(titleLableDef.assetName, BitmapFont.class));
-        titleFontActor.setText(this.chapterResources.getChapterDef().title);
-        tmpVector.set(titleLableDef.position[0], titleLableDef.position[1]);
+        final SharedResources.LabelDef titleLabelDef = this.softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
+        this.titleFontActor = new BitmapFontActor(0, this.assetManager.get(titleLabelDef.assetName, BitmapFont.class));
+        this.titleFontActor.setText(this.chapterResources.getChapterDef().title);
+        this.tmpVector.set(titleLabelDef.position[0], titleLabelDef.position[1]);
         ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVector);
-        titleFontActor.setPosition(tmpVector.x, tmpVector.y);
-        titleFontActor.getBitmapFont().setColor(titleLableDef.color[0],titleLableDef.color[1],titleLableDef.color[2],0);
+        this.titleFontActor.setPosition(tmpVector.x, tmpVector.y);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
+        this.titleAnimation = (ColorAnimation) this.levelResources.getAnimation(config.TITLE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
     }
 
     @Override
     public void dispose() {
+        /*
+        //System
         Runtime.getInstance().removeLayer(this.ticklayer);
+        this.ticklayer.dispose(true);
+
+        //HUD
+        Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
+
+
+
+
         Runtime.getInstance().removeLayer(this.skyLayer);
         Runtime.getInstance().removeLayer(this.foregroundOffScreenLayer);
         Runtime.getInstance().removeLayer(this.softBuddyOffScreenLayer);
         Runtime.getInstance().removeLayer(this.backgroundOffScreenLayer);
         Runtime.getInstance().removeLayer(this.saucerLayer);
         Runtime.getInstance().removeLayer(this.particlesEffectBatchLayer);
-        Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
 
-        this.ticklayer.dispose(true);
+
+
         this.skyLayer.dispose(true);
         this.backgroundLayer.dispose(true);
         this.backgroundOffScreenLayer.dispose();
@@ -341,6 +357,7 @@ public class Level01 extends Level{
 
         this.flyingSaucerActor.dispose();
         this.landingSaucerActor.dispose();
+        this.titleFontActor.dispose();
         this.flyingSaucerParticlesActor.dispose();
         this.flyingSaucerParticlesEffect.dispose();
         this.softBuddyActor.dispose();
@@ -360,6 +377,7 @@ public class Level01 extends Level{
         this.foregroundOffScreenLayer = null;
         this.saucerLayer = null;
         this.bitmapFontBatchLayer = null;
+        this.titleFontActor = null;
 
         this.flyingSaucerActor = null;
         this.landingSaucerActor = null;
@@ -373,32 +391,53 @@ public class Level01 extends Level{
         this.foregroundOffScreenRenderer = null;
         this.tmpVector = null;
         this.config = null;
-        //this.touchDispatcher = null;
+        //this.touchDispatcher = null;*/
+
+        Runtime.getInstance().removeLayer(this.ticklayer);
+        this.ticklayer.dispose(true);
+        this.introRenderer.dispose();
+        this.introRenderer = null;
+        this.ticklayer = null;
+        this.config = null;
+        this.tmpVector = null;
+
+        this.disposeHUD();
+        this.disposeForeground();
+        this.disposeBackground();
     }
+
+    private void disposeHUD(){
+        Runtime.getInstance().removeLayer(this.bitmapFontBatchLayer);
+        this.bitmapFontBatchLayer.dispose(true);
+        this.bitmapFontBatchLayer = null;
+        this.titleFontActor.dispose();
+        this.titleFontActor = null;
+        this.titleAnimation = null;
+    }
+
+    private void disposeForeground(){
+
+    }
+
+    private void disposeBackground(){
+
+    }
+
+
 
     public void graphicsTick(float deltaTime){
         time += deltaTime;
         switch(state){
             case STATE_TITLE :
-                if(time < config.TITLE_FADE_START){
-                    final float fadeTime = 1f - ((config.TITLE_FADE_START - time) / config.TITLE_FADE_START);
-                    this.titleFontActor.getBitmapFont().getColor().a = Interpolation.fade.apply(fadeTime);
+                if(!this.titleAnimation.isAnimationFinished(time)){
+                    this.titleFontActor.playAnimation(this.titleAnimation,time);
                     Runtime.getInstance().getViewport().getCamera().position.set(0,levelWorldWidth/2,0);
                     Runtime.getInstance().getViewport().apply();
                 }
-                else if(time >= config.TITLE_FADE_PAUSE){
-                    if(time < config.SCROLL_DOWN_START) {
-                        final float fadeTime = ((config.TITLE_FADE_END - time) / (config.TITLE_FADE_END - config.TITLE_FADE_PAUSE));
-                        this.titleFontActor.getBitmapFont().getColor().a = Interpolation.fade.apply(fadeTime);
-                        Runtime.getInstance().getViewport().getCamera().position.set(0, levelWorldWidth / 2, 0);
-                        Runtime.getInstance().getViewport().apply();
-                    }
-                    else{
-                        this.titleFontActor.getBitmapFont().getColor().a = 0;
-                        this.bitmapFontBatchLayer.removeActor(this.titleFontActor);
-                        this.bitmapFontBatchLayer.hide();
-                        state = STATE_SCROLL_DOWN;
-                    }
+                else{
+                    this.bitmapFontBatchLayer.removeActor(this.titleFontActor);
+                    this.bitmapFontBatchLayer.hide();
+                    state = STATE_SCROLL_DOWN;
                 }
                 break;
             case STATE_SCROLL_DOWN :
