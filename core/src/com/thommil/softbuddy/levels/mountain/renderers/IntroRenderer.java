@@ -59,16 +59,16 @@ public class IntroRenderer extends SpriteBatchRenderer{
         lightData[SCREEN_HEIGHT] = height;
     }
 
-    public void setLightColor(final float r, final float g, final float b){
-        lightData[LIGHT_R] = r;
-        lightData[LIGHT_G] = g;
-        lightData[LIGHT_B] = b;
+    public void setLightColor(final Color color){
+        lightData[LIGHT_R] = color.r;
+        lightData[LIGHT_G] = color.g;
+        lightData[LIGHT_B] = color.b;
     }
 
-    public void setAmbiantColor(final float r, final float g, final float b){
-        lightData[AMBIENT_R] = r;
-        lightData[AMBIENT_G] = g;
-        lightData[AMBIENT_B] = b;
+    public void setAmbiantColor(final Color color){
+        lightData[AMBIENT_R] = color.r;
+        lightData[AMBIENT_G] = color.g;
+        lightData[AMBIENT_B] = color.b;
     }
 
     public void setFallOff(final float constantAttenuation, final float linearAttenutation, final float quadraticAttenuation){

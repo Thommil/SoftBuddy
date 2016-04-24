@@ -471,16 +471,13 @@
 			"name" : "title",
 			"type" : "COLOR",
 			"playMode" : "NORMAL",
-			"interpolator" : "LINEAR",
+			"interpolator" : "CIRCLE_IN",
 			"frameDuration" : 2,
 			"keyFrames" : [
 				{
 					"color" : [0,0,0,0]
 				},
 				{
-					"color" : [0,0,0,0]
-				},
-				{
 					"color" : [1,1,1,1]
 				},
 				{
@@ -488,6 +485,79 @@
 				},
 				{
 					"color" : [0,0,0,0]
+				}
+			]
+		},
+		{
+			"name" : "scroll_down",
+			"type" : "TRANSLATE",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 4,
+			"keyFrames" : [
+				{
+					"xOffset" : 0,
+					"yOffset" : 0
+				}
+			]
+		},
+		{
+			"name" : "reactor_spot",
+			"type" : "COLOR",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 0,
+			"keyFrames" : [
+				{
+					"color" : [0,0,1,1]
+				}
+			]
+		},
+		{
+			"name" : "sun_spot",
+			"type" : "COLOR",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 2,
+			"keyFrames" : [
+				{
+					"color" : [0,0,0,1]
+				},
+				{
+					"color" : [1,1,1,1]
+				}
+			]
+		},
+		{
+			"name" : "ambient",
+			"type" : "COLOR",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 2,
+			"keyFrames" : [
+				{
+					"color" : [0.3,0.3,0.3,1]
+				},
+				{
+					"color" : [0.6,0.6,0.6,1]
+				}
+			]
+		},
+		{
+			"name" : "flying_saucer",
+			"type" : "TRANSLATE",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 5,
+			"keyFrames" : [
+				{
+					"xOffset" : 60,
+					"yOffset" : 0
+				},
+				{
+					"xOffset" : -60,
+					"yOffset" : 0,
+					"flipX" : true
 				}
 			]
 		}
