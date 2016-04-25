@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonValue;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.actor.graphics.BitmapFontActor;
 import com.thommil.libgdx.runtime.actor.graphics.ParticleEffectActor;
@@ -40,39 +41,51 @@ public class Level01 extends Level{
 
     public static class Config{
 
-        public String BACKGROUND_ID = "background";
-        public String FOREGROUND_ID = "foreground";
-        public String TITLE_ID = "title";
-        public String SCROLL_DOWN_ID = "scroll_down";
-        public String AMBIENT_ID = "ambient";
-        public String SUNRISE_SPOT_ID = "sunrise_spot";
-        public String FLYING_SAUCER_ID = "flying_saucer";
-        public String REACTOR_SPOT_ID = "reactor_spot";
-        public String SUNRISE_ID = "sunrise";
-        public String LANDING_SAUCER_ID = "landing_saucer";
-        public String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
+        public final String BACKGROUND_ID = "background";
+        public final String FOREGROUND_ID = "foreground";
+        public final String TITLE_ID = "title";
+        public final String SCROLL_DOWN_ID = "scroll_down";
+        public final String AMBIENT_ID = "ambient";
+        public final String SUNRISE_SPOT_ID = "sunrise_spot";
+        public final String FLYING_SAUCER_ID = "flying_saucer";
+        public final String REACTOR_SPOT_ID = "reactor_spot";
+        public final String SUNRISE_ID = "sunrise";
+        public final String LANDING_SAUCER_ID = "landing_saucer";
+        public final String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
 
-        public float SCROLL_DOWN_STARS_STEP = 3f;
+        public final float scrollDownStarsStep;
+        public final float[] saucerFlyStartPositon;
+        public final float[] reactorSpotFalloff;
+        public final float[] reactorOffset;
+        public final float[] reactorSpotOffset;
+        public final float reactorScaleFactor;
+        public final float[] sunriseSpotFalloff;
+        public final float[] sunriseStartPosition;
+        public final float[] saucerLandingStartPosition;
+        public final float[] softbuddyGroupStartOffset;
+        public final float softbuddyGroupStartWidth;
+        public final Interpolation flyInterpolation;
 
-        public float[] SAUCER_FLY_START_POSITON = new float[]{-30f, 3f};
-        public float[] REACTOR_SPOT_FALLOFF = new float[]{0.01f,0.1f,1f};
-        public float[] REACTOR_OFFSET = new float[]{-0.3f, 0.5f, 0.005f};
-        public float[] REACTOR_SPOT_OFFSET = new float[]{-3f, 0f};
-
-        public float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
-        public float[] SUNRISE_START_POSITION = new float[]{30f, -20f};
-
-        public float[] SAUCER_LANDING_START_POSITION = new float[]{0f, 6f};
-
-        public float[] SOFTBUDDY_GROUP_START_OFFSET = new float[]{1.5f, 1.5f};
-        public float SOFTBUDDY_GROUP_START_WIDTH = 2f;
-
-        public Interpolation flyInterpolation = new Interpolation() {
-            @Override
-            public float apply(float a) {
-                return (float) (1 - Math.pow(1 - (2*a),5))/2;
-            }
-        };
+        public Config(SceneLoader levelResources){
+            final JsonValue jsonConfig = levelResources.getJsonRoot().get("configuration");
+            this.scrollDownStarsStep = jsonConfig.get(SCROLL_DOWN_ID).getFloat("step");
+            this.saucerFlyStartPositon = jsonConfig.get(FLYING_SAUCER_ID).get("start_position").asFloatArray();
+            this.reactorSpotFalloff = jsonConfig.get(FLYING_SAUCER_ID).get("reactor_spot_falloff").asFloatArray();
+            this.reactorOffset = jsonConfig.get(FLYING_SAUCER_ID).get("reactor_offset").asFloatArray();
+            this.reactorScaleFactor = jsonConfig.get(FLYING_SAUCER_ID).getFloat("reactor_scale_factor");
+            this.reactorSpotOffset = jsonConfig.get(FLYING_SAUCER_ID).get("reactor_spot_offset").asFloatArray();
+            this.sunriseStartPosition = jsonConfig.get(SUNRISE_ID).get("start_position").asFloatArray();
+            this.sunriseSpotFalloff = jsonConfig.get(SUNRISE_ID).get("spot_falloff").asFloatArray();
+            this.saucerLandingStartPosition = jsonConfig.get(LANDING_SAUCER_ID).get("start_position").asFloatArray();
+            this.softbuddyGroupStartOffset = jsonConfig.get(SOFTBUFFY_PARTICLE_ID).get("start_position_offset").asFloatArray();
+            this.softbuddyGroupStartWidth = jsonConfig.get(SOFTBUFFY_PARTICLE_ID).getFloat("start_width");
+            this.flyInterpolation = new Interpolation() {
+                @Override
+                public float apply(float a) {
+                    return (float) (1 - Math.pow(1 - (2*a),5))/2;
+                }
+            };
+        }
     }
 
     private static final int STATE_TITLE = 0;
@@ -166,7 +179,6 @@ public class Level01 extends Level{
         this.saucerLayer.removeActor(this.flyingSaucerActor);
         if(this.flyingSaucerActor.isFlipX()) this.flyingSaucerActor.flip(true, false);
         this.particlesEffectBatchLayer.removeActor(this.flyingSaucerParticlesActor);
-        if(this.flyingSaucerParticlesEffect != null) this.flyingSaucerParticlesActor.release(this.flyingSaucerParticlesEffect);
         this.softBuddyActor.reset();
 
         //HUD
@@ -189,18 +201,28 @@ public class Level01 extends Level{
 
     @Override
     public void start() {
-
+        switch(this.state){
+            case STATE_SCROLL_DOWN:
+                Runtime.getInstance().getViewport().getCamera().position.set(0,this.tmpVector.y,0);
+                Runtime.getInstance().getViewport().apply();
+                break;
+        }
     }
 
     @Override
     public void stop() {
+        switch(this.state){
+            case STATE_SCROLL_DOWN:
+                this.tmpVector.set(0, Runtime.getInstance().getViewport().getCamera().position.y);
+                break;
+        }
         Runtime.getInstance().getViewport().getCamera().position.set(0,0,0);
         Runtime.getInstance().getViewport().apply();
     }
 
     @Override
     protected void build() {
-        this.config = new Config();
+        this.config = new Config(this.levelResources);
         this.screenVector = new Vector2();
         this.tmpVector = new Vector2();
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
@@ -454,19 +476,19 @@ public class Level01 extends Level{
                 break;
             case STATE_SCROLL_DOWN :
                 if(!this.scrollDownAnimation.isAnimationFinished(time)){
-                    this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-config.SCROLL_DOWN_STARS_STEP);
+                    this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-config.scrollDownStarsStep);
                     Runtime.getInstance().getViewport().getCamera().position.add(0,-this.scrollDownAnimation.getKeyFrame(time).y,0);
                     Runtime.getInstance().getViewport().apply();
                 }
                 else{
                     Runtime.getInstance().getViewport().getCamera().position.set(0, 0, 0);
                     Runtime.getInstance().getViewport().apply();
-                    this.flyingSaucerActor.setPosition(config.SAUCER_FLY_START_POSITON[0],config.SAUCER_FLY_START_POSITON[1]);
+                    this.flyingSaucerActor.setPosition(config.saucerFlyStartPositon[0],config.saucerFlyStartPositon[1]);
                     this.saucerLayer.addActor(this.flyingSaucerActor);
-                    this.particlesEffectBatchLayer.addActor(this.flyingSaucerParticlesActor);
                     this.introRenderer.switchLight(true);
-                    this.introRenderer.setFallOff(config.REACTOR_SPOT_FALLOFF[0], config.REACTOR_SPOT_FALLOFF[1], config.REACTOR_SPOT_FALLOFF[2]);
-                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, config.SAUCER_FLY_START_POSITON[0], config.SAUCER_FLY_START_POSITON[1], false, false, config.REACTOR_OFFSET[2]);
+                    this.introRenderer.setFallOff(config.reactorSpotFalloff[0], config.reactorSpotFalloff[1], config.reactorSpotFalloff[2]);
+                    this.particlesEffectBatchLayer.addActor(this.flyingSaucerParticlesActor);
+                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, config.saucerFlyStartPositon[0], config.saucerFlyStartPositon[1], false, false, config.reactorScaleFactor);
                     this.time = 0;
                     this.state = STATE_SAUCER_FLY;
                     this.graphicsTick(0);
@@ -477,13 +499,13 @@ public class Level01 extends Level{
                     this.flyingSaucerActor.playAnimation(this.flyingSaucerAnimation, time);
                     if(!this.flyingSaucerActor.isFlipX()) {
                         this.tmpVector.set(this.flyingSaucerActor.x, this.flyingSaucerActor.y);
-                        this.tmpVector.add(config.REACTOR_SPOT_OFFSET[0], config.REACTOR_SPOT_OFFSET[1]);
-                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + config.REACTOR_OFFSET[0], this.flyingSaucerActor.y + config.REACTOR_OFFSET[1]);
+                        this.tmpVector.add(config.reactorSpotOffset[0], config.reactorSpotOffset[1]);
+                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + config.reactorOffset[0], this.flyingSaucerActor.y + config.reactorOffset[1]);
                     }
                     else {
                         this.tmpVector.set(this.flyingSaucerActor.x, this.flyingSaucerActor.y);
-                        this.tmpVector.add(-config.REACTOR_SPOT_OFFSET[0] + this.flyingSaucerActor.width, config.REACTOR_SPOT_OFFSET[1]);
-                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + this.flyingSaucerActor.width - config.REACTOR_OFFSET[0], this.flyingSaucerActor.y + config.REACTOR_OFFSET[1]);
+                        this.tmpVector.add(-config.reactorSpotOffset[0] + this.flyingSaucerActor.width, config.reactorSpotOffset[1]);
+                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + this.flyingSaucerActor.width - config.reactorOffset[0], this.flyingSaucerActor.y + config.reactorOffset[1]);
                     }
                     this.screenVector.set(this.tmpVector);
                     Runtime.getInstance().getViewport().project(this.screenVector);
@@ -491,12 +513,11 @@ public class Level01 extends Level{
                 }
                 else{
                     this.saucerLayer.removeActor(this.flyingSaucerActor);
-                    this.flyingSaucerParticlesActor.release(this.flyingSaucerParticlesEffect);
                     this.particlesEffectBatchLayer.removeActor(this.flyingSaucerParticlesActor);
-                    this.introRenderer.setFallOff(config.SUNRISE_SPOT_FALLOFF[0], config.SUNRISE_SPOT_FALLOFF[1], config.SUNRISE_SPOT_FALLOFF[2]);
+                    this.introRenderer.setFallOff(config.sunriseSpotFalloff[0], config.sunriseSpotFalloff[1], config.sunriseSpotFalloff[2]);
                     this.introRenderer.setLightColor(this.sunSpotAnimation.getKeyFrame(0));
-                    this.tmpVector.set(config.SUNRISE_START_POSITION[0], config.SUNRISE_START_POSITION[1]);
-                    this.screenVector.set(config.SUNRISE_START_POSITION[0], config.SUNRISE_START_POSITION[1]);
+                    this.tmpVector.set(config.sunriseStartPosition[0], config.sunriseStartPosition[1]);
+                    this.screenVector.set(config.sunriseStartPosition[0], config.sunriseStartPosition[1]);
                     Runtime.getInstance().getViewport().project(this.screenVector);
                     this.introRenderer.setLightPosition((int) this.screenVector.x, (int) this.screenVector.y);
                     this.time = 0;
@@ -517,7 +538,7 @@ public class Level01 extends Level{
                 else{
                     this.backgroundOffScreenLayer.setOffScreenRendering(true);
                     this.foregroundOffScreenLayer.setOffScreenRendering(true);
-                    this.landingSaucerActor.setPosition(config.SAUCER_LANDING_START_POSITION[0], config.SAUCER_LANDING_START_POSITION[1]);
+                    this.landingSaucerActor.setPosition(config.saucerLandingStartPosition[0], config.saucerLandingStartPosition[1]);
                     this.saucerLayer.addActor(this.landingSaucerActor);
                     this.time = 0;
                     state = STATE_SAUCER_LANDING;
@@ -540,7 +561,7 @@ public class Level01 extends Level{
     public void physicsTick(float deltaTime){
         switch (state){
             case STATE_SOFTBUDDY_IN :
-                this.softBuddyActor.createGroup(this.landingSaucerActor.x + config.SOFTBUDDY_GROUP_START_OFFSET[0], this.landingSaucerActor.y + config.SOFTBUDDY_GROUP_START_OFFSET[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES,config.SOFTBUDDY_GROUP_START_WIDTH);
+                this.softBuddyActor.createGroup(this.landingSaucerActor.x + config.softbuddyGroupStartOffset[0], this.landingSaucerActor.y + config.softbuddyGroupStartOffset[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES,config.softbuddyGroupStartWidth);
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:

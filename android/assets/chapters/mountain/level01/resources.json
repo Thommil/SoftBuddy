@@ -568,10 +568,10 @@
 			"keyFrames" : [
 				{
 					"xOffset" : 0,
-					"yOffset" : 60
+					"yOffset" : 50
 				},
 				{
-					"xOffset" : -60,
+					"xOffset" : -100,
 					"yOffset" : 0
 				}
 			]
@@ -580,15 +580,37 @@
 			"name" : "landing_saucer",
 			"type" : "TRANSLATE",
 			"playMode" : "NORMAL",
-			"interpolator" : "LINEAR",
-			"frameDuration" : 3,
+			"interpolator" : "EXP10_OUT",
+			"frameDuration" : 2,
 			"keyFrames" : [
 				{
 					"xOffset" : 0,
-					"yOffset" : -2
+					"yOffset" : -3
 				}
 			]
 		}
-
-	]
+	],
+	"configuration":{
+		"scroll_down" : {
+			"step" : 3
+		},
+		"flying_saucer" : {
+			"start_position" : [-30, 3],
+			"reactor_spot_falloff" : [0.01, 0.1, 1],
+			"reactor_offset" : [-0.3, 0.5],
+			"reactor_scale_factor" : 0.005,
+			"reactor_spot_offset" : [-3, 0]
+		},
+		"sunrise" : {
+			"start_position" : [30, -20],
+			"spot_falloff" : [1, 0, 0]
+		},
+		"landing_saucer" : {
+			"start_position" : [0, 6]
+		},
+		"softbuddy_particle" : {
+			"start_position_offset" : [1.5, 1.5],
+			"start_width" : 1
+		}
+	}
 }
