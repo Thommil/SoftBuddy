@@ -433,13 +433,11 @@
 			"body": -1,
 			"x": 0,
 			"y": 0,
-			"width" : 2.0,
-			"height" : 0.6,
-			"regionX" : 40,
-			"regionY" : 500,
-			"regionWidth" : 412,
-			"regionHeight" : 125,
-			"file" : "chapters/mountain/level01/main.png",
+			"regionX" : 0,
+			"regionY" : 0,
+			"regionWidth" : 32,
+			"regionHeight" : 32,
+			"file" : "chapters/mountain/softbuddy_particle.png",
 			"name" : "flying_saucer_reactor"
 
 		},

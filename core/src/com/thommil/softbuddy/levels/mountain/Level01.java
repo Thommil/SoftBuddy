@@ -56,7 +56,7 @@ public class Level01 extends Level{
 
         public float[] SAUCER_FLY_START_POSITON = new float[]{-30f, 3f};
         public float[] REACTOR_SPOT_FALLOFF = new float[]{0.01f,0.1f,1f};
-        public float[] REACTOR_OFFSET = new float[]{-0.5f, 0.5f, 0.01f};
+        public float[] REACTOR_OFFSET = new float[]{-0.3f, 0.5f, 0.005f};
         public float[] REACTOR_SPOT_OFFSET = new float[]{-3f, 0f};
 
         public float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
@@ -332,7 +332,7 @@ public class Level01 extends Level{
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
         this.particlesEffectBatchLayer.setAdditive(true);
         this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(config.FLYING_SAUCER_ID, this.assetManager);
-        this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,100);
+        this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
         this.flyingSaucerParticlesEffect = null;
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
