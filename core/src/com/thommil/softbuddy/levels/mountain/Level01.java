@@ -45,9 +45,10 @@ public class Level01 extends Level{
         public String TITLE_ID = "title";
         public String SCROLL_DOWN_ID = "scroll_down";
         public String AMBIENT_ID = "ambient";
-        public String SUNRISE_SPOT_ID = "reactor_spot";
+        public String SUNRISE_SPOT_ID = "sunrise_spot";
         public String FLYING_SAUCER_ID = "flying_saucer";
         public String REACTOR_SPOT_ID = "reactor_spot";
+        public String SUNRISE_ID = "sunrise";
         public String LANDING_SAUCER_ID = "landing_saucer";
         public String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
 
@@ -58,21 +59,13 @@ public class Level01 extends Level{
         public float[] REACTOR_OFFSET = new float[]{-0.5f, 0.5f, 0.01f};
         public float[] REACTOR_SPOT_OFFSET = new float[]{-3f, 0f};
 
-
         public float[] SUNRISE_SPOT_FALLOFF = new float[]{1f,0f,0f};
+        public float[] SUNRISE_START_POSITION = new float[]{30f, -20f};
 
-        public float SUNRISE_START = 30f;
-        public float[] SUNRISE_BOTTOM = new float[]{30f, -10f};
-        public float[] SUNRISE_TOP = new float[]{-40f, 30f};
+        public float[] SAUCER_LANDING_START_POSITION = new float[]{0f, 6f};
 
-        public float SUNRISE_END = SUNRISE_START + 10f;
-
-        public float SAUCER_LANDING_START = SUNRISE_END;
-        public float[] SAUCER_LANDING_TOP = new float[]{-0.5f, 6f};
-        public float[] SAUCER_LANDING_BOTTOM = new float[]{-0.5f, 0.5f};
-        public float SAUCER_LANDING_END = SAUCER_LANDING_START + 3f;
-
-        public float[] SOFTBUDDY_GROUP = new float[]{SAUCER_LANDING_BOTTOM[0] + 1.5f, SAUCER_LANDING_BOTTOM[1] + 1.5f , 2f};
+        public float[] SOFTBUDDY_GROUP_START_OFFSET = new float[]{1.5f, 1.5f};
+        public float SOFTBUDDY_GROUP_START_WIDTH = 2f;
 
         public Interpolation flyInterpolation = new Interpolation() {
             @Override
@@ -100,6 +93,7 @@ public class Level01 extends Level{
     private int state;
 
     private Vector2 tmpVector;
+    private Vector2 screenVector;
 
     //Tick
     private Layer ticklayer;
@@ -140,6 +134,8 @@ public class Level01 extends Level{
     private ColorAnimation sunSpotAnimation;
     private ColorAnimation ambientColorAnimation;
     private TranslateAnimation flyingSaucerAnimation;
+    private TranslateAnimation sunriseAnimation;
+    private TranslateAnimation landingSaucerAnimation;
 
     //HUD
     private BitmapFontBatchLayer bitmapFontBatchLayer;
@@ -161,10 +157,17 @@ public class Level01 extends Level{
         this.introRenderer.setAmbiantColor(this.ambientColorAnimation.getKeyFrame(0));
         this.introRenderer.setLightColor(this.reactorSpotAnimation.getKeyFrame(0));
         this.backgroundOffScreenLayer.setOffScreenRendering(false);
+        this.introRenderer.switchLight(false);
 
         //Foreground
         this.foregroundOffScreenLayer.setOffScreenRendering(false);
         this.softBuddyOffScreenLayer.setOffScreenRendering(false);
+        this.saucerLayer.removeActor(this.landingSaucerActor);
+        this.saucerLayer.removeActor(this.flyingSaucerActor);
+        if(this.flyingSaucerActor.isFlipX()) this.flyingSaucerActor.flip(true, false);
+        this.particlesEffectBatchLayer.removeActor(this.flyingSaucerParticlesActor);
+        if(this.flyingSaucerParticlesEffect != null) this.flyingSaucerParticlesActor.release(this.flyingSaucerParticlesEffect);
+        this.softBuddyActor.reset();
 
         //HUD
         this.titleFontActor.getBitmapFont().setColor(this.titleAnimation.getKeyFrame(0));
@@ -178,6 +181,8 @@ public class Level01 extends Level{
         this.sunSpotAnimation.reset();
         this.ambientColorAnimation.reset();
         this.flyingSaucerAnimation.reset();
+        this.sunriseAnimation.reset();
+        this.landingSaucerAnimation.reset();
 
         state = STATE_TITLE;
     }
@@ -196,6 +201,7 @@ public class Level01 extends Level{
     @Override
     protected void build() {
         this.config = new Config();
+        this.screenVector = new Vector2();
         this.tmpVector = new Vector2();
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
         this.levelWorldHeight = Runtime.getInstance().getSettings().viewport.height * 2;
@@ -233,6 +239,7 @@ public class Level01 extends Level{
         this.scrollDownAnimation.getKeyFrame(0).y = this.levelWorldHeight/2;
         this.sunSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(config.SUNRISE_SPOT_ID, this.assetManager);
         this.ambientColorAnimation = (ColorAnimation) this.levelResources.getAnimation(config.AMBIENT_ID, this.assetManager);
+        this.sunriseAnimation = (TranslateAnimation) this.levelResources.getAnimation(config.SUNRISE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.skyLayer);
 
         this.backgroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1,this.introRenderer);
@@ -252,7 +259,7 @@ public class Level01 extends Level{
                 ,Color.WHITE.toFloatBits());
 
         this.backgroundLayer.addActor(backgroundActor);
-        this.backgroundOffScreenRenderer = new OffScreenRenderer(Runtime.getInstance().getViewport(), Pixmap.Format.RGBA4444,true,true);
+        this.backgroundOffScreenRenderer = new OffScreenRenderer(Runtime.getInstance().getViewport(), Pixmap.Format.RGBA8888,true,true);
         this.backgroundOffScreenLayer = new OffScreenLayer<SpriteBatchLayer>(Runtime.getInstance().getViewport(),this.backgroundLayer, this.backgroundOffScreenRenderer);
         Runtime.getInstance().addLayer(this.backgroundOffScreenLayer);
     }
@@ -289,6 +296,7 @@ public class Level01 extends Level{
                 ,landingSaucerImageDef.regionHeight
                 ,landingSaucerImageDef.width
                 ,landingSaucerImageDef.height);
+        this.landingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(config.LANDING_SAUCER_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
@@ -317,14 +325,15 @@ public class Level01 extends Level{
         };
 
         this.foregroundLayer.addActor(foregroundStaticBodyActor);
-        this.foregroundOffScreenRenderer = new OffScreenRenderer(Runtime.getInstance().getViewport(), Pixmap.Format.RGBA4444,true,true);
+        this.foregroundOffScreenRenderer = new OffScreenRenderer(Runtime.getInstance().getViewport(), Pixmap.Format.RGBA8888,true,true);
         this.foregroundOffScreenLayer = new OffScreenLayer<SpriteBatchLayer>(Runtime.getInstance().getViewport(),this.foregroundLayer, this.foregroundOffScreenRenderer);
         Runtime.getInstance().addLayer(this.foregroundOffScreenLayer);
 
-        this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),2);
+        this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
         this.particlesEffectBatchLayer.setAdditive(true);
         this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(config.FLYING_SAUCER_ID, this.assetManager);
         this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,100);
+        this.flyingSaucerParticlesEffect = null;
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
 
@@ -332,9 +341,9 @@ public class Level01 extends Level{
         final SharedResources.LabelDef titleLabelDef = this.softBuddyGameAPI.getSharedResources().getLabelDef(Chapter.TITLE_LABEL);
         this.titleFontActor = new BitmapFontActor(0, this.assetManager.get(titleLabelDef.assetName, BitmapFont.class));
         this.titleFontActor.setText(this.chapterResources.getChapterDef().title);
-        this.tmpVector.set(titleLabelDef.position[0], titleLabelDef.position[1]);
-        ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, tmpVector);
-        this.titleFontActor.setPosition(tmpVector.x, tmpVector.y);
+        this.screenVector.set(titleLabelDef.position[0], titleLabelDef.position[1]);
+        ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, screenVector);
+        this.titleFontActor.setPosition(screenVector.x, screenVector.y);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
         this.titleAnimation = (ColorAnimation) this.levelResources.getAnimation(config.TITLE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
@@ -352,6 +361,7 @@ public class Level01 extends Level{
 
         this.config = null;
         this.tmpVector = null;
+        this.screenVector = null;
     }
 
     private void disposeHUD(){
@@ -389,6 +399,7 @@ public class Level01 extends Level{
         this.flyingSaucerActor = null;
         this.reactorSpotAnimation = null;
         this.flyingSaucerAnimation = null;
+        this.landingSaucerAnimation = null;
 
         Runtime.getInstance().removeLayer(this.softBuddyOffScreenLayer);
         this.softBuddyOffScreenLayer.dispose(true);
@@ -413,6 +424,7 @@ public class Level01 extends Level{
         this.backgroundLayer = null;
         this.sunSpotAnimation = null;
         this.ambientColorAnimation = null;
+        this.sunriseAnimation = null;
 
         Runtime.getInstance().removeLayer(this.skyLayer);
         this.skyLayer.dispose(true);
@@ -473,51 +485,48 @@ public class Level01 extends Level{
                         this.tmpVector.add(-config.REACTOR_SPOT_OFFSET[0] + this.flyingSaucerActor.width, config.REACTOR_SPOT_OFFSET[1]);
                         this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + this.flyingSaucerActor.width - config.REACTOR_OFFSET[0], this.flyingSaucerActor.y + config.REACTOR_OFFSET[1]);
                     }
-                    Runtime.getInstance().getViewport().project(this.tmpVector);
-                    this.introRenderer.setLightPosition((int) this.tmpVector.x, (int) this.tmpVector.y);
+                    this.screenVector.set(this.tmpVector);
+                    Runtime.getInstance().getViewport().project(this.screenVector);
+                    this.introRenderer.setLightPosition((int) this.screenVector.x, (int) this.screenVector.y);
                 }
                 else{
                     this.saucerLayer.removeActor(this.flyingSaucerActor);
                     this.flyingSaucerParticlesActor.release(this.flyingSaucerParticlesEffect);
                     this.particlesEffectBatchLayer.removeActor(this.flyingSaucerParticlesActor);
-                    this.introRenderer.switchLight(false);
                     this.introRenderer.setFallOff(config.SUNRISE_SPOT_FALLOFF[0], config.SUNRISE_SPOT_FALLOFF[1], config.SUNRISE_SPOT_FALLOFF[2]);
+                    this.introRenderer.setLightColor(this.sunSpotAnimation.getKeyFrame(0));
+                    this.tmpVector.set(config.SUNRISE_START_POSITION[0], config.SUNRISE_START_POSITION[1]);
+                    this.screenVector.set(config.SUNRISE_START_POSITION[0], config.SUNRISE_START_POSITION[1]);
+                    Runtime.getInstance().getViewport().project(this.screenVector);
+                    this.introRenderer.setLightPosition((int) this.screenVector.x, (int) this.screenVector.y);
                     this.time = 0;
                     this.state = STATE_SUNRISE;
                     this.graphicsTick(0);
                 }
                 break;
             case STATE_SUNRISE :
-                if(time <= config.SUNRISE_END) {
-                    if(time > config.SUNRISE_START) {
-                        this.introRenderer.switchLight(true);
-                        final float delta = 1 - ((config.SUNRISE_END - time) / (config.SUNRISE_END - config.SUNRISE_START));
-                        this.tmpVector.x = Interpolation.linear.apply(config.SUNRISE_BOTTOM[0], config.SUNRISE_TOP[0], delta);
-                        this.tmpVector.y = Interpolation.linear.apply(config.SUNRISE_BOTTOM[1], config.SUNRISE_TOP[1], delta);
-                        this.introRenderer.setLightColor(this.sunSpotAnimation.getKeyFrame(0));
-                        this.introRenderer.setAmbiantColor(this.ambientColorAnimation.getKeyFrame(1));
-                        Runtime.getInstance().getViewport().project(this.tmpVector);
-                        this.introRenderer.setLightPosition((int) this.tmpVector.x, (int) this.tmpVector.y);
-                        this.skyLayer.setTime(delta);
-                    }
+                if(!this.sunriseAnimation.isAnimationFinished(time)){
+                    this.introRenderer.setLightColor(this.sunSpotAnimation.getKeyFrame(time));
+                    this.introRenderer.setAmbiantColor(this.ambientColorAnimation.getKeyFrame(time));
+                    this.tmpVector.add(this.sunriseAnimation.getKeyFrame(time));
+                    this.screenVector.set(this.tmpVector);
+                    Runtime.getInstance().getViewport().project(this.screenVector);
+                    this.introRenderer.setLightPosition((int) this.screenVector.x, (int) this.screenVector.y);
+                    this.skyLayer.setTime(time/this.sunriseAnimation.getAnimationDuration());
                 }
                 else{
                     this.backgroundOffScreenLayer.setOffScreenRendering(true);
                     this.foregroundOffScreenLayer.setOffScreenRendering(true);
-                    this.landingSaucerActor.setPosition(-1000,-1000);
+                    this.landingSaucerActor.setPosition(config.SAUCER_LANDING_START_POSITION[0], config.SAUCER_LANDING_START_POSITION[1]);
                     this.saucerLayer.addActor(this.landingSaucerActor);
+                    this.time = 0;
                     state = STATE_SAUCER_LANDING;
                     this.graphicsTick(0);
                 }
                 break;
             case STATE_SAUCER_LANDING :
-                if(time <= config.SAUCER_LANDING_END) {
-                    if (time > config.SAUCER_LANDING_START) {
-                        final float delta = 1f - ((config.SAUCER_LANDING_END - time) / (config.SAUCER_LANDING_END - config.SAUCER_LANDING_START));
-                        this.tmpVector.x = config.SAUCER_LANDING_BOTTOM[0];
-                        this.tmpVector.y = Interpolation.fade.apply(config.SAUCER_LANDING_TOP[1], config.SAUCER_LANDING_BOTTOM[1], delta);
-                        this.landingSaucerActor.setPosition(this.tmpVector.x, this.tmpVector.y);
-                    }
+                if(!this.landingSaucerAnimation.isAnimationFinished(time)){
+                    this.landingSaucerActor.playAnimation(this.landingSaucerAnimation, time);
                 }
                 else{
                     this.softBuddyOffScreenLayer.setOffScreenRendering(true);
@@ -531,7 +540,7 @@ public class Level01 extends Level{
     public void physicsTick(float deltaTime){
         switch (state){
             case STATE_SOFTBUDDY_IN :
-                this.softBuddyActor.createGroup(config.SOFTBUDDY_GROUP[0],config.SOFTBUDDY_GROUP[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES,config.SOFTBUDDY_GROUP[2]);
+                this.softBuddyActor.createGroup(this.landingSaucerActor.x + config.SOFTBUDDY_GROUP_START_OFFSET[0], this.landingSaucerActor.y + config.SOFTBUDDY_GROUP_START_OFFSET[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES,config.SOFTBUDDY_GROUP_START_WIDTH);
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:

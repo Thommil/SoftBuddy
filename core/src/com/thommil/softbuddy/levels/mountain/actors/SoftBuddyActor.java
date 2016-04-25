@@ -56,6 +56,11 @@ public class SoftBuddyActor extends ParticleSystemActor{
         return this.particleGroup;
     }
 
+    public void reset(){
+        if(this.particleGroup != null){
+            this.particleGroup.destroyParticlesInGroup();
+        }
+    }
 
     @Override
     public void dispose() {

@@ -71,7 +71,8 @@ public class MainScreen extends AbstractScreen implements InputProcessor{
         this.mainMenuBatchLayer.addActor(new ButtonActor(this.screenDef.buttons[1].name.hashCode(), this.fgTextureSet, this.screenDef.buttons[1].widget.region, this.screenDef.buttons[1].size){
             @Override
             public boolean onTouchDown(float worldX, float worldY, int button) {
-                softBuddyGameAPI.quit();
+                //softBuddyGameAPI.quit();
+                softBuddyGameAPI.startLevel(selectedChapter, selectedChapter, true);
                 return true;
             }
         });

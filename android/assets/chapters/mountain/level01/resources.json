@@ -514,11 +514,11 @@
 			]
 		},
 		{
-			"name" : "sun_spot",
+			"name" : "sunrise_spot",
 			"type" : "COLOR",
 			"playMode" : "NORMAL",
 			"interpolator" : "LINEAR",
-			"frameDuration" : 2,
+			"frameDuration" : 10,
 			"keyFrames" : [
 				{
 					"color" : [0,0,0,1]
@@ -533,7 +533,7 @@
 			"type" : "COLOR",
 			"playMode" : "NORMAL",
 			"interpolator" : "LINEAR",
-			"frameDuration" : 2,
+			"frameDuration" : 10,
 			"keyFrames" : [
 				{
 					"color" : [0.3,0.3,0.3,1]
@@ -558,6 +558,36 @@
 					"xOffset" : -60,
 					"yOffset" : 0,
 					"flipX" : true
+				}
+			]
+		},
+		{
+			"name" : "sunrise",
+			"type" : "TRANSLATE",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 5,
+			"keyFrames" : [
+				{
+					"xOffset" : 0,
+					"yOffset" : 60
+				},
+				{
+					"xOffset" : -60,
+					"yOffset" : 0
+				}
+			]
+		},
+		{
+			"name" : "landing_saucer",
+			"type" : "TRANSLATE",
+			"playMode" : "NORMAL",
+			"interpolator" : "LINEAR",
+			"frameDuration" : 3,
+			"keyFrames" : [
+				{
+					"xOffset" : 0,
+					"yOffset" : -2
 				}
 			]
 		}
