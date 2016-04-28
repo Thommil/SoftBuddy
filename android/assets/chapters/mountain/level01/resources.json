@@ -437,7 +437,7 @@
 			"regionY" : 0,
 			"regionWidth" : 32,
 			"regionHeight" : 32,
-			"file" : "chapters/mountain/softbuddy_particle.png",
+			"file" : "common/softbuddy_particle.png",
 			"name" : "flying_saucer_reactor"
 
 		},
@@ -608,7 +608,7 @@
 		"landing_saucer" : {
 			"start_position" : [0, 6]
 		},
-		"softbuddy_particle" : {
+		"softbuddy" : {
 			"start_position_offset" : [1.5, 1.5],
 			"start_width" : 1
 		}

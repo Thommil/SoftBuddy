@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonValue;
 import com.thommil.libgdx.runtime.tools.JSONLoader;
+import finnstr.libgdx.liquidfun.ParticleSystemDef;
 
 
 public class SharedResources extends JSONLoader{
@@ -18,6 +19,8 @@ public class SharedResources extends JSONLoader{
     private Array<ScreenDef> screensDef;
     private Array<WidgetDef> widgetsDef;
     private Configuration configuration;
+    private SoftBuddyDef softBuddyDef;
+
 
     public SharedResources() {
         super();
@@ -26,6 +29,7 @@ public class SharedResources extends JSONLoader{
         this.widgetsDef = this.getWidgetsDef();
         this.screensDef = this.getScreensDef();
         this.configuration = this.getConfiguration();
+        this.softBuddyDef = this.getSoftBuddyDef();
     }
 
     public void load(final AssetManager assetManager){
@@ -41,7 +45,10 @@ public class SharedResources extends JSONLoader{
         for(final WidgetDef widgetDef : this.widgetsDef){
             assetManager.load(widgetDef.texturePath, Texture.class);
         }
+
         assetManager.finishLoading();
+
+        assetManager.load(this.softBuddyDef.particlesImage, Texture.class);
     }
 
     public Configuration getConfiguration(){
@@ -62,6 +69,76 @@ public class SharedResources extends JSONLoader{
         }
 
         return this.configuration;
+    }
+
+    public SoftBuddyDef getSoftBuddyDef(){
+        if(this.softBuddyDef == null){
+            this.softBuddyDef = new SoftBuddyDef();
+            if (this.jsonRoot.has("configuration")) {
+                if (this.jsonRoot.get("configuration").has("softbuddy")) {
+                    final JsonValue jsonSoftBuddy = this.jsonRoot.get("configuration").get("softbuddy");
+                    if (jsonSoftBuddy.has("max_particles")) {
+                        this.softBuddyDef.maxParticles = jsonSoftBuddy.getInt("max_particles");
+                    }
+                    if (jsonSoftBuddy.has("particles_radius")) {
+                        this.softBuddyDef.particlesRadius = jsonSoftBuddy.getFloat("particles_radius");
+                    }
+                    if (jsonSoftBuddy.has("particles_scale_factor")) {
+                        this.softBuddyDef.particlesScaleFactor = jsonSoftBuddy.getFloat("particles_scale_factor");
+                    }
+                    if (jsonSoftBuddy.has("particles_image")) {
+                        this.softBuddyDef.particlesImage = jsonSoftBuddy.getString("particles_image");
+                    }
+                    if (jsonSoftBuddy.has("strictContactCheck")) {
+                        this.softBuddyDef.strictContactCheck = jsonSoftBuddy.getBoolean("strictContactCheck");
+                    }
+                    if (jsonSoftBuddy.has("gravityScale")) {
+                        this.softBuddyDef.gravityScale = jsonSoftBuddy.getFloat("gravityScale");
+                    }
+                    if (jsonSoftBuddy.has("pressureStrength")) {
+                        this.softBuddyDef.pressureStrength = jsonSoftBuddy.getFloat("pressureStrength");
+                    }
+                    if (jsonSoftBuddy.has("dampingStrength")) {
+                        this.softBuddyDef.dampingStrength = jsonSoftBuddy.getFloat("dampingStrength");
+                    }
+                    if (jsonSoftBuddy.has("elasticStrength")) {
+                        this.softBuddyDef.elasticStrength = jsonSoftBuddy.getFloat("elasticStrength");
+                    }
+                    if (jsonSoftBuddy.has("springStrength")) {
+                        this.softBuddyDef.springStrength = jsonSoftBuddy.getFloat("springStrength");
+                    }
+                    if (jsonSoftBuddy.has("viscousStrength")) {
+                        this.softBuddyDef.viscousStrength = jsonSoftBuddy.getFloat("viscousStrength");
+                    }
+                    if (jsonSoftBuddy.has("surfaceTensionPressureStrength")) {
+                        this.softBuddyDef.surfaceTensionPressureStrength = jsonSoftBuddy.getFloat("surfaceTensionPressureStrength");
+                    }
+                    if (jsonSoftBuddy.has("surfaceTensionNormalStrength")) {
+                        this.softBuddyDef.surfaceTensionNormalStrength = jsonSoftBuddy.getFloat("surfaceTensionNormalStrength");
+                    }
+                    if (jsonSoftBuddy.has("repulsiveStrength")) {
+                        this.softBuddyDef.repulsiveStrength = jsonSoftBuddy.getFloat("repulsiveStrength");
+                    }
+                    if (jsonSoftBuddy.has("ejectionStrength")) {
+                        this.softBuddyDef.ejectionStrength = jsonSoftBuddy.getFloat("ejectionStrength");
+                    }
+                    if (jsonSoftBuddy.has("staticPressureStrength")) {
+                        this.softBuddyDef.staticPressureStrength = jsonSoftBuddy.getFloat("staticPressureStrength");
+                    }
+                    if (jsonSoftBuddy.has("staticPressureRelaxation")) {
+                        this.softBuddyDef.staticPressureRelaxation = jsonSoftBuddy.getFloat("staticPressureRelaxation");
+                    }
+                    if (jsonSoftBuddy.has("staticPressureIterations")) {
+                        this.softBuddyDef.staticPressureIterations = jsonSoftBuddy.getInt("staticPressureIterations");
+                    }
+                    if (jsonSoftBuddy.has("colorMixingStrength")) {
+                        this.softBuddyDef.colorMixingStrength = jsonSoftBuddy.getFloat("colorMixingStrength");
+                    }
+                }
+            }
+        }
+
+        return this.softBuddyDef;
     }
 
     public Array<LabelDef> getLabelsDef(){
@@ -160,6 +237,13 @@ public class SharedResources extends JSONLoader{
             }
         }
         return null;
+    }
+
+    public static class SoftBuddyDef extends ParticleSystemDef{
+        public int maxParticles = 1000;
+        public float particlesRadius = 0.03f;
+        public float particlesScaleFactor = 2f;
+        public String particlesImage;
     }
 
     public static class LabelDef{

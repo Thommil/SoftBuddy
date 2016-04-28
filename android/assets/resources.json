@@ -1,4 +1,40 @@
 {
+  "configuration" : {
+    "input" : {
+      "keyboard" : {
+        "left" : 21,
+        "right" : 22,
+        "force" : 50
+      },
+      "sensor" : {
+        "force" : 1
+      }
+    },
+    "softbuddy" : {
+      "max_particles" : 1000,
+      "particles_radius" : 0.03,
+      "particles_scale_factor" : 2.0,
+      "particles_image" : "common/softbuddy_particle.png",
+      "strictContactCheck" : true,
+      "density" : 1.0,
+      "gravityScale" : 1.0,
+      "pressureStrength" : 0.05,
+      "dampingStrength" : 1.0,
+      "elasticStrength" : 0.25,
+      "springStrength" : 0.25,
+      "viscousStrength" : 0.25,
+      "surfaceTensionPressureStrength" : 0.2,
+      "surfaceTensionNormalStrength" : 0.2,
+      "repulsiveStrength" : 1.0,
+      "powderStrength" : 0.5,
+      "ejectionStrength" : 0.5,
+      "staticPressureStrength" : 0.2,
+      "staticPressureRelaxation" : 0.2,
+      "staticPressureIterations" : 8,
+      "colorMixingStrength" : 0.5
+    }
+  },
+
   "screens" :{
      "main": {
         "background": "screens/mainscreen_bg.png",
@@ -42,19 +78,6 @@
       "size": 20,
       "pos": [300, -260],
       "color": [1, 1, 1, 1]
-    }
-  },
-
-  "configuration" : {
-    "input" : {
-      "keyboard" : {
-        "left" : 21,
-        "right" : 22,
-        "force" : 200
-      },
-      "sensor" : {
-        "force" : 100
-      }
     }
   }
 }

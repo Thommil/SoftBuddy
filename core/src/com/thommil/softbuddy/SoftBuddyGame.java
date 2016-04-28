@@ -252,6 +252,7 @@ public class SoftBuddyGame extends Game implements SoftBuddyGameAPI {
 		if(this.currentChapter != null){
 			this.currentChapter.dispose();
 		}
+		this.getAssetManager().dispose();
 		Gdx.app.exit();
 	}
 }

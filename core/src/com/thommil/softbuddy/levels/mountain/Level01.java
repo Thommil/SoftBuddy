@@ -1,7 +1,6 @@
 package com.thommil.softbuddy.levels.mountain;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -33,7 +32,7 @@ import com.thommil.softbuddy.levels.Chapter;
 import com.thommil.softbuddy.levels.Level;
 import com.thommil.softbuddy.levels.common.layers.SkyLayer;
 import com.thommil.softbuddy.levels.common.renderers.SoftBuddyRenderer;
-import com.thommil.softbuddy.levels.mountain.actors.SoftBuddyActor;
+import com.thommil.softbuddy.levels.common.actors.SoftBuddyActor;
 import com.thommil.softbuddy.levels.mountain.renderers.IntroRenderer;
 
 public class Level01 extends Level{
@@ -52,7 +51,7 @@ public class Level01 extends Level{
         public final String REACTOR_SPOT_ID = "reactor_spot";
         public final String SUNRISE_ID = "sunrise";
         public final String LANDING_SAUCER_ID = "landing_saucer";
-        public final String SOFTBUFFY_PARTICLE_ID = "softbuddy_particle";
+        public final String SOFTBUFFY_ID = "softbuddy";
 
         public final float scrollDownStarsStep;
         public final float[] saucerFlyStartPositon;
@@ -78,8 +77,8 @@ public class Level01 extends Level{
             this.sunriseStartPosition = jsonConfig.get(SUNRISE_ID).get("start_position").asFloatArray();
             this.sunriseSpotFalloff = jsonConfig.get(SUNRISE_ID).get("spot_falloff").asFloatArray();
             this.saucerLandingStartPosition = jsonConfig.get(LANDING_SAUCER_ID).get("start_position").asFloatArray();
-            this.softbuddyGroupStartOffset = jsonConfig.get(SOFTBUFFY_PARTICLE_ID).get("start_position_offset").asFloatArray();
-            this.softbuddyGroupStartWidth = jsonConfig.get(SOFTBUFFY_PARTICLE_ID).getFloat("start_width");
+            this.softbuddyGroupStartOffset = jsonConfig.get(SOFTBUFFY_ID).get("start_position_offset").asFloatArray();
+            this.softbuddyGroupStartWidth = jsonConfig.get(SOFTBUFFY_ID).getFloat("start_width");
             this.flyInterpolation = new Interpolation() {
                 @Override
                 public float apply(float a) {
@@ -293,12 +292,11 @@ public class Level01 extends Level{
     }
 
     protected void buildForeground() {
-        final SceneLoader.ImageDef softBuddyParticleImageDef = this.chapterResources.getImageDefinition(levelConfiguration.SOFTBUFFY_PARTICLE_ID);
         this.softBuddyParticlesRenderer = new TexturedParticlesBatchRenderer(SoftBuddyGameAPI.PARTICLES_BATCH_SIZE);
         this.softBuddyLayer = new ParticlesBatchLayer(Runtime.getInstance().getViewport(),1, this.softBuddyParticlesRenderer);
-        this.softBuddyActor = new SoftBuddyActor(levelConfiguration.SOFTBUFFY_PARTICLE_ID.hashCode(), new TextureSet(new Texture(Gdx.files.internal(softBuddyParticleImageDef.path))));
+        this.softBuddyActor = new SoftBuddyActor(0, this.softBuddyGameAPI.getSharedResources().getSoftBuddyDef(), this.assetManager);
         this.softBuddyLayer.addActor(this.softBuddyActor);
-        this.softBuddyLayer.setScaleFactor(SoftBuddyActor.DEFAULT_PARTICLES_SCALEFACTOR);
+        this.softBuddyLayer.setScaleFactor(this.softBuddyGameAPI.getSharedResources().getSoftBuddyDef().particlesScaleFactor);
         this.softBuddyRenderer = new SoftBuddyRenderer(Runtime.getInstance().getViewport());
         this.softBuddyOffScreenLayer = new OffScreenLayer<ParticlesBatchLayer>(Runtime.getInstance().getViewport(),this.softBuddyLayer,this.softBuddyRenderer);
         Runtime.getInstance().addLayer(this.softBuddyOffScreenLayer);
@@ -567,7 +565,7 @@ public class Level01 extends Level{
     public void physicsTick(float deltaTime){
         switch (state){
             case STATE_SOFTBUDDY_IN :
-                this.softBuddyActor.createGroup(this.landingSaucerActor.x + levelConfiguration.softbuddyGroupStartOffset[0], this.landingSaucerActor.y + levelConfiguration.softbuddyGroupStartOffset[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES, levelConfiguration.softbuddyGroupStartWidth);
+                this.softBuddyActor.createGroup(this.landingSaucerActor.x + levelConfiguration.softbuddyGroupStartOffset[0], this.landingSaucerActor.y + levelConfiguration.softbuddyGroupStartOffset[1], levelConfiguration.softbuddyGroupStartWidth);
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:

@@ -1,10 +1,11 @@
-package com.thommil.softbuddy.levels.mountain.actors;
+package com.thommil.softbuddy.levels.common.actors;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.thommil.libgdx.runtime.actor.physics.ParticleSystemActor;
 import com.thommil.libgdx.runtime.graphics.TextureSet;
+import com.thommil.softbuddy.SharedResources;
 import finnstr.libgdx.liquidfun.ParticleDef;
 import finnstr.libgdx.liquidfun.ParticleGroup;
 import finnstr.libgdx.liquidfun.ParticleGroupDef;
@@ -12,29 +13,20 @@ import finnstr.libgdx.liquidfun.ParticleSystemDef;
 
 public class SoftBuddyActor extends ParticleSystemActor{
 
-    public static final int DEFAULT_MAX_PARTICLES = 1000;
-    public static final float DEFAULT_PARTICLES_RADIUS = 0.03f;
-    public static final float DEFAULT_PARTICLES_SCALEFACTOR = 2f;
-
+    protected final SharedResources.SoftBuddyDef softBuddyDef;
     protected ParticleGroup particleGroup;
 
-    public SoftBuddyActor(final int id, final TextureSet textureSet) {
-        super(id, DEFAULT_PARTICLES_RADIUS, textureSet);
-    }
-
-    public SoftBuddyActor(final int id, final float particlesRadius, final TextureSet textureSet) {
-        super(id, particlesRadius, textureSet);
+    public SoftBuddyActor(final int id, final SharedResources.SoftBuddyDef softBuddyDef, final AssetManager assetManager) {
+        super(id, softBuddyDef.particlesRadius, new TextureSet(assetManager.get(softBuddyDef.particlesImage, Texture.class)));
+        this.softBuddyDef = softBuddyDef;
     }
 
     @Override
     public ParticleSystemDef getDefinition() {
-        final ParticleSystemDef particleSystemDef = super.getDefinition();
-        particleSystemDef.density = 10f;
-
-        return particleSystemDef;
+        return this.softBuddyDef;
     }
 
-    public ParticleGroup createGroup(float x, float y, int particlesCount, float shapeWidth){
+    public ParticleGroup createGroup(float x, float y, float shapeWidth){
         final ParticleGroupDef particleGroupDef = new ParticleGroupDef();
         particleGroupDef.flags.add(ParticleDef.ParticleType.b2_tensileParticle);
         particleGroupDef.flags.add(ParticleDef.ParticleType.b2_waterParticle);
@@ -44,11 +36,12 @@ public class SoftBuddyActor extends ParticleSystemActor{
         particleGroupDef.position.set(x,y);
         final float stride = 0.75f * (this.particlesRadius * 2f);
         final float particlesPerLine = (float)Math.ceil(shapeWidth / stride * 2f);
-        final float shapeHeight = particlesCount / particlesPerLine * stride * 2;
+        final float shapeHeight = this.softBuddyDef.maxParticles / particlesPerLine * stride * 2;
         shape.setAsBox(shapeWidth/2f,shapeHeight/2f);
         particleGroupDef.shape = shape;
         this.particleGroup = this.particleSystem.createParticleGroup(particleGroupDef);
         shape.dispose();
+
         return this.particleGroup;
     }
 
@@ -64,6 +57,6 @@ public class SoftBuddyActor extends ParticleSystemActor{
 
     @Override
     public void dispose() {
-        this.textureSet.dispose();
+
     }
 }

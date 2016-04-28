@@ -1,10 +1,3 @@
 {
-  "title" : "01 - The landing",
-  "image" :
-  [
-    {
-      "file" : "chapters/mountain/softbuddy_particle.png",
-      "name" : "softbuddy_particle"
-    }
-  ]
+  "title" : "01 - The landing"
 }
