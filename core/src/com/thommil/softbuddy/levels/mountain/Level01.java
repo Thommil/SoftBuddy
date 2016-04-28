@@ -1,6 +1,7 @@
 package com.thommil.softbuddy.levels.mountain;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -39,7 +40,7 @@ public class Level01 extends Level{
 
     public static final String RESOURCES_FILE = "chapters/mountain/level01/resources.json";
 
-    public static class Config{
+    public static class LevelConfiguration {
 
         public final String BACKGROUND_ID = "background";
         public final String FOREGROUND_ID = "foreground";
@@ -66,7 +67,7 @@ public class Level01 extends Level{
         public final float softbuddyGroupStartWidth;
         public final Interpolation flyInterpolation;
 
-        public Config(SceneLoader levelResources){
+        public LevelConfiguration(SceneLoader levelResources){
             final JsonValue jsonConfig = levelResources.getJsonRoot().get("configuration");
             this.scrollDownStarsStep = jsonConfig.get(SCROLL_DOWN_ID).getFloat("step");
             this.saucerFlyStartPositon = jsonConfig.get(FLYING_SAUCER_ID).get("start_position").asFloatArray();
@@ -96,7 +97,8 @@ public class Level01 extends Level{
     private static final int STATE_SOFTBUDDY_IN = 5;
     private static final int STATE_PLAY = 6;
 
-    private Config config;
+    private SharedResources.Configuration globalConfiguration;
+    private LevelConfiguration levelConfiguration;
 
     private float levelWorldWidth;
     private float levelWorldHeight;
@@ -208,6 +210,7 @@ public class Level01 extends Level{
                 break;
         }
 
+        this.levelConfiguration.softbuddyGroupStartOffset[1] = 5;
         state = STATE_SAUCER_LANDING;
     }
 
@@ -224,7 +227,8 @@ public class Level01 extends Level{
 
     @Override
     protected void build() {
-        this.config = new Config(this.levelResources);
+        this.globalConfiguration = this.softBuddyGameAPI.getSharedResources().getConfiguration();
+        this.levelConfiguration = new LevelConfiguration(this.levelResources);
         this.screenVector = new Vector2();
         this.tmpVector = new Vector2();
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
@@ -259,18 +263,18 @@ public class Level01 extends Level{
     protected void buildBackground() {
         this.introRenderer = new IntroRenderer(1);
         this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/4, this.levelWorldWidth, this.levelWorldHeight,this.levelWorldHeight/4);
-        this.scrollDownAnimation = (TranslateAnimation)this.levelResources.getAnimation(config.SCROLL_DOWN_ID, this.assetManager);
+        this.scrollDownAnimation = (TranslateAnimation)this.levelResources.getAnimation(levelConfiguration.SCROLL_DOWN_ID, this.assetManager);
         this.scrollDownAnimation.getKeyFrame(0).y = this.levelWorldHeight/2;
-        this.sunSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(config.SUNRISE_SPOT_ID, this.assetManager);
-        this.ambientColorAnimation = (ColorAnimation) this.levelResources.getAnimation(config.AMBIENT_ID, this.assetManager);
-        this.sunriseAnimation = (TranslateAnimation) this.levelResources.getAnimation(config.SUNRISE_ID, this.assetManager);
+        this.sunSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.SUNRISE_SPOT_ID, this.assetManager);
+        this.ambientColorAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.AMBIENT_ID, this.assetManager);
+        this.sunriseAnimation = (TranslateAnimation) this.levelResources.getAnimation(levelConfiguration.SUNRISE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.skyLayer);
 
         this.backgroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1,this.introRenderer);
-        final SceneLoader.ImageDef backgroundImageDef = this.levelResources.getImageDefinition(config.BACKGROUND_ID);
+        final SceneLoader.ImageDef backgroundImageDef = this.levelResources.getImageDefinition(levelConfiguration.BACKGROUND_ID);
         final Texture backgroundTexture = this.assetManager.get(backgroundImageDef.path, Texture.class);
         this.introRenderer.setNormalOffset(backgroundImageDef.normalOffset.x/backgroundTexture.getWidth(),backgroundImageDef.normalOffset.y/backgroundTexture.getHeight());
-        final StaticActor backgroundActor = new StaticActor(config.BACKGROUND_ID.hashCode()
+        final StaticActor backgroundActor = new StaticActor(levelConfiguration.BACKGROUND_ID.hashCode()
                 ,new TextureSet(backgroundTexture)
                 ,backgroundImageDef.x - backgroundImageDef.width/2
                 ,backgroundImageDef.y - backgroundImageDef.height/2
@@ -289,10 +293,10 @@ public class Level01 extends Level{
     }
 
     protected void buildForeground() {
-        final SceneLoader.ImageDef softBuddyParticleImageDef = this.chapterResources.getImageDefinition(config.SOFTBUFFY_PARTICLE_ID);
+        final SceneLoader.ImageDef softBuddyParticleImageDef = this.chapterResources.getImageDefinition(levelConfiguration.SOFTBUFFY_PARTICLE_ID);
         this.softBuddyParticlesRenderer = new TexturedParticlesBatchRenderer(SoftBuddyGameAPI.PARTICLES_BATCH_SIZE);
         this.softBuddyLayer = new ParticlesBatchLayer(Runtime.getInstance().getViewport(),1, this.softBuddyParticlesRenderer);
-        this.softBuddyActor = new SoftBuddyActor(config.SOFTBUFFY_PARTICLE_ID.hashCode(), new TextureSet(new Texture(Gdx.files.internal(softBuddyParticleImageDef.path))));
+        this.softBuddyActor = new SoftBuddyActor(levelConfiguration.SOFTBUFFY_PARTICLE_ID.hashCode(), new TextureSet(new Texture(Gdx.files.internal(softBuddyParticleImageDef.path))));
         this.softBuddyLayer.addActor(this.softBuddyActor);
         this.softBuddyLayer.setScaleFactor(SoftBuddyActor.DEFAULT_PARTICLES_SCALEFACTOR);
         this.softBuddyRenderer = new SoftBuddyRenderer(Runtime.getInstance().getViewport());
@@ -300,33 +304,33 @@ public class Level01 extends Level{
         Runtime.getInstance().addLayer(this.softBuddyOffScreenLayer);
 
         this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
-        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(config.FLYING_SAUCER_ID);
-        this.flyingSaucerActor = new SpriteActor(config.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
+        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(levelConfiguration.FLYING_SAUCER_ID);
+        this.flyingSaucerActor = new SpriteActor(levelConfiguration.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
                 ,flyingSaucerImageDef.regionX
                 ,flyingSaucerImageDef.regionY
                 ,flyingSaucerImageDef.regionWidth
                 ,flyingSaucerImageDef.regionHeight
                 ,flyingSaucerImageDef.width
                 ,flyingSaucerImageDef.height);
-        this.flyingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(config.FLYING_SAUCER_ID, this.assetManager);
-        this.flyingSaucerAnimation.getKeyFrame(0).interpolation = config.flyInterpolation;
-        this.flyingSaucerAnimation.getKeyFrame(1).interpolation = config.flyInterpolation;
-        this.reactorSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(config.REACTOR_SPOT_ID, this.assetManager);
-        final SceneLoader.ImageDef landingSaucerImageDef = this.levelResources.getImageDefinition(config.LANDING_SAUCER_ID);
-        this.landingSaucerActor = new SpriteActor(config.LANDING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(landingSaucerImageDef.path, Texture.class))
+        this.flyingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(levelConfiguration.FLYING_SAUCER_ID, this.assetManager);
+        this.flyingSaucerAnimation.getKeyFrame(0).interpolation = levelConfiguration.flyInterpolation;
+        this.flyingSaucerAnimation.getKeyFrame(1).interpolation = levelConfiguration.flyInterpolation;
+        this.reactorSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.REACTOR_SPOT_ID, this.assetManager);
+        final SceneLoader.ImageDef landingSaucerImageDef = this.levelResources.getImageDefinition(levelConfiguration.LANDING_SAUCER_ID);
+        this.landingSaucerActor = new SpriteActor(levelConfiguration.LANDING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(landingSaucerImageDef.path, Texture.class))
                 ,landingSaucerImageDef.regionX
                 ,landingSaucerImageDef.regionY
                 ,landingSaucerImageDef.regionWidth
                 ,landingSaucerImageDef.regionHeight
                 ,landingSaucerImageDef.width
                 ,landingSaucerImageDef.height);
-        this.landingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(config.LANDING_SAUCER_ID, this.assetManager);
+        this.landingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(levelConfiguration.LANDING_SAUCER_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
-        final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(config.FOREGROUND_ID);
-        final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(config.FOREGROUND_ID);
-        final StaticBodyActor foregroundStaticBodyActor = new StaticBodyActor(config.FOREGROUND_ID.hashCode()
+        final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(levelConfiguration.FOREGROUND_ID);
+        final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(levelConfiguration.FOREGROUND_ID);
+        final StaticBodyActor foregroundStaticBodyActor = new StaticBodyActor(levelConfiguration.FOREGROUND_ID.hashCode()
                 ,new TextureSet(this.assetManager.get(foregroundImageDef.path, Texture.class))
                 ,foregroundBodyDef.position.x + foregroundImageDef.x - foregroundImageDef.width/2
                 ,foregroundBodyDef.position.y + foregroundImageDef.y - foregroundImageDef.height/2
@@ -355,8 +359,8 @@ public class Level01 extends Level{
 
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
         this.particlesEffectBatchLayer.setAdditive(true);
-        this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(config.FLYING_SAUCER_ID, this.assetManager);
-        this.flyingSaucerParticlesActor = new ParticleEffectActor(config.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
+        this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(levelConfiguration.FLYING_SAUCER_ID, this.assetManager);
+        this.flyingSaucerParticlesActor = new ParticleEffectActor(levelConfiguration.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
         this.flyingSaucerParticlesEffect = null;
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
     }
@@ -369,7 +373,7 @@ public class Level01 extends Level{
         ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, screenVector);
         this.titleFontActor.setPosition(screenVector.x, screenVector.y);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
-        this.titleAnimation = (ColorAnimation) this.levelResources.getAnimation(config.TITLE_ID, this.assetManager);
+        this.titleAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.TITLE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
     }
 
@@ -383,7 +387,7 @@ public class Level01 extends Level{
         this.disposeForeground();
         this.disposeBackground();
 
-        this.config = null;
+        this.levelConfiguration = null;
         this.tmpVector = null;
         this.screenVector = null;
     }
@@ -478,19 +482,19 @@ public class Level01 extends Level{
                 break;
             case STATE_SCROLL_DOWN :
                 if(!this.scrollDownAnimation.isAnimationFinished(time)){
-                    this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()-config.scrollDownStarsStep);
+                    this.skyLayer.setStarsOffset(0,this.skyLayer.getStarsYOffset()- levelConfiguration.scrollDownStarsStep);
                     Runtime.getInstance().getViewport().getCamera().position.add(0,-this.scrollDownAnimation.getKeyFrame(time).y,0);
                     Runtime.getInstance().getViewport().apply();
                 }
                 else{
                     Runtime.getInstance().getViewport().getCamera().position.set(0, 0, 0);
                     Runtime.getInstance().getViewport().apply();
-                    this.flyingSaucerActor.setPosition(config.saucerFlyStartPositon[0],config.saucerFlyStartPositon[1]);
+                    this.flyingSaucerActor.setPosition(levelConfiguration.saucerFlyStartPositon[0], levelConfiguration.saucerFlyStartPositon[1]);
                     this.saucerLayer.addActor(this.flyingSaucerActor);
                     this.introRenderer.switchLight(true);
-                    this.introRenderer.setFallOff(config.reactorSpotFalloff[0], config.reactorSpotFalloff[1], config.reactorSpotFalloff[2]);
+                    this.introRenderer.setFallOff(levelConfiguration.reactorSpotFalloff[0], levelConfiguration.reactorSpotFalloff[1], levelConfiguration.reactorSpotFalloff[2]);
                     this.particlesEffectBatchLayer.addActor(this.flyingSaucerParticlesActor);
-                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, config.saucerFlyStartPositon[0], config.saucerFlyStartPositon[1], false, false, config.reactorScaleFactor);
+                    this.flyingSaucerParticlesEffect = this.flyingSaucerParticlesActor.spawn(true, levelConfiguration.saucerFlyStartPositon[0], levelConfiguration.saucerFlyStartPositon[1], false, false, levelConfiguration.reactorScaleFactor);
                     this.time = 0;
                     this.state = STATE_SAUCER_FLY;
                     this.graphicsTick(0);
@@ -501,13 +505,13 @@ public class Level01 extends Level{
                     this.flyingSaucerActor.playAnimation(this.flyingSaucerAnimation, time);
                     if(!this.flyingSaucerActor.isFlipX()) {
                         this.tmpVector.set(this.flyingSaucerActor.x, this.flyingSaucerActor.y);
-                        this.tmpVector.add(config.reactorSpotOffset[0], config.reactorSpotOffset[1]);
-                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + config.reactorOffset[0], this.flyingSaucerActor.y + config.reactorOffset[1]);
+                        this.tmpVector.add(levelConfiguration.reactorSpotOffset[0], levelConfiguration.reactorSpotOffset[1]);
+                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + levelConfiguration.reactorOffset[0], this.flyingSaucerActor.y + levelConfiguration.reactorOffset[1]);
                     }
                     else {
                         this.tmpVector.set(this.flyingSaucerActor.x, this.flyingSaucerActor.y);
-                        this.tmpVector.add(-config.reactorSpotOffset[0] + this.flyingSaucerActor.width, config.reactorSpotOffset[1]);
-                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + this.flyingSaucerActor.width - config.reactorOffset[0], this.flyingSaucerActor.y + config.reactorOffset[1]);
+                        this.tmpVector.add(-levelConfiguration.reactorSpotOffset[0] + this.flyingSaucerActor.width, levelConfiguration.reactorSpotOffset[1]);
+                        this.flyingSaucerParticlesEffect.setPosition(this.flyingSaucerActor.x + this.flyingSaucerActor.width - levelConfiguration.reactorOffset[0], this.flyingSaucerActor.y + levelConfiguration.reactorOffset[1]);
                     }
                     this.screenVector.set(this.tmpVector);
                     Runtime.getInstance().getViewport().project(this.screenVector);
@@ -516,10 +520,10 @@ public class Level01 extends Level{
                 else{
                     this.saucerLayer.removeActor(this.flyingSaucerActor);
                     this.particlesEffectBatchLayer.removeActor(this.flyingSaucerParticlesActor);
-                    this.introRenderer.setFallOff(config.sunriseSpotFalloff[0], config.sunriseSpotFalloff[1], config.sunriseSpotFalloff[2]);
+                    this.introRenderer.setFallOff(levelConfiguration.sunriseSpotFalloff[0], levelConfiguration.sunriseSpotFalloff[1], levelConfiguration.sunriseSpotFalloff[2]);
                     this.introRenderer.setLightColor(this.sunSpotAnimation.getKeyFrame(0));
-                    this.tmpVector.set(config.sunriseStartPosition[0], config.sunriseStartPosition[1]);
-                    this.screenVector.set(config.sunriseStartPosition[0], config.sunriseStartPosition[1]);
+                    this.tmpVector.set(levelConfiguration.sunriseStartPosition[0], levelConfiguration.sunriseStartPosition[1]);
+                    this.screenVector.set(levelConfiguration.sunriseStartPosition[0], levelConfiguration.sunriseStartPosition[1]);
                     Runtime.getInstance().getViewport().project(this.screenVector);
                     this.introRenderer.setLightPosition((int) this.screenVector.x, (int) this.screenVector.y);
                     this.time = 0;
@@ -540,7 +544,7 @@ public class Level01 extends Level{
                 else{
                     this.backgroundOffScreenLayer.setOffScreenRendering(true);
                     this.foregroundOffScreenLayer.setOffScreenRendering(true);
-                    this.landingSaucerActor.setPosition(config.saucerLandingStartPosition[0], config.saucerLandingStartPosition[1]);
+                    this.landingSaucerActor.setPosition(levelConfiguration.saucerLandingStartPosition[0], levelConfiguration.saucerLandingStartPosition[1]);
                     this.saucerLayer.addActor(this.landingSaucerActor);
                     this.time = 0;
                     state = STATE_SAUCER_LANDING;
@@ -563,11 +567,19 @@ public class Level01 extends Level{
     public void physicsTick(float deltaTime){
         switch (state){
             case STATE_SOFTBUDDY_IN :
-                this.softBuddyActor.createGroup(this.landingSaucerActor.x + config.softbuddyGroupStartOffset[0], this.landingSaucerActor.y + config.softbuddyGroupStartOffset[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES,config.softbuddyGroupStartWidth);
+                this.softBuddyActor.createGroup(this.landingSaucerActor.x + levelConfiguration.softbuddyGroupStartOffset[0], this.landingSaucerActor.y + levelConfiguration.softbuddyGroupStartOffset[1],SoftBuddyActor.DEFAULT_MAX_PARTICLES, levelConfiguration.softbuddyGroupStartWidth);
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:
-                this.tmpVector.set(-Gdx.input.getPitch(), 0);
+                if(Gdx.input.isKeyPressed(this.globalConfiguration.input.keyboard.leftKey)){
+                    this.tmpVector.set(-this.globalConfiguration.input.keyboard.force, 0);
+                }
+                else if(Gdx.input.isKeyPressed(this.globalConfiguration.input.keyboard.rightKey)){
+                    this.tmpVector.set(this.globalConfiguration.input.keyboard.force, 0);
+                }
+                else {
+                    this.tmpVector.set(-Gdx.input.getPitch() * this.globalConfiguration.input.sensor.force, 0);
+                }
                 this.softBuddyActor.getParticleGroup().applyForce(Level01.this.tmpVector);
                 break;
         }

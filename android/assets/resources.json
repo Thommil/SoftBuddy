@@ -43,5 +43,18 @@
       "pos": [300, -260],
       "color": [1, 1, 1, 1]
     }
+  },
+
+  "configuration" : {
+    "input" : {
+      "keyboard" : {
+        "left" : 21,
+        "right" : 22,
+        "force" : 200
+      },
+      "sensor" : {
+        "force" : 100
+      }
+    }
   }
 }
