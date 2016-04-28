@@ -207,6 +207,8 @@ public class Level01 extends Level{
                 Runtime.getInstance().getViewport().apply();
                 break;
         }
+
+        state = STATE_SAUCER_LANDING;
     }
 
     @Override
