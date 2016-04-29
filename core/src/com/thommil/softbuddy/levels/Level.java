@@ -3,6 +3,7 @@ package com.thommil.softbuddy.levels;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
 import com.thommil.libgdx.runtime.Runtime;
 import com.thommil.libgdx.runtime.events.TouchDispatcher;
@@ -18,6 +19,8 @@ public abstract class Level implements Disposable, InputProcessor{
     protected static final LevelResources levelResources = new LevelResources();
     protected SharedResources.Configuration globalConfiguration;
 
+    private static final Vector2 screenCenter = new Vector2(0,0);
+
     public enum Direction{
         IDLE,
         RIGHT,
@@ -25,7 +28,6 @@ public abstract class Level implements Disposable, InputProcessor{
     }
 
     protected Direction currentDirection = Direction.IDLE;
-    protected float currentForce = 0.0f;
 
     public void load(final AssetManager assetManager){
         this.levelResources.load(this.getResourcesPath(), assetManager);
@@ -38,6 +40,7 @@ public abstract class Level implements Disposable, InputProcessor{
     public abstract String getResourcesPath();
 
     public final void build(final ChapterResources chapterResources, final SoftBuddyGameAPI softBuddyGameAPI, final AssetManager assetManager){
+        Runtime.getInstance().getViewport().project(Level.screenCenter);
         this.globalConfiguration = softBuddyGameAPI.getSharedResources().getConfiguration();
         this.chapterResources = chapterResources;
         this.softBuddyGameAPI = softBuddyGameAPI;
@@ -62,11 +65,9 @@ public abstract class Level implements Disposable, InputProcessor{
             default :
                 if(keycode == this.globalConfiguration.input.keyboard.leftKey){
                     this.currentDirection = Direction.LEFT;
-                    this.currentForce = -this.globalConfiguration.input.keyboard.force;
                 }
-                else if(keycode == this.globalConfiguration.input.keyboard.rightKey){
+                else{
                     this.currentDirection = Direction.RIGHT;
-                    this.currentForce = this.globalConfiguration.input.keyboard.force;
                 }
         }
 
@@ -76,7 +77,6 @@ public abstract class Level implements Disposable, InputProcessor{
     @Override
     public boolean keyUp(int keycode) {
         this.currentDirection = Direction.IDLE;
-        this.currentForce = 0;
         return false;
     }
 
@@ -87,36 +87,33 @@ public abstract class Level implements Disposable, InputProcessor{
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        /*
-        /*switch(Gdx.app.getType()){
-                    case Application.ApplicationType.Desktop:
-                        break;
-                }
-
-                if(Gdx.input.isKeyPressed(this.globalConfiguration.input.keyboard.leftKey)){
-                    this.tmpVector.set(-this.globalConfiguration.input.keyboard.force, 0);
-                }
-                else if(Gdx.input.isKeyPressed(this.globalConfiguration.input.keyboard.rightKey)){
-                    this.tmpVector.set(this.globalConfiguration.input.keyboard.force, 0);
-                }
-                else {
-                    this.tmpVector.set(-Gdx.input.getPitch() * this.globalConfiguration.input.sensor.force, 0);
-                }
-                this.softBuddyActor.getParticleGroup().applyForce(Level01.this.tmpVector);
-                break;*/
-
+        if(pointer == 0) {
+            if (screenX < Level.screenCenter.x) {
+                this.currentDirection = Direction.LEFT;
+            } else {
+                this.currentDirection = Direction.RIGHT;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        this.currentDirection = Direction.IDLE;
-        this.currentForce = 0;
+        if(pointer == 0) {
+            this.currentDirection = Direction.IDLE;
+        }
         return false;
     }
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if(pointer == 0) {
+            if (screenX < Level.screenCenter.x) {
+                this.currentDirection = Direction.LEFT;
+            } else {
+                this.currentDirection = Direction.RIGHT;
+            }
+        }
         return false;
     }
 

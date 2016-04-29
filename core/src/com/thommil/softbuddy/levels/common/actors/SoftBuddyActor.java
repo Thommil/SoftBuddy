@@ -16,9 +16,12 @@ public class SoftBuddyActor extends ParticleSystemActor{
     protected final SharedResources.SoftBuddyDef softBuddyDef;
     protected ParticleGroup particleGroup;
 
+    public float moveForce = 50;
+
     public SoftBuddyActor(final int id, final SharedResources.SoftBuddyDef softBuddyDef, final AssetManager assetManager) {
         super(id, softBuddyDef.particlesRadius, new TextureSet(assetManager.get(softBuddyDef.particlesImage, Texture.class)));
         this.softBuddyDef = softBuddyDef;
+        this.moveForce = softBuddyDef.moveForce;
     }
 
     @Override

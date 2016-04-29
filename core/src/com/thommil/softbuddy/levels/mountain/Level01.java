@@ -1,7 +1,5 @@
 package com.thommil.softbuddy.levels.mountain;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -568,7 +566,16 @@ public class Level01 extends Level{
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:
-                this.tmpVector.set(this.currentForce, 0);
+                switch(currentDirection){
+                    case LEFT:
+                        this.tmpVector.set(-this.softBuddyActor.moveForce, 0);
+                        break;
+                    case RIGHT:
+                        this.tmpVector.set(this.softBuddyActor.moveForce, 0);
+                        break;
+                    default :
+                        this.tmpVector.set(0, 0);
+                }
                 this.softBuddyActor.getParticleGroup().applyForce(this.tmpVector);
         }
     }

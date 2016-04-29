@@ -59,10 +59,6 @@ public class SharedResources extends JSONLoader{
                     if(this.jsonRoot.get("configuration").get("input").has("keyboard")){
                         configuration.input.keyboard.leftKey = this.jsonRoot.get("configuration").get("input").get("keyboard").getInt("left");
                         configuration.input.keyboard.rightKey = this.jsonRoot.get("configuration").get("input").get("keyboard").getInt("right");
-                        configuration.input.keyboard.force = this.jsonRoot.get("configuration").get("input").get("keyboard").getFloat("force");
-                    }
-                    if(this.jsonRoot.get("configuration").get("input").has("sensor")){
-                        configuration.input.sensor.force = this.jsonRoot.get("configuration").get("input").get("sensor").getFloat("force");
                     }
                 }
             }
@@ -77,17 +73,20 @@ public class SharedResources extends JSONLoader{
             if (this.jsonRoot.has("configuration")) {
                 if (this.jsonRoot.get("configuration").has("softbuddy")) {
                     final JsonValue jsonSoftBuddy = this.jsonRoot.get("configuration").get("softbuddy");
-                    if (jsonSoftBuddy.has("max_particles")) {
-                        this.softBuddyDef.maxParticles = jsonSoftBuddy.getInt("max_particles");
+                    if (jsonSoftBuddy.has("moveForce")) {
+                        this.softBuddyDef.moveForce = jsonSoftBuddy.getInt("moveForce");
                     }
-                    if (jsonSoftBuddy.has("particles_radius")) {
-                        this.softBuddyDef.particlesRadius = jsonSoftBuddy.getFloat("particles_radius");
+                    if (jsonSoftBuddy.has("maxParticles")) {
+                        this.softBuddyDef.maxParticles = jsonSoftBuddy.getInt("maxParticles");
                     }
-                    if (jsonSoftBuddy.has("particles_scale_factor")) {
-                        this.softBuddyDef.particlesScaleFactor = jsonSoftBuddy.getFloat("particles_scale_factor");
+                    if (jsonSoftBuddy.has("particlesRadius")) {
+                        this.softBuddyDef.particlesRadius = jsonSoftBuddy.getFloat("particlesRadius");
                     }
-                    if (jsonSoftBuddy.has("particles_image")) {
-                        this.softBuddyDef.particlesImage = jsonSoftBuddy.getString("particles_image");
+                    if (jsonSoftBuddy.has("particlesScaleFactor")) {
+                        this.softBuddyDef.particlesScaleFactor = jsonSoftBuddy.getFloat("particlesScaleFactor");
+                    }
+                    if (jsonSoftBuddy.has("particlesImage")) {
+                        this.softBuddyDef.particlesImage = jsonSoftBuddy.getString("particlesImage");
                     }
                     if (jsonSoftBuddy.has("strictContactCheck")) {
                         this.softBuddyDef.strictContactCheck = jsonSoftBuddy.getBoolean("strictContactCheck");
@@ -240,6 +239,7 @@ public class SharedResources extends JSONLoader{
     }
 
     public static class SoftBuddyDef extends ParticleSystemDef{
+        public float moveForce = 50;
         public int maxParticles = 1000;
         public float particlesRadius = 0.03f;
         public float particlesScaleFactor = 2f;
@@ -286,21 +286,14 @@ public class SharedResources extends JSONLoader{
         public static class Input{
 
             public Keyboard keyboard;
-            public Sensor sensor;
 
             public Input(){
                 keyboard = new Keyboard();
-                sensor = new Sensor();
             }
 
             public static class Keyboard{
                 public int leftKey;
                 public int rightKey;
-                public float force;
-            }
-
-            public static class Sensor{
-                public float force;
             }
         }
     }

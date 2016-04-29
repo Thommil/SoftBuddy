@@ -3,18 +3,15 @@
     "input" : {
       "keyboard" : {
         "left" : 21,
-        "right" : 22,
-        "force" : 50
-      },
-      "sensor" : {
-        "force" : 1
+        "right" : 22
       }
     },
     "softbuddy" : {
-      "max_particles" : 1000,
-      "particles_radius" : 0.03,
-      "particles_scale_factor" : 2.0,
-      "particles_image" : "common/softbuddy_particle.png",
+      "moveForce" : 50,
+      "maxParticles" : 1000,
+      "particlesRadius" : 0.03,
+      "particlesScaleFactor" : 2.0,
+      "particlesImage" : "common/softbuddy_particle.png",
       "strictContactCheck" : true,
       "density" : 1.0,
       "gravityScale" : 1.0,
