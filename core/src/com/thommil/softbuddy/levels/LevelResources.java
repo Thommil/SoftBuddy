@@ -7,11 +7,8 @@ import com.thommil.libgdx.runtime.tools.SceneLoader;
 
 public class LevelResources extends SceneLoader {
 
-    public LevelResources(final String resourcesPath){
+    public void load(final String resourcesPath, final AssetManager assetManager){
         this.parse(Gdx.files.internal(resourcesPath));
-    }
-
-    public void load(final AssetManager assetManager){
         for(final ImageDef imageDef : this.getImagesDefinition()){
             assetManager.load(imageDef.path, Texture.class);
         }

@@ -10,10 +10,6 @@ public class ChapterResources extends SceneLoader {
 
     protected ChapterDef chapterDef;
 
-    public ChapterResources(final String resourcesPath){
-        this.parse(Gdx.files.internal(resourcesPath));
-    }
-
     public ChapterDef getChapterDef(){
         if(this.chapterDef == null){
             this.chapterDef = new ChapterDef();
@@ -22,7 +18,8 @@ public class ChapterResources extends SceneLoader {
         return this.chapterDef;
     }
 
-    public void load(final AssetManager assetManager){
+    public void load(final String resourcesPath, final AssetManager assetManager){
+        this.parse(Gdx.files.internal(resourcesPath));
         for(final ImageDef imageDef : this.getImagesDefinition()){
             assetManager.load(imageDef.path, Texture.class);
         }

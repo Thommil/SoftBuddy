@@ -1,5 +1,6 @@
 package com.thommil.softbuddy.levels.mountain;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -96,7 +97,6 @@ public class Level01 extends Level{
     private static final int STATE_SOFTBUDDY_IN = 5;
     private static final int STATE_PLAY = 6;
 
-    private SharedResources.Configuration globalConfiguration;
     private LevelConfiguration levelConfiguration;
 
     private float levelWorldWidth;
@@ -226,8 +226,7 @@ public class Level01 extends Level{
 
     @Override
     protected void build() {
-        this.globalConfiguration = this.softBuddyGameAPI.getSharedResources().getConfiguration();
-        this.levelConfiguration = new LevelConfiguration(this.levelResources);
+        this.levelConfiguration = new LevelConfiguration(Level.levelResources);
         this.screenVector = new Vector2();
         this.tmpVector = new Vector2();
         this.levelWorldWidth = Runtime.getInstance().getSettings().viewport.width;
@@ -262,15 +261,15 @@ public class Level01 extends Level{
     protected void buildBackground() {
         this.introRenderer = new IntroRenderer(1);
         this.skyLayer = new SkyLayer(Runtime.getInstance().getViewport(), true, SkyLayer.MIDNIGHT, -this.levelWorldWidth/2, -this.levelWorldHeight/4, this.levelWorldWidth, this.levelWorldHeight,this.levelWorldHeight/4);
-        this.scrollDownAnimation = (TranslateAnimation)this.levelResources.getAnimation(levelConfiguration.SCROLL_DOWN_ID, this.assetManager);
+        this.scrollDownAnimation = (TranslateAnimation)Level.levelResources.getAnimation(levelConfiguration.SCROLL_DOWN_ID, this.assetManager);
         this.scrollDownAnimation.getKeyFrame(0).y = this.levelWorldHeight/2;
-        this.sunSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.SUNRISE_SPOT_ID, this.assetManager);
-        this.ambientColorAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.AMBIENT_ID, this.assetManager);
-        this.sunriseAnimation = (TranslateAnimation) this.levelResources.getAnimation(levelConfiguration.SUNRISE_ID, this.assetManager);
+        this.sunSpotAnimation = (ColorAnimation) Level.levelResources.getAnimation(levelConfiguration.SUNRISE_SPOT_ID, this.assetManager);
+        this.ambientColorAnimation = (ColorAnimation) Level.levelResources.getAnimation(levelConfiguration.AMBIENT_ID, this.assetManager);
+        this.sunriseAnimation = (TranslateAnimation) Level.levelResources.getAnimation(levelConfiguration.SUNRISE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.skyLayer);
 
         this.backgroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1,this.introRenderer);
-        final SceneLoader.ImageDef backgroundImageDef = this.levelResources.getImageDefinition(levelConfiguration.BACKGROUND_ID);
+        final SceneLoader.ImageDef backgroundImageDef = Level.levelResources.getImageDefinition(levelConfiguration.BACKGROUND_ID);
         final Texture backgroundTexture = this.assetManager.get(backgroundImageDef.path, Texture.class);
         this.introRenderer.setNormalOffset(backgroundImageDef.normalOffset.x/backgroundTexture.getWidth(),backgroundImageDef.normalOffset.y/backgroundTexture.getHeight());
         final StaticActor backgroundActor = new StaticActor(levelConfiguration.BACKGROUND_ID.hashCode()
@@ -302,7 +301,7 @@ public class Level01 extends Level{
         Runtime.getInstance().addLayer(this.softBuddyOffScreenLayer);
 
         this.saucerLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1);
-        final SceneLoader.ImageDef flyingSaucerImageDef = this.levelResources.getImageDefinition(levelConfiguration.FLYING_SAUCER_ID);
+        final SceneLoader.ImageDef flyingSaucerImageDef = Level.levelResources.getImageDefinition(levelConfiguration.FLYING_SAUCER_ID);
         this.flyingSaucerActor = new SpriteActor(levelConfiguration.FLYING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(flyingSaucerImageDef.path, Texture.class))
                 ,flyingSaucerImageDef.regionX
                 ,flyingSaucerImageDef.regionY
@@ -310,11 +309,11 @@ public class Level01 extends Level{
                 ,flyingSaucerImageDef.regionHeight
                 ,flyingSaucerImageDef.width
                 ,flyingSaucerImageDef.height);
-        this.flyingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(levelConfiguration.FLYING_SAUCER_ID, this.assetManager);
+        this.flyingSaucerAnimation = (TranslateAnimation) Level.levelResources.getAnimation(levelConfiguration.FLYING_SAUCER_ID, this.assetManager);
         this.flyingSaucerAnimation.getKeyFrame(0).interpolation = levelConfiguration.flyInterpolation;
         this.flyingSaucerAnimation.getKeyFrame(1).interpolation = levelConfiguration.flyInterpolation;
-        this.reactorSpotAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.REACTOR_SPOT_ID, this.assetManager);
-        final SceneLoader.ImageDef landingSaucerImageDef = this.levelResources.getImageDefinition(levelConfiguration.LANDING_SAUCER_ID);
+        this.reactorSpotAnimation = (ColorAnimation) Level.levelResources.getAnimation(levelConfiguration.REACTOR_SPOT_ID, this.assetManager);
+        final SceneLoader.ImageDef landingSaucerImageDef = Level.levelResources.getImageDefinition(levelConfiguration.LANDING_SAUCER_ID);
         this.landingSaucerActor = new SpriteActor(levelConfiguration.LANDING_SAUCER_ID.hashCode(), new TextureSet(this.assetManager.get(landingSaucerImageDef.path, Texture.class))
                 ,landingSaucerImageDef.regionX
                 ,landingSaucerImageDef.regionY
@@ -322,12 +321,12 @@ public class Level01 extends Level{
                 ,landingSaucerImageDef.regionHeight
                 ,landingSaucerImageDef.width
                 ,landingSaucerImageDef.height);
-        this.landingSaucerAnimation = (TranslateAnimation) this.levelResources.getAnimation(levelConfiguration.LANDING_SAUCER_ID, this.assetManager);
+        this.landingSaucerAnimation = (TranslateAnimation) Level.levelResources.getAnimation(levelConfiguration.LANDING_SAUCER_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.saucerLayer);
 
         this.foregroundLayer = new SpriteBatchLayer(Runtime.getInstance().getViewport(),1, this.introRenderer);
-        final SceneLoader.BodyDef foregroundBodyDef = this.levelResources.getBodyDefintion(levelConfiguration.FOREGROUND_ID);
-        final SceneLoader.ImageDef foregroundImageDef = this.levelResources.getImageDefinition(levelConfiguration.FOREGROUND_ID);
+        final SceneLoader.BodyDef foregroundBodyDef = Level.levelResources.getBodyDefintion(levelConfiguration.FOREGROUND_ID);
+        final SceneLoader.ImageDef foregroundImageDef = Level.levelResources.getImageDefinition(levelConfiguration.FOREGROUND_ID);
         final StaticBodyActor foregroundStaticBodyActor = new StaticBodyActor(levelConfiguration.FOREGROUND_ID.hashCode()
                 ,new TextureSet(this.assetManager.get(foregroundImageDef.path, Texture.class))
                 ,foregroundBodyDef.position.x + foregroundImageDef.x - foregroundImageDef.width/2
@@ -346,7 +345,7 @@ public class Level01 extends Level{
 
             @Override
             public Array<FixtureDef> getFixturesDefinition() {
-                return Level01.this.levelResources.getFixturesDefinition(foregroundBodyDef.index);
+                return Level.levelResources.getFixturesDefinition(foregroundBodyDef.index);
             }
         };
 
@@ -357,7 +356,7 @@ public class Level01 extends Level{
 
         this.particlesEffectBatchLayer = new ParticlesEffectBatchLayer(Runtime.getInstance().getViewport(),1);
         this.particlesEffectBatchLayer.setAdditive(true);
-        this.flyingSaucerParticlesEffect = this.levelResources.getParticleEffect(levelConfiguration.FLYING_SAUCER_ID, this.assetManager);
+        this.flyingSaucerParticlesEffect = Level.levelResources.getParticleEffect(levelConfiguration.FLYING_SAUCER_ID, this.assetManager);
         this.flyingSaucerParticlesActor = new ParticleEffectActor(levelConfiguration.FLYING_SAUCER_ID.hashCode(), this.flyingSaucerParticlesEffect,1);
         this.flyingSaucerParticlesEffect = null;
         Runtime.getInstance().addLayer(this.particlesEffectBatchLayer);
@@ -371,7 +370,7 @@ public class Level01 extends Level{
         ViewportLayout.adaptToScreen(SoftBuddyGameAPI.REFERENCE_SCREEN, screenVector);
         this.titleFontActor.setPosition(screenVector.x, screenVector.y);
         this.bitmapFontBatchLayer = new BitmapFontBatchLayer(Runtime.getInstance().getViewport(), 1);
-        this.titleAnimation = (ColorAnimation) this.levelResources.getAnimation(levelConfiguration.TITLE_ID, this.assetManager);
+        this.titleAnimation = (ColorAnimation) Level.levelResources.getAnimation(levelConfiguration.TITLE_ID, this.assetManager);
         Runtime.getInstance().addLayer(this.bitmapFontBatchLayer);
     }
 
@@ -569,18 +568,8 @@ public class Level01 extends Level{
                 state = STATE_PLAY;
                 break;
             case STATE_PLAY:
-                if(Gdx.input.isKeyPressed(this.globalConfiguration.input.keyboard.leftKey)){
-                    this.tmpVector.set(-this.globalConfiguration.input.keyboard.force, 0);
-                }
-                else if(Gdx.input.isKeyPressed(this.globalConfiguration.input.keyboard.rightKey)){
-                    this.tmpVector.set(this.globalConfiguration.input.keyboard.force, 0);
-                }
-                else {
-                    this.tmpVector.set(-Gdx.input.getPitch() * this.globalConfiguration.input.sensor.force, 0);
-                }
-                this.softBuddyActor.getParticleGroup().applyForce(Level01.this.tmpVector);
-                break;
+                this.tmpVector.set(this.currentForce, 0);
+                this.softBuddyActor.getParticleGroup().applyForce(this.tmpVector);
         }
-
     }
 }
