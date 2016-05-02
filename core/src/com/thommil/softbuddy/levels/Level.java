@@ -126,5 +126,4 @@ public abstract class Level implements Disposable, InputProcessor{
     public boolean scrolled(int amount) {
         return false;
     }
-
 }
